@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-bs-theme="auto">
+<html lang="en" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8">
@@ -88,6 +88,8 @@
         .bd-mode-toggle {
             z-index: 1500;
         }
+
+        /* sidebar custom */
     </style>
 
     <!-- Custom styles for this template -->
@@ -254,6 +256,7 @@
     </div>
 
     <script src="{{ url('assets/feathericon/feather.min.js') }} "></script>
+    <script src="{{ url('assets/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
     <script>
         feather.replace()

@@ -9,7 +9,7 @@
 </div>
 
 <div class="row">
-    <div class="col">
+    <div class="col mb-1">
         <div class="card text-center">
             <div class="card-header">
                 Sales
@@ -24,7 +24,7 @@
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col mb-1">
         <div class="card text-center">
             <div class="card-header">
                 Customer
@@ -39,7 +39,7 @@
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col mb-1">
         <div class="card text-center">
             <div class="card-header">
                 Supplier
