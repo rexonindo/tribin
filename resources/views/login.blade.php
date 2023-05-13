@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors, Ana Suryana">
-    <title>JAT Online System</title>
+    <title>JAT Integrated Online System</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -86,7 +86,7 @@
         $("#lnwarning").hide();
         $("#ln2").hide();
         $("#inputUserid").keypress(function(e) {
-            if (e.which == 13) {
+            if (e.key === 'Enter') {
                 if ($(this).val() != "") {
                     $("#ln1").slideUp('slow', function() {
                         $("#ln2").show();
