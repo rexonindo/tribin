@@ -17,3 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+
+# Terkait API User Login
+Route::put('/user/{id}', function(Request $request, $id){
+    return $id;
+});
