@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 # Terkait API User Login
-Route::put('/user/{id}', function(Request $request, $id){
+Route::put('/user/{id}', function (Request $request, $id) {
     return $id;
 });
+Route::post('/user', [UserController::class, 'simpan']);

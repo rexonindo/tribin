@@ -10,7 +10,10 @@
     <title>Home · JOS</title>
 
     <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-
+    <link href="{{ url('assets/alertify/css/alertify.min.css') }}" rel="stylesheet">
+    <link href="{{ url('assets/alertify/css/themes/semantic.min.css') }}" rel="stylesheet">
+    <script src="{{ url('assets/jquery/jquery.min.js') }} "></script>
+    <script src="{{ url('assets/alertify/alertify.min.js') }} "></script>
     <!-- Favicons -->
     <meta name="theme-color" content="#712cf9">
 
