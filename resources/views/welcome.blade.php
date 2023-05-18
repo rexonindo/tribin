@@ -213,7 +213,7 @@
                                 <p class="card-text"></p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Enter</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" josCD='{{base64_encode("retail")}}' josNM='JAT Sales Retail' onclick="enter_jat_power(this)">Enter</button>
                                     </div>
                                     <small class="text-body-secondary"></small>
                                 </div>
@@ -230,7 +230,7 @@
                                 <p class="card-text"></p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">Enter</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" josCD='{{base64_encode("service")}}' josNM='JAT Sparepart and Service' onclick="enter_jat_power(this)">Enter</button>
                                     </div>
                                     <small class="text-body-secondary"></small>
                                 </div>
