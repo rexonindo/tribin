@@ -173,7 +173,7 @@
                         <div class="card shadow-sm">
                             <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
                                 <title>PT. JAT Powerindo</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">PT. JAT Powerindo</text>
+                                <rect width="100%" height="100%" fill="#ff7e30" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">PT. JAT Powerindo</text>
                             </svg>
                             <div class="card-body">
                                 <p class="card-text">
@@ -190,7 +190,7 @@
                         <div class="card shadow-sm">
                             <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
                                 <title>CV. Jaya Abadi Teknik</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">CV. Jaya Abadi Teknik</text>
+                                <rect width="100%" height="100%" fill="#ff7e30" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">CV. Jaya Abadi Teknik</text>
                             </svg>
                             <div class="card-body">
                                 <p class="card-text"></p>
@@ -207,7 +207,7 @@
                         <div class="card shadow-sm">
                             <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
                                 <title>JAT Sales Retail</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">JAT Sales Retail</text>
+                                <rect width="100%" height="100%" fill="#38aab0" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">JAT Sales Retail</text>
                             </svg>
                             <div class="card-body">
                                 <p class="card-text"></p>
@@ -224,7 +224,7 @@
                         <div class="card shadow-sm">
                             <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
                                 <title>JAT Sparepart and Service</title>
-                                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">JAT Sparepart and Service</text>
+                                <rect width="100%" height="100%" fill="#38aab0" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">JAT Sparepart and Service</text>
                             </svg>
                             <div class="card-body">
                                 <p class="card-text"></p>
