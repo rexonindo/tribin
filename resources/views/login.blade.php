@@ -10,6 +10,7 @@
     <title>JAT Integrated Online System</title>
 
     <!-- Bootstrap core CSS -->
+    <link href="{{ url('assets/fontaw/css/all.css') }}" rel="stylesheet">
     <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <script src="{{ url('assets/jquery/jquery.min.js') }} "></script>
 
@@ -50,8 +51,8 @@
                     @csrf
                     <div class="row">
                         <div class="col mb-4">
-                            <h1 class="display-4 text-primary mb-0">JOS</h1>
-                            JAT Online System
+                            <h1 class="display-4 text-primary mb-0"><a href="/">JOS</a></h1>
+                            JAT Online System <i class="fas fa-link"></i> <span class="badge bg-info">{{ $_COOKIE['JOS_BNM']}}</span>
                         </div>
                     </div>
                     <div class="row" id="lnwarning">

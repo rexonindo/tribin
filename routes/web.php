@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,7 +18,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 # Autentikasi
-Route::get('/',[LoginController::class, 'login'])->name('login');
+Route::get('/welcome',[LoginController::class, 'login'])->name('login');
+Route::get('/',[PageController::class, 'welcome']);
 Route::post('actionlogin', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
 

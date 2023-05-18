@@ -29,7 +29,7 @@ class LoginController extends Controller
             return redirect('home');
         } else {
             Session::flash('error', 'Email atau Passwordnya');
-            return redirect('/');
+            return redirect('/welcome');
         }
     }
 
