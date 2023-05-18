@@ -12,12 +12,14 @@
     <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url('assets/alertify/css/alertify.min.css') }}" rel="stylesheet">
     <link href="{{ url('assets/alertify/css/themes/semantic.min.css') }}" rel="stylesheet">
+    <link href="{{ url('assets/fontaw/css/all.css') }}" rel="stylesheet">
+    <link href="{{ url('assets/gijgo/css/gijgo.min.css') }}" rel="stylesheet" type="text/css" />
     <script src="{{ url('assets/jquery/jquery.min.js') }} "></script>
     <script src="{{ url('assets/alertify/alertify.min.js') }} "></script>
+    <script src="{{ url('assets/gijgo/js/gijgo.min.js') }} "></script>
+    <script src="{{ url('assets/js/tribin.js') }} "></script>
     <!-- Favicons -->
     <meta name="theme-color" content="#712cf9">
-
-
     <style>
         .bd-placeholder-img {
             font-size: 1.125rem;
@@ -117,40 +119,43 @@
     </svg>
 
 
-    <header class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
+    <header class="navbar sticky-top flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="{{ url ('home')}}">JAT Online System</a>
         <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+        <div class="navbar-nav w-100"></div>
         <div class="navbar-nav">
-            <div class="nav-item">
-                <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#">
+            <div class="nav-item dropdown text-nowrap">
+                <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown">
                     <span data-feather="mail" class="align-text-bottom"></span>
                     <span class="badge text-bg-info">3</span>
                 </a>
-            </div>
-        </div>
-        <div class="navbar-nav">
-            <div class="nav-item">
-                <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#">
-                    <span data-feather="bell" class="align-text-bottom"></span>
-                    <span class="badge text-bg-info">7</span>
-                </a>
+                <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
             </div>
         </div>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
-                <a class="nav-link px-3" href="{{route('actionlogout')}}">Sign out</a>
+                <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6" href="{{route('actionlogout')}}" title="Log out">
+                    <span data-feather="log-out" class="align-text-bottom"></span>
+                </a>
             </div>
         </div>
     </header>
 
     <div class="container-fluid">
         <div class="row">
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse">
-                <div class="position-sticky pt-3 sidebar-sticky">
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-body-secondary text-uppercase">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse overflow-y-auto">
+                <div class="position-sticky pt-2 sidebar-sticky ">
+                    <div id="tree"></div>
+                    <!-- <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-body-secondary text-uppercase">
                         <span>Master</span>
                         <a class="link-secondary" href="#" aria-label="Master">
                             <span data-feather="plus-circle" class="align-text-bottom"></span>
@@ -248,11 +253,11 @@
                                 User Roles
                             </a>
                         </li>
-                    </ul>
+                    </ul> -->
                 </div>
             </nav>
 
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="konten-div">
                 @yield('konten')
             </main>
         </div>
@@ -263,6 +268,182 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
     <script>
         feather.replace()
+        const mainTree = $('#tree').tree({
+            uiLibrary: 'bootstrap5',
+            dataSource: [{
+                "id": 'A',
+                "text": "Master",
+                "appUrl": null,
+                "flagUrl": null,
+                "checked": false,
+                "hasChildren": false,
+                "children": [{
+                    "id": 'AA',
+                    "text": "Item",
+                    "appUrl": 1373541278,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }, {
+                    "id": 'AB',
+                    "text": "Customer",
+                    "appUrl": 126730000,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }, {
+                    "id": 'AC',
+                    "text": "Supplier",
+                    "appUrl": 3081677,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }, {
+                    "id": 'AD',
+                    "text": "Sales Order",
+                    "appUrl": 3081677,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }, {
+                    "id": 'AC',
+                    "text": "Employee",
+                    "appUrl": 3081677,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }]
+            }, {
+                "id": 'B',
+                "text": "Transaction",
+                "appUrl": null,
+                "flagUrl": null,
+                "checked": false,
+                "hasChildren": false,
+                "children": [{
+                    "id": 'BA',
+                    "text": "Delivery",
+                    "appUrl": 325145963,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }, {
+                    "id": 'BB',
+                    "text": "Return",
+                    "appUrl": 35151728,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }, {
+                    "id": 'BC',
+                    "text": "Mexico",
+                    "appUrl": 119530753,
+                    "flagUrl": "https://code.gijgo.com/flags/24/mexico.png",
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }]
+            }, {
+                "id": 'C',
+                "text": "Report",
+                "appUrl": null,
+                "flagUrl": null,
+                "checked": false,
+                "hasChildren": false,
+                "children": [{
+                    "id": 'CA',
+                    "text": "Rent Status",
+                    "appUrl": 207350000,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "children": []
+                }]
+            }, {
+                "id": 'D',
+                "text": "Settings",
+                "appUrl": null,
+                "flagUrl": null,
+                "checked": false,
+                "hasChildren": false,
+                "children": [{
+                        "id": 'DA',
+                        "text": "User Registration",
+                        "appUrl": '{{ url("user/registration") }}',
+                        "flagUrl": null,
+                        "checked": false,
+                        "hasChildren": false,
+                        "children": []
+                    },
+                    {
+                        "id": 'DA',
+                        "text": "User Registration",
+                        "appUrl": '{{ url("user/registration") }}',
+                        "flagUrl": null,
+                        "checked": false,
+                        "hasChildren": false,
+                        "children": []
+                    }, {
+                        "id": 'DA',
+                        "text": "User Registration",
+                        "appUrl": '{{ url("user/registration") }}',
+                        "flagUrl": null,
+                        "checked": false,
+                        "hasChildren": false,
+                        "children": []
+                    }, {
+                        "id": 'DA',
+                        "text": "User Registration 1",
+                        "appUrl": '{{ url("user/registration") }}',
+                        "flagUrl": null,
+                        "checked": false,
+                        "hasChildren": false,
+                        "children": []
+                    }, {
+                        "id": 'DA',
+                        "text": "User Registration 2",
+                        "appUrl": '{{ url("user/registration") }}',
+                        "flagUrl": null,
+                        "checked": false,
+                        "hasChildren": false,
+                        "children": []
+                    }, {
+                        "id": 'DA',
+                        "text": "User Registration 2",
+                        "appUrl": '{{ url("user/registration") }}',
+                        "flagUrl": null,
+                        "checked": false,
+                        "hasChildren": false,
+                        "children": []
+                    }
+                ]
+            }],
+            primaryKey: 'id',
+            // imageUrlField: 'flagUrl',
+            // checkboxes: true
+        });
+        mainTree.on('select', function(e, node, id) {
+            const SelectedData = mainTree.getDataById(id)
+            const ContentContainer = document.getElementById('konten-div')
+            ContentContainer.innerHTML = 'Please wait'
+            if (SelectedData.appUrl) {
+                $.ajax({
+                    type: "GET",
+                    url: SelectedData.appUrl,
+                    dataType: "text",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
+        })
     </script>
 </body>
 

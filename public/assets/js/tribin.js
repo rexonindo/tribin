@@ -12,7 +12,6 @@ function setInnerHTML(elm, html) {
             const scriptText = document.createTextNode(oldScriptEl.innerHTML);
             newScriptEl.appendChild(scriptText);
 
-            console.log(oldScriptEl.parentNode)
             oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
         });
 }
