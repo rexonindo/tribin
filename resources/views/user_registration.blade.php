@@ -1,6 +1,3 @@
-
-
-
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">User Registration</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
@@ -33,6 +30,8 @@
                 <input type="password" id="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="basic-addon2">
             </div>
         </div>
+    </div>
+    <div class="row">
         <div class="col mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon3">Password Confirmation</span>

@@ -154,106 +154,7 @@
         <div class="row">
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse overflow-y-auto">
                 <div class="position-sticky pt-2 sidebar-sticky ">
-                    <div id="tree"></div>
-                    <!-- <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-body-secondary text-uppercase">
-                        <span>Master</span>
-                        <a class="link-secondary" href="#" aria-label="Master">
-                            <span data-feather="plus-circle" class="align-text-bottom"></span>
-                        </a>
-                    </h6>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="box" class="align-text-bottom"></span>
-                                Item Master
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="users" class="align-text-bottom"></span>
-                                Supplier
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="users" class="align-text-bottom"></span>
-                                Customers
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file" class="align-text-bottom"></span>
-                                Purchase Orders
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file" class="align-text-bottom"></span>
-                                Sales Orders
-                            </a>
-                        </li>
-                    </ul>
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-1 text-body-secondary text-uppercase">
-                        <span>Transaction</span>
-                        <a class="link-secondary" href="#" aria-label="Master">
-                            <span data-feather="plus-circle" class="align-text-bottom"></span>
-                        </a>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text" class="align-text-bottom"></span>
-                                Receive Order
-                            </a>
-                        </li>
-                    </ul>
-
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                        <span>Reports</span>
-                        <a class="link-secondary" href="#" aria-label="Add a new report">
-                            <span data-feather="plus-circle" class="align-text-bottom"></span>
-                        </a>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text" class="align-text-bottom"></span>
-                                Current month
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text" class="align-text-bottom"></span>
-                                Last quarter
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text" class="align-text-bottom"></span>
-                                Social engagement
-                            </a>
-                        </li>
-                    </ul>
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
-                        <span>Administration</span>
-                        <a class="link-secondary" href="#" aria-label="Add a new report">
-                            <span data-feather="plus-circle" class="align-text-bottom"></span>
-                        </a>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url ('user/registration')}}">
-                                <span data-feather="file-text" class="align-text-bottom"></span>
-                                User Registration
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text" class="align-text-bottom"></span>
-                                User Roles
-                            </a>
-                        </li>
-                    </ul> -->
+                    <div id="tree"></div>                 
                 </div>
             </nav>
 
@@ -270,6 +171,8 @@
         feather.replace()
         const mainTree = $('#tree').tree({
             uiLibrary: 'bootstrap5',
+            iconsLibrary: 'fontawesome',
+            imageCssClassField: 'faCssClass',
             dataSource: [{
                 "id": 'A',
                 "text": "Master",
@@ -284,6 +187,7 @@
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-file',
                     "children": []
                 }, {
                     "id": 'AB',
@@ -292,6 +196,7 @@
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-users-rectangle',
                     "children": []
                 }, {
                     "id": 'AC',
@@ -300,6 +205,16 @@
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-users-rectangle',
+                    "children": []
+                }, {
+                    "id": 'AF',
+                    "text": "Quotation",
+                    "appUrl": 3081677,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "faCssClass": 'fa fa-file',
                     "children": []
                 }, {
                     "id": 'AD',
@@ -308,14 +223,25 @@
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-file',
                     "children": []
                 }, {
-                    "id": 'AC',
+                    "id": 'AE',
                     "text": "Employee",
                     "appUrl": 3081677,
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-people-roof',
+                    "children": []
+                }, {
+                    "id": 'AF',
+                    "text": "Schedule",
+                    "appUrl": 3081677,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "faCssClass": 'fa fa-calendar-check',
                     "children": []
                 }]
             }, {
@@ -332,6 +258,7 @@
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-truck',
                     "children": []
                 }, {
                     "id": 'BB',
@@ -340,14 +267,34 @@
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-truck fa-flip-horizontal',
                     "children": []
                 }, {
                     "id": 'BC',
-                    "text": "Mexico",
+                    "text": "Attendance",
                     "appUrl": 119530753,
-                    "flagUrl": "https://code.gijgo.com/flags/24/mexico.png",
+                    "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-clipboard-user',
+                    "children": []
+                }, {
+                    "id": 'BD',
+                    "text": "Payroll",
+                    "appUrl": 119530753,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "faCssClass": 'fa fa-receipt',
+                    "children": []
+                }, {
+                    "id": 'BE',
+                    "text": "Invoice",
+                    "appUrl": 119530753,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "faCssClass": 'fa fa-file-invoice',
                     "children": []
                 }]
             }, {
@@ -364,6 +311,16 @@
                     "flagUrl": null,
                     "checked": false,
                     "hasChildren": false,
+                    "faCssClass": 'fa fa-flag',
+                    "children": []
+                },{
+                    "id": 'CB',
+                    "text": "General Ledger",
+                    "appUrl": 207350000,
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "faCssClass": 'fa fa-book',
                     "children": []
                 }]
             }, {
@@ -380,47 +337,7 @@
                         "flagUrl": null,
                         "checked": false,
                         "hasChildren": false,
-                        "children": []
-                    },
-                    {
-                        "id": 'DA',
-                        "text": "User Registration",
-                        "appUrl": '{{ url("user/registration") }}',
-                        "flagUrl": null,
-                        "checked": false,
-                        "hasChildren": false,
-                        "children": []
-                    }, {
-                        "id": 'DA',
-                        "text": "User Registration",
-                        "appUrl": '{{ url("user/registration") }}',
-                        "flagUrl": null,
-                        "checked": false,
-                        "hasChildren": false,
-                        "children": []
-                    }, {
-                        "id": 'DA',
-                        "text": "User Registration 1",
-                        "appUrl": '{{ url("user/registration") }}',
-                        "flagUrl": null,
-                        "checked": false,
-                        "hasChildren": false,
-                        "children": []
-                    }, {
-                        "id": 'DA',
-                        "text": "User Registration 2",
-                        "appUrl": '{{ url("user/registration") }}',
-                        "flagUrl": null,
-                        "checked": false,
-                        "hasChildren": false,
-                        "children": []
-                    }, {
-                        "id": 'DA',
-                        "text": "User Registration 2",
-                        "appUrl": '{{ url("user/registration") }}',
-                        "flagUrl": null,
-                        "checked": false,
-                        "hasChildren": false,
+                        "faCssClass": 'fa fa-user-plus',
                         "children": []
                     }
                 ]
