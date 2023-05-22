@@ -75,7 +75,7 @@
                             <a href="" id="btnback" title="back">Login as another account ?</a> <br><br>
                             <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Password" required>
                             <div class="d-grid">
-                                <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+                                <button class="btn btn-primary btn-block" type="submit" onclick="btnLogin_eClick(event)">Sign in</button>
                             </div>
                         </div>
                     </div>
@@ -84,6 +84,31 @@
         </div>
     </div>
     <script>
+        function btnLogin_eClick(e) {
+            e.preventDefault()
+            const data = {
+                inputUserid: inputUserid.value,
+                inputPassword: inputPassword.value,
+                _token: '{{ csrf_token() }}',
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{route('actionlogin')}}",
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    if (!response.tokennya) {
+                        alert(response.message)
+                    } else {
+                        sessionStorage.setItem('tokenGue', response.tokennya)
+                        location.href = '/home'
+                    }
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alert(xthrow)
+                }
+            });
+        }
         $("#lnwarning").hide();
         $("#ln2").hide();
         $("#inputUserid").keypress(function(e) {

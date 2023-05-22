@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -26,16 +27,19 @@ class LoginController extends Controller
         ];
 
         if (Auth::attempt($data)) {
-            return redirect('home');
+            $request->session()->regenerate();
+            $user  = User::where('email', $request->input('inputUserid'))->first();
+            return ['tokennya' => $user->createToken($request->input('inputUserid') . 'bebas')->plainTextToken];
         } else {
-            Session::flash('error', 'Email atau Passwordnya');
-            return redirect('/welcome');
+            return ['message' => 'invalid login'];
         }
     }
 
-    function actionLogout()
+    function actionLogout(Request $request)
     {
         Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect('/');
     }
 }

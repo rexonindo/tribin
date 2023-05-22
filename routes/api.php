@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessRulesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -15,9 +16,9 @@ use App\Http\Controllers\UserController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 
 
@@ -26,3 +27,14 @@ Route::put('/user/{id}', function (Request $request, $id) {
     return $id;
 });
 Route::post('/user', [UserController::class, 'simpan']);
+Route::get('/logout', function (Request $request) {
+    $request->user()->currentAccessToken()->delete();
+    return ['message' => 'ok logout'];
+})->middleware('auth:sanctum');
+
+
+# Terkait API Menu
+Route::get('/menu', [AccessRulesController::class, 'getMenu'])->middleware('auth:sanctum');
+Route::get('/setting/tree', [AccessRulesController::class, 'getMenuForTreeSetting']);
+Route::get('/setting/tree/roles', [AccessRulesController::class, 'getAllAccessRoles']);
+Route::post('/setting/tree/roles', [AccessRulesController::class, 'setAccess'])->middleware('auth:sanctum');

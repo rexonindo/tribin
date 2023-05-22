@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessRulesController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PageController;
@@ -18,8 +19,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 # Autentikasi
-Route::get('/welcome',[LoginController::class, 'login'])->name('login');
-Route::get('/',[PageController::class, 'welcome']);
+Route::get('/welcome', [LoginController::class, 'login'])->name('login');
+Route::get('/', [PageController::class, 'welcome']);
 Route::post('actionlogin', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
 
@@ -28,6 +29,9 @@ Route::get('home', [HomeController::class, 'index'])->name('home')->middleware('
 
 # Terkait tampilan user registration
 Route::get('user/registration', [UserController::class, 'index'])->middleware('auth');
+
+# Terkait seting akses user
+Route::get('/setting/access', [AccessRulesController::class, 'index'])->middleware('auth');
 
 Route::get('/version', function () {
     return app()->version();

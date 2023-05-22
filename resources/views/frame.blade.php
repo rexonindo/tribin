@@ -143,7 +143,7 @@
         </div>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
-                <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6" href="{{route('actionlogout')}}" title="Log out">
+                <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
                     <span data-feather="log-out" class="align-text-bottom"></span>
                 </a>
             </div>
@@ -154,7 +154,7 @@
         <div class="row">
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse overflow-y-auto">
                 <div class="position-sticky pt-2 sidebar-sticky ">
-                    <div id="tree"></div>                 
+                    <div id="tree"></div>
                 </div>
             </nav>
 
@@ -313,7 +313,7 @@
                     "hasChildren": false,
                     "faCssClass": 'fa fa-flag',
                     "children": []
-                },{
+                }, {
                     "id": 'CB',
                     "text": "General Ledger",
                     "appUrl": 207350000,
@@ -331,26 +331,32 @@
                 "checked": false,
                 "hasChildren": false,
                 "children": [{
-                        "id": 'DA',
-                        "text": "User Registration",
-                        "appUrl": '{{ url("user/registration") }}',
-                        "flagUrl": null,
-                        "checked": false,
-                        "hasChildren": false,
-                        "faCssClass": 'fa fa-user-plus',
-                        "children": []
-                    }
-                ]
+                    "id": 'DA',
+                    "text": "User Registration",
+                    "appUrl": '{{ url("user/registration") }}',
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "faCssClass": 'fa fa-user-plus',
+                    "children": []
+                }, {
+                    "id": 'DB',
+                    "text": "Access Rules",
+                    "appUrl": '{{ url("setting/access") }}',
+                    "flagUrl": null,
+                    "checked": false,
+                    "hasChildren": false,
+                    "faCssClass": 'fa fa-sitemap',
+                    "children": []
+                }]
             }],
             primaryKey: 'id',
-            // imageUrlField: 'flagUrl',
-            // checkboxes: true
         });
         mainTree.on('select', function(e, node, id) {
             const SelectedData = mainTree.getDataById(id)
             const ContentContainer = document.getElementById('konten-div')
-            ContentContainer.innerHTML = 'Please wait'
             if (SelectedData.appUrl) {
+                ContentContainer.innerHTML = 'Please wait'
                 $.ajax({
                     type: "GET",
                     url: SelectedData.appUrl,
@@ -361,6 +367,28 @@
                 });
             }
         })
+
+        function btnLogout_eClick(e) {
+            e.preventDefault()
+            if (confirm('Log out ?')) {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/logout",
+                    dataType: "json",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Authorization": `Bearer ${sessionStorage.getItem('tokenGue')}`
+                    },
+                    success: function(response) {
+                        sessionStorage.removeItem("tokenGue");
+                        location.href = `{{route('actionlogout')}}`
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        location.href = `{{route('actionlogout')}}`
+                    }
+                });
+            }
+        }
     </script>
 </body>
 
