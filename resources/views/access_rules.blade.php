@@ -52,7 +52,8 @@
         imageCssClassField: 'faCssClass',
         dataSource: '/api/setting/tree',
         primaryKey: 'id',
-        checkboxes: true
+        checkboxes: true,
+        cascadeCheck: false
     });
     $("#divroles").css('height', $(window).height() * 73 / 100);
     $('#cmbgroup').change(function() {
@@ -91,7 +92,7 @@
         if (grpid == '_') {
             alertify.message('nothing to be processed')
             return
-        }        
+        }
         $.ajax({
             type: "post",
             url: "/api/setting/tree/roles",
@@ -100,12 +101,12 @@
                 groupID: grpid,
                 menuID: FinalNodes
             },
-            headers : {
+            headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Authorization": `Bearer ${sessionStorage.getItem('tokenGue')}` 
+                "Authorization": `Bearer ${sessionStorage.getItem('tokenGue')}`
             },
-            success: function(response) {   
-                alert('saved successfully')             
+            success: function(response) {
+                alert('saved successfully')
                 getAllAM()
             },
             error: function(xhr, ajaxOptions, throwError) {
@@ -133,6 +134,8 @@
                     lgroupid.push('' + response[i].role_name + '');
                     lmenuid.push('' + response[i].menu_code + '');
                 }
+                console.log('init')
+                console.log(lgroupid)
             },
             error: function(xhr, ajaxOptions, throwError) {
                 alertify.error(throwError);
