@@ -133,9 +133,7 @@
                 for (let i = 0; i < response.length; i++) {
                     lgroupid.push('' + response[i].role_name + '');
                     lmenuid.push('' + response[i].menu_code + '');
-                }
-                console.log('init')
-                console.log(lgroupid)
+                }                
             },
             error: function(xhr, ajaxOptions, throwError) {
                 alertify.error(throwError);

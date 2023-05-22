@@ -27,7 +27,7 @@ class AccessRulesController extends Controller
                         'id' => $n['code'],
                         'text' => $n['name'],
                         'appUrl' => $n['url'],
-                        'faCssClass' => $n['icon'], 
+                        'faCssClass' => $n['icon'],
                         'checked' => false,
                     ];
                     $n['USED'] = '1';
@@ -50,15 +50,15 @@ class AccessRulesController extends Controller
 
     public function getMenuForTreeSetting()
     {
-        $rs = Menu::select(['*', DB::raw("'0' USED")])->get()->toArray();       
+        $rs = Menu::select(['*', DB::raw("'0' USED")])->get()->toArray();
         $rsfix = [];
         foreach ($rs as &$r) {
             if ($r['USED'] == '0') {
                 $obj = [
-                    'id' => $r['code'], 
-                    'text' => $r['name'], 
-                    'appUrl' => $r['url'], 
-                    'faCssClass' => $r['icon'], 
+                    'id' => $r['code'],
+                    'text' => $r['name'],
+                    'appUrl' => $r['url'],
+                    'faCssClass' => $r['icon'],
                     'checked' => false,
                 ];
                 $rschild = $this->ishasChild($rs, $r['code']);
@@ -73,19 +73,49 @@ class AccessRulesController extends Controller
         return $rsfix;
     }
 
-    public function getAllAccessRoles(){
+    public function getAllAccessRoles()
+    {
         return MenuRoles::select('*')->get();
     }
 
-    function setAccess(Request $request){
-        date_default_timezone_set('Asia/Jakarta');     
+    function getAccessRolesByRoleName()
+    {
+        $rs = MenuRoles::select(['code','parent_code', 'name', 'url', 'icon', DB::raw("'0' USED")])
+            ->join('menus', 'menu_code', '=', 'code')
+            ->where('role_name', Auth::user()->role)
+            ->orderBy('code', 'asc')
+            ->get()->toArray();
+        $rsfix = [];
+        foreach ($rs as &$r) {
+            if ($r['USED'] == '0') {
+                $obj = [
+                    'id' => $r['code'],
+                    'text' => $r['name'],
+                    'appUrl' => $r['url'],
+                    'faCssClass' => $r['icon'],
+                    'checked' => false,
+                ];
+                $rschild = $this->ishasChild($rs, $r['code']);
+                if (count($rschild) > 0) {
+                    $obj['children'] = $rschild;
+                }
+                $rsfix[] = $obj;
+                $r['USED'] = '1';
+            }
+        }
+        unset($r);
+        return $rsfix;
+    }
+
+    function setAccess(Request $request)
+    {
+        date_default_timezone_set('Asia/Jakarta');
         $grid = $request->input('groupID');
         $mnid = $request->input('menuID');
         $usrlg = Auth::user()->name ? Auth::user()->nick_name : 'ada';
-        
-        $RSTobeSave = [];      
-        for($i=0;$i<count($mnid); $i++)
-        {
+
+        $RSTobeSave = [];
+        for ($i = 0; $i < count($mnid); $i++) {
             $RSTobeSave[] = [
                 'role_name' => $grid,
                 'menu_code' => $mnid[$i],

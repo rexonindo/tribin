@@ -169,187 +169,24 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
     <script>
         feather.replace()
+
+        function getmenu(){
+            $.ajax({
+                type: "GET",
+                url: "/menu",                
+                dataType: "json",
+                success: function (response) {
+                    
+                }
+            });
+        }
+
+        getmenu()
         const mainTree = $('#tree').tree({
             uiLibrary: 'bootstrap5',
             iconsLibrary: 'fontawesome',
             imageCssClassField: 'faCssClass',
-            dataSource: [{
-                "id": 'A',
-                "text": "Master",
-                "appUrl": null,
-                "flagUrl": null,
-                "checked": false,
-                "hasChildren": false,
-                "children": [{
-                    "id": 'AA',
-                    "text": "Item",
-                    "appUrl": 1373541278,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-file',
-                    "children": []
-                }, {
-                    "id": 'AB',
-                    "text": "Customer",
-                    "appUrl": 126730000,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-users-rectangle',
-                    "children": []
-                }, {
-                    "id": 'AC',
-                    "text": "Supplier",
-                    "appUrl": 3081677,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-users-rectangle',
-                    "children": []
-                }, {
-                    "id": 'AF',
-                    "text": "Quotation",
-                    "appUrl": 3081677,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-file',
-                    "children": []
-                }, {
-                    "id": 'AD',
-                    "text": "Sales Order",
-                    "appUrl": 3081677,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-file',
-                    "children": []
-                }, {
-                    "id": 'AE',
-                    "text": "Employee",
-                    "appUrl": 3081677,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-people-roof',
-                    "children": []
-                }, {
-                    "id": 'AF',
-                    "text": "Schedule",
-                    "appUrl": 3081677,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-calendar-check',
-                    "children": []
-                }]
-            }, {
-                "id": 'B',
-                "text": "Transaction",
-                "appUrl": null,
-                "flagUrl": null,
-                "checked": false,
-                "hasChildren": false,
-                "children": [{
-                    "id": 'BA',
-                    "text": "Delivery",
-                    "appUrl": 325145963,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-truck',
-                    "children": []
-                }, {
-                    "id": 'BB',
-                    "text": "Return",
-                    "appUrl": 35151728,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-truck fa-flip-horizontal',
-                    "children": []
-                }, {
-                    "id": 'BC',
-                    "text": "Attendance",
-                    "appUrl": 119530753,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-clipboard-user',
-                    "children": []
-                }, {
-                    "id": 'BD',
-                    "text": "Payroll",
-                    "appUrl": 119530753,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-receipt',
-                    "children": []
-                }, {
-                    "id": 'BE',
-                    "text": "Invoice",
-                    "appUrl": 119530753,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-file-invoice',
-                    "children": []
-                }]
-            }, {
-                "id": 'C',
-                "text": "Report",
-                "appUrl": null,
-                "flagUrl": null,
-                "checked": false,
-                "hasChildren": false,
-                "children": [{
-                    "id": 'CA',
-                    "text": "Rent Status",
-                    "appUrl": 207350000,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-flag',
-                    "children": []
-                }, {
-                    "id": 'CB',
-                    "text": "General Ledger",
-                    "appUrl": 207350000,
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-book',
-                    "children": []
-                }]
-            }, {
-                "id": 'D',
-                "text": "Settings",
-                "appUrl": null,
-                "flagUrl": null,
-                "checked": false,
-                "hasChildren": false,
-                "children": [{
-                    "id": 'DA',
-                    "text": "User Registration",
-                    "appUrl": '{{ url("user/registration") }}',
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-user-plus',
-                    "children": []
-                }, {
-                    "id": 'DB',
-                    "text": "Access Rules",
-                    "appUrl": '{{ url("setting/access") }}',
-                    "flagUrl": null,
-                    "checked": false,
-                    "hasChildren": false,
-                    "faCssClass": 'fa fa-sitemap',
-                    "children": []
-                }]
-            }],
+            dataSource: '/menu',
             primaryKey: 'id',
         });
         mainTree.on('select', function(e, node, id) {

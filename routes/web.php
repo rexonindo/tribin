@@ -26,6 +26,7 @@ Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('acti
 
 # Terkait tampilan awal
 Route::get('home', [HomeController::class, 'index'])->name('home')->middleware('auth');
+Route::get('menu', [AccessRulesController::class, 'getAccessRolesByRoleName'])->middleware('auth');
 
 # Terkait tampilan user registration
 Route::get('user/registration', [UserController::class, 'index'])->middleware('auth');
