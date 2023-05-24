@@ -86,19 +86,31 @@
     <script>
         function btnLogin_eClick(e) {
             e.preventDefault()
+            if (inputUserid.value.length <= 3) {
+                inputUserid.focus()
+                return
+            }
+            if (inputPassword.value.length <= 5) {
+                inputPassword.focus()
+                return
+            }
             const data = {
                 inputUserid: inputUserid.value,
                 inputPassword: inputPassword.value,
                 _token: '{{ csrf_token() }}',
             }
+            e.target.disabled = true
             $.ajax({
                 type: "POST",
                 url: "{{route('actionlogin')}}",
                 data: data,
                 dataType: "json",
                 success: function(response) {
+                    e.target.disabled = false
                     if (!response.tokennya) {
                         alert(response.message)
+                        inputUserid.value = ''
+                        inputPassword.value = ''
                     } else {
                         sessionStorage.setItem('tokenGue', response.tokennya)
                         location.href = '/home'
@@ -106,6 +118,7 @@
                 },
                 error: function(xhr, xopt, xthrow) {
                     alert(xthrow)
+                    e.target.disabled = false
                 }
             });
         }
