@@ -13,7 +13,13 @@
         <div class="col mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon4">User Name</span>
-                <input type="text" id="userName" class="form-control" placeholder="User Name" aria-label="User Name" aria-describedby="basic-addon4">
+                <input type="text" id="userName" onkeyup="userName_eKeyUp(event)" class="form-control" placeholder="User Name" aria-label="User Name" aria-describedby="basic-addon4">
+            </div>
+        </div>
+        <div class="col mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text" id="basic-addon1">Nick Name</span>
+                <input type="text" id="userNickName" class="form-control" placeholder="Nick Name" maxlength="16">
             </div>
         </div>
         <div class="col mb-1">
@@ -43,7 +49,7 @@
         <div class="col mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon2">Roles</span>
-                <select class="form-select">
+                <select class="form-select" id="role">
                     @foreach($RSRoles as $r)
                     <option value="{{ $r->name }}">{{ $r->description }}</option>
                     @endforeach
@@ -58,7 +64,11 @@
     </div>
 </form>
 <script>
+    function userName_eKeyUp(e){
+        userNickName.value = e.target.value.replace(' ', '_').substr(0,16)
+    }
     function btnSaveOnclick(pthis) {
+
         if (password.value != passwordConfirmation.value) {
             passwordConfirmation.focus()
             alertify.warning('Please confirm password')
@@ -74,10 +84,18 @@
             alertify.warning(`User name is required`)
             return
         }
+
+        if(userNickName.value.includes(' '))
+        {
+            alertify.message('should not contain space')
+            return
+        }
         const data = {
             name: userName.value,
+            nick_name: userNickName.value,
             email: userEmail.value,
             password: passwordConfirmation.value,
+            role: role.value,
             _token: '{{ csrf_token() }}',
         }
         if (confirm(`Are you sure ?`)) {
@@ -93,6 +111,11 @@
                     alertify.success(response.msg)
                     pthis.disabled = false
                     document.getElementById('div-alert').innerHTML = ''
+                    userName.value = ''
+                    userNickName.value = ''
+                    userEmail.value = ''
+                    passwordConfirmation.value = ''
+                    password.value = ''
                 },
                 error: function(xhr, xopt, xthrow) {
                     const respon = Object.keys(xhr.responseJSON)
