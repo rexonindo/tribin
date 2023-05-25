@@ -170,18 +170,6 @@
     <script>
         feather.replace()
 
-        function getmenu(){
-            $.ajax({
-                type: "GET",
-                url: "/menu",                
-                dataType: "json",
-                success: function (response) {
-                    
-                }
-            });
-        }
-
-        getmenu()
         const mainTree = $('#tree').tree({
             uiLibrary: 'bootstrap5',
             iconsLibrary: 'fontawesome',
@@ -225,7 +213,7 @@
                     }
                 });
             }
-        }
+        }        
     </script>
 </body>
 

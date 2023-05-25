@@ -256,7 +256,7 @@
     function enter_jat_power(pthis){
         window.location.href = '/welcome'
         Cookies.set('JOS_BCD', pthis.attributes['joscd'].nodeValue, {expires:365});
-        Cookies.set('JOS_BNM', pthis.attributes['josnm'].nodeValue, {expires:365});
+        Cookies.set('JOS_BNM', pthis.attributes['josnm'].nodeValue, {expires:365});        
     }
 </script>
 
