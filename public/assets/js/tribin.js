@@ -15,3 +15,11 @@ function setInnerHTML(elm, html) {
             oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
         });
 }
+
+function tribinClearTextBox() {
+    let textBoxInputList = document.getElementsByClassName('form-control')
+    let textBoxInputLength = textBoxInputList.length
+    for (let i = 0; i < textBoxInputLength; i++) {
+        textBoxInputList[i].value = ''
+    }
+}

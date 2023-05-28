@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\AccessRulesController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,3 +39,9 @@ Route::get('/setting/access', [AccessRulesController::class, 'index'])->middlewa
 Route::get('/version', function () {
     return app()->version();
 });
+
+# Terkait Item Master
+Route::get('item/form', [ItemController::class, 'index'])->middleware('auth');
+Route::get('item', [ItemController::class, 'search'])->middleware('auth');
+Route::post('item', [ItemController::class, 'simpan'])->middleware('auth');
+Route::put('item/{id}', [ItemController::class, 'update'])->middleware('auth');
