@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -53,3 +54,9 @@ Route::get('customer/form', [CustomerController::class, 'index'])->middleware('a
 Route::get('customer', [CustomerController::class, 'search'])->middleware('auth');
 Route::post('customer', [CustomerController::class, 'simpan'])->middleware('auth');
 Route::put('customer/{id}', [CustomerController::class, 'update'])->middleware('auth');
+
+# Terkait Supplier Master
+Route::get('supplier/form', [SupplierController::class, 'index'])->middleware('auth');
+Route::get('supplier', [SupplierController::class, 'search'])->middleware('auth');
+Route::post('supplier', [SupplierController::class, 'simpan'])->middleware('auth');
+Route::put('supplier/{id}', [SupplierController::class, 'update'])->middleware('auth');
