@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccessRulesController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
@@ -45,3 +46,10 @@ Route::get('item/form', [ItemController::class, 'index'])->middleware('auth');
 Route::get('item', [ItemController::class, 'search'])->middleware('auth');
 Route::post('item', [ItemController::class, 'simpan'])->middleware('auth');
 Route::put('item/{id}', [ItemController::class, 'update'])->middleware('auth');
+
+
+# Terkait Customer Master
+Route::get('customer/form', [CustomerController::class, 'index'])->middleware('auth');
+Route::get('customer', [CustomerController::class, 'search'])->middleware('auth');
+Route::post('customer', [CustomerController::class, 'simpan'])->middleware('auth');
+Route::put('customer/{id}', [CustomerController::class, 'update'])->middleware('auth');
