@@ -10,14 +10,14 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Supplier Code</span>
                 <input type="text" id="supplierCode" class="form-control" placeholder="Supplier Code" aria-label="Supplier Code" maxlength="10">
                 <button class="btn btn-primary" type="button" onclick="btnShowSupplierModal()"><i class="fas fa-search"></i></button>
             </div>
         </div>
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Supplier Name</span>
                 <input type="text" id="supplierName" class="form-control" placeholder="Suppplier Name" maxlength="50">
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Currency</span>
                 <select class="form-select" id="currency">
@@ -34,7 +34,7 @@
                 </select>
             </div>
         </div>
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Tax Registration Number</span>
                 <input type="text" id="supplierTax" class="form-control" placeholder="" maxlength="45">

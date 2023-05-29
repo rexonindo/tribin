@@ -5,88 +5,90 @@
     </div>
 </div>
 <form id="item-form">
-    <div class="row">
-        <div class="col mb-1" id="div-alert">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col mb-1" id="div-alert">
+            </div>
         </div>
+        <div class="row">
+            <div class="col-md-6 mb-1">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Item Code</span>
+                    <input type="text" id="itemCode" class="form-control" placeholder="Item Code" aria-label="Item Code" maxlength="25" onkeypress="itemCodeOnKeyPress(event)">
+                    <button class="btn btn-primary" type="button" onclick="btnShowItemModal()"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div class="col-md-6 mb-1">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Item Name</span>
+                    <input type="text" id="itemName" class="form-control" placeholder="Item Name" maxlength="50">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-1">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Unit Measurement</span>
+                    <select class="form-select" id="unitMeasurement" onchange="unitMeasurementOnChange()">
+                        <option value="UNIT">Unit</option>
+                        <option value="PCS">PCS</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-1">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Brand</span>
+                    <input type="text" id="itemBrand" class="form-control" placeholder="Item Brand" aria-label="Item Brand" maxlength="45">
+                </div>
+            </div>
+            <div class="col-md-6 mb-1">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Model</span>
+                    <input type="text" id="itemModel" class="form-control" placeholder="Item Model" maxlength="45">
+                </div>
+            </div>
+        </div>
+        <div class="row border-bottom">
+            <div class="col mb-3">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Specification</span>
+                    <input type="text" id="itemSpec" class="form-control" placeholder="Item Spec" aria-label="Item Spec" maxlength="50">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-1">
+                <h4>Item Type</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="itemType" id="radio1" value="1" checked>
+                    <label class="form-check-label" for="radio1">Finished Good</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="itemType" id="radio2" value="2">
+                    <label class="form-check-label" for="radio2">Spare Part</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="itemType" id="radio3" value="3">
+                    <label class="form-check-label" for="radio3">Services</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mb-1">
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
+                    <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="itemInputMode" value="0">
     </div>
-    <div class="row">
-        <div class="col mb-1">
-            <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text">Item Code</span>
-                <input type="text" id="itemCode" class="form-control" placeholder="Item Code" aria-label="Item Code" maxlength="25" onkeypress="itemCodeOnKeyPress(event)">
-                <button class="btn btn-primary" type="button" onclick="btnShowItemModal()"><i class="fas fa-search"></i></button>
-            </div>
-        </div>
-        <div class="col mb-1">
-            <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text">Item Name</span>
-                <input type="text" id="itemName" class="form-control" placeholder="Item Name" maxlength="50">
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col mb-1">
-            <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text">Unit Measurement</span>
-                <select class="form-select" id="unitMeasurement" onchange="unitMeasurementOnChange()">
-                    <option value="UNIT">Unit</option>
-                    <option value="PCS">PCS</option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col mb-1">
-            <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text">Brand</span>
-                <input type="text" id="itemBrand" class="form-control" placeholder="Item Brand" aria-label="Item Brand" maxlength="45">
-            </div>
-        </div>
-        <div class="col mb-1">
-            <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text">Model</span>
-                <input type="text" id="itemModel" class="form-control" placeholder="Item Model" maxlength="45">
-            </div>
-        </div>
-    </div>
-    <div class="row border-bottom">
-        <div class="col mb-3">
-            <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text">Specification</span>
-                <input type="text" id="itemSpec" class="form-control" placeholder="Item Spec" aria-label="Item Spec" maxlength="50">
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col mb-1">
-            <h4>Item Type</h4>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col mb-3">
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="itemType" id="radio1" value="1" checked>
-                <label class="form-check-label" for="radio1">Finished Good</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="itemType" id="radio2" value="2">
-                <label class="form-check-label" for="radio2">Spare Part</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="itemType" id="radio3" value="3">
-                <label class="form-check-label" for="radio3">Services</label>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col mb-1">
-            <div class="btn-group btn-group-sm">
-                <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
-                <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
-            </div>
-        </div>
-    </div>
-    <input type="hidden" id="itemInputMode" value="0">
 </form>
 <!-- Modal -->
 <div class="modal fade" id="itemModal" tabindex="-1">
@@ -174,13 +176,16 @@
                             itemBrand.value = arrayItem['MITM_BRAND']
                             itemModel.value = arrayItem['MITM_MODEL']
                             itemSpec.value = arrayItem['MITM_SPEC']
-                            switch(arrayItem['MITM_ITMTYPE']){
+                            switch (arrayItem['MITM_ITMTYPE']) {
                                 case '1':
-                                    radio1.checked = true;break
+                                    radio1.checked = true;
+                                    break
                                 case '2':
-                                    radio2.checked = true;break
+                                    radio2.checked = true;
+                                    break
                                 case '3':
-                                    radio3.checked = true;break
+                                    radio3.checked = true;
+                                    break
                             }
                             itemCode.disabled = true
                         }
@@ -289,7 +294,7 @@
             }
         } else {
             if (confirm(`Are you sure want to update ?`)) {
-                const data = {                    
+                const data = {
                     MITM_ITMNM: itemName.value.trim(),
                     MITM_STKUOM: unitMeasurement.value.trim(),
                     MITM_ITMTYPE: document.querySelector("input[type='radio'][name=itemType]:checked").value,

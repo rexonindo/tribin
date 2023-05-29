@@ -10,14 +10,14 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Customer Code</span>
                 <input type="text" id="customerCode" class="form-control" placeholder="Customer Code" aria-label="Customer Code" maxlength="10">
                 <button class="btn btn-primary" type="button" onclick="btnShowCustomerModal()"><i class="fas fa-search"></i></button>
             </div>
         </div>
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Customer Name</span>
                 <input type="text" id="customerName" class="form-control" placeholder="Customer Name" maxlength="50">
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Currency</span>
                 <select class="form-select" id="currency">
@@ -34,7 +34,7 @@
                 </select>
             </div>
         </div>
-        <div class="col mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Tax Registration Number</span>
                 <input type="text" id="customerTax" class="form-control" placeholder="" maxlength="45">
