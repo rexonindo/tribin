@@ -23,6 +23,7 @@ class ItemController extends Controller
             'MITM_ITMTYPE' => 'required',
             'MITM_BRAND' => 'required',
             'MITM_SPEC' => 'required',
+            'MITM_ITMCAT' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -37,6 +38,7 @@ class ItemController extends Controller
             'MITM_BRAND' => $request->MITM_BRAND,
             'MITM_MODEL' => $request->MITM_MODEL,
             'MITM_SPEC' => $request->MITM_SPEC,
+            'MITM_ITMCAT' => $request->MITM_ITMCAT,
         ]);
         return ['msg' => 'OK'];
     }
@@ -62,6 +64,7 @@ class ItemController extends Controller
                 ,'MITM_BRAND' => $request->MITM_BRAND
                 ,'MITM_MODEL' => $request->MITM_MODEL
                 ,'MITM_SPEC' => $request->MITM_SPEC
+                ,'MITM_ITMCAT' => $request->MITM_ITMCAT
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }

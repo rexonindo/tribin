@@ -26,13 +26,20 @@
             </div>
         </div>
         <div class="row">
-            <div class="col mb-1">
+            <div class="col-md-6 mb-1">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Unit Measurement</span>
                     <select class="form-select" id="unitMeasurement" onchange="unitMeasurementOnChange()">
                         <option value="UNIT">Unit</option>
                         <option value="PCS">PCS</option>
+                        <option value="EA">EA</option>
                     </select>
+                </div>
+            </div>
+            <div class="col-md-6 mb-1">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Category</span>
+                    <input type="text" id="itemCategory" class="form-control" placeholder="Compressor...Genset" maxlength="15">
                 </div>
             </div>
         </div>
@@ -126,6 +133,7 @@
                                             <th>Brand</th>
                                             <th>Model</th>
                                             <th>Specification</th>
+                                            <th>Category</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -147,7 +155,7 @@
                 searchBy: itemSearchBy.value,
                 searchValue: e.target.value,
             }
-            itemTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="7">Please wait</td></tr>`
+            itemTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="8">Please wait</td></tr>`
             $.ajax({
                 type: "GET",
                 url: "item",
@@ -176,6 +184,7 @@
                             itemBrand.value = arrayItem['MITM_BRAND']
                             itemModel.value = arrayItem['MITM_MODEL']
                             itemSpec.value = arrayItem['MITM_SPEC']
+                            itemCategory.value = arrayItem['MITM_ITMCAT']
                             switch (arrayItem['MITM_ITMTYPE']) {
                                 case '1':
                                     radio1.checked = true;
@@ -201,6 +210,8 @@
                         newcell.innerHTML = arrayItem['MITM_MODEL']
                         newcell = newrow.insertCell(6)
                         newcell.innerHTML = arrayItem['MITM_SPEC']
+                        newcell = newrow.insertCell(7)
+                        newcell.innerHTML = arrayItem['MITM_ITMCAT']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -258,6 +269,7 @@
             MITM_BRAND: itemBrand.value.trim(),
             MITM_MODEL: itemModel.value.trim(),
             MITM_SPEC: itemSpec.value.trim(),
+            MITM_ITMCAT: itemCategory.value.trim(),
             _token: '{{ csrf_token() }}',
         }
         if (itemInputMode.value === '0') {
