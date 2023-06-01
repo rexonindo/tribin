@@ -18,6 +18,7 @@
     <script src="{{ url('assets/alertify/alertify.min.js') }} "></script>
     <script src="{{ url('assets/gijgo/js/gijgo.min.js') }} "></script>
     <script src="{{ url('assets/js/tribin.js') }} "></script>
+    <script src="{{ url('assets/numeral/numeral.min.js') }} "></script>
     <!-- Favicons -->
     <meta name="theme-color" content="#712cf9">
     <style>

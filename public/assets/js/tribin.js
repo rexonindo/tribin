@@ -23,3 +23,11 @@ function tribinClearTextBox() {
         textBoxInputList[i].value = ''
     }
 }
+
+function tribinClearTextBoxByClassName(ClassName) {
+    let textBoxInputList = document.getElementsByClassName(ClassName)
+    let textBoxInputLength = textBoxInputList.length
+    for (let i = 0; i < textBoxInputLength; i++) {
+        textBoxInputList[i].value = ''
+    }
+}
