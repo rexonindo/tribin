@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PageController extends Controller
 {
-    function welcome()
+    function index()
     {
         if (Auth::check()) {
             return redirect('home');

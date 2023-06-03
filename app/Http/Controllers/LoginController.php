@@ -14,7 +14,7 @@ class LoginController extends Controller
         if (Auth::check()) {
             return redirect('home');
         } else {
-            return view('login');
+            return isset($_COOKIE['JOS_BNM']) ? view('login') : redirect('/');
         }
     }
 

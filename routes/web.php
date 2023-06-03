@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 
 # Autentikasi
 Route::get('/welcome', [LoginController::class, 'login'])->name('login');
-Route::get('/', [PageController::class, 'welcome']);
+Route::get('/', [PageController::class, 'index']);
 Route::post('actionlogin', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
 
