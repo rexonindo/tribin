@@ -177,6 +177,10 @@
             imageCssClassField: 'faCssClass',
             dataSource: '/menu',
             primaryKey: 'id',
+            icons : {
+                expand : `<span style="color: Tomato"><i class="fas fa-folder" /></span>`,
+                collapse : `<span style="color: Tomato"><i class="fas fa-folder-open" /></span>`,
+            }
         });
         mainTree.on('select', function(e, node, id) {
             const SelectedData = mainTree.getDataById(id)
