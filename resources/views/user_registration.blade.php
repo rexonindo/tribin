@@ -10,19 +10,19 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-4 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon4">User Name</span>
                 <input type="text" id="userName" onkeyup="userName_eKeyUp(event)" class="form-control" placeholder="User Name" aria-label="User Name" aria-describedby="basic-addon4">
             </div>
         </div>
-        <div class="col mb-1">
+        <div class="col-md-4 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon1">Nick Name</span>
                 <input type="text" id="userNickName" class="form-control" placeholder="Nick Name" maxlength="16">
             </div>
         </div>
-        <div class="col mb-1">
+        <div class="col-md-4 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon1">Email</span>
                 <input type="email" id="userEmail" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="basic-addon1">
@@ -30,7 +30,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-12 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon2">Password</span>
                 <input type="password" id="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="basic-addon2">
@@ -38,7 +38,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-12 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon3">Password Confirmation</span>
                 <input type="password" id="passwordConfirmation" class="form-control" placeholder="Password Confirmation" aria-label="Password" aria-describedby="basic-addon3">
@@ -46,7 +46,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-1">
+        <div class="col-md-12 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon2">Roles</span>
                 <select class="form-select" id="role">
