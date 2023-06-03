@@ -89,7 +89,7 @@
                                 <div class="col-md-6 mb-1">
                                     <div class="input-group input-group-sm mb-1">
                                         <span class="input-group-text">Price</span>
-                                        <input type="text" id="quotationPrice" class="form-control quotationInputItem" title="price per hour">                                        
+                                        <input type="text" id="quotationPrice" class="form-control quotationInputItem" title="price per hour">
                                     </div>
                                 </div>
                             </div>
@@ -395,6 +395,7 @@
                             $('#customerModal').modal('hide')
                             quotationCustomerCode.value = arrayItem['MCUS_CUSCD']
                             quotationCustomer.value = arrayItem['MCUS_CUSNM']
+                            quotationAttn.focus()
                         }
                         newcell = newrow.insertCell(1)
                         newcell.innerHTML = arrayItem['MCUS_CUSNM']
@@ -493,28 +494,65 @@
         }
         const quotationTableBody = quotationTable.getElementsByTagName('tbody')[0]
         newrow = quotationTableBody.insertRow(-1)
+        newrow.title = 'not selected'
+        newrow.onclick = (event) => {
+            const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
+            if (selrow.title === 'selected') {
+                selrow.title = 'not selected'
+                selrow.classList.remove('table-info')
+            } else {
+                const ttlrows = quotationTable.rows.length
+                for (let i = 1; i < ttlrows; i++) {
+                    quotationTable.rows[i].classList.remove('table-info')
+                    quotationTable.rows[i].title = 'not selected'
+                }
+                selrow.title = 'selected'
+                selrow.classList.add('table-info')
+            }
+        }
         newcell = newrow.insertCell(0)
-        newcell.innerHTML = quotationItemCode.value
-        
+        newcell.classList.add('d-none')
+
         newcell = newrow.insertCell(1)
-        newcell.innerHTML = quotationItemName.value
-        
+        newcell.innerHTML = quotationItemCode.value
+
         newcell = newrow.insertCell(2)
+        newcell.innerHTML = quotationItemName.value
+
+        newcell = newrow.insertCell(3)
         newcell.innerHTML = quotationUsage.value
         newcell.classList.add('text-center')
-        
-        newcell = newrow.insertCell(3)
+
+        newcell = newrow.insertCell(4)
         newcell.innerHTML = numeral(quotationPrice.value).format(',')
         newcell.classList.add('text-end')
 
-        newcell = newrow.insertCell(4)
+        newcell = newrow.insertCell(5)
         newcell.innerHTML = numeral(quotationOperator.value).format(',')
         newcell.classList.add('text-end')
 
-        newcell = newrow.insertCell(5)
+        newcell = newrow.insertCell(6)
         newcell.innerHTML = numeral(quotationMOBDEMOB.value).format(',')
         newcell.classList.add('text-end')
 
         tribinClearTextBoxByClassName('quotationInputItem')
+    }
+
+    function btnNewOnclick() {
+        tribinClearTextBox()
+        quotationTable.getElementsByTagName('tbody')[0].innerHTML = ``
+        quotationConditionContainer.innerHTML = ``
+    }
+
+    function btnRemoveLineOnclick() {
+        const ttlrows = quotationTable.rows.length
+        for (let i = 1; i < ttlrows; i++) {
+            if (quotationTable.rows[i].title === 'selected') {
+                if(confirm(`Are you sure ?`)){
+                    quotationTable.rows[i].remove()
+                    break;
+                }
+            }
+        }
     }
 </script>

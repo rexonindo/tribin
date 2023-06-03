@@ -144,7 +144,7 @@
         </div>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
-                <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
+                <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6 text-danger" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
                     <span data-feather="log-out" class="align-text-bottom"></span>
                 </a>
             </div>
