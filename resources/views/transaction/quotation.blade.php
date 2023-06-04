@@ -108,7 +108,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12 mb-1">
+                                <div class="col-md-12 mb-1 text-center">
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-secondary" id="btnSaveLine" onclick="btnSaveLineOnclick(this)">Save line</button>
                                         <button type="button" class="btn btn-outline-secondary" id="btnRemoveLine" onclick="btnRemoveLineOnclick(this)">Remove line</button>
@@ -199,8 +199,8 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <div class="table-responsive" id="quotationTabelContainer">
-                                <table id="quotationTabel" class="table table-sm table-striped table-bordered table-hover">
+                            <div class="table-responsive" id="quotationSavedTabelContainer">
+                                <table id="quotationSavedTabel" class="table table-sm table-striped table-bordered table-hover">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Code</th>
@@ -588,8 +588,8 @@
                 quotationIssueDate.focus()
                 return
             }
-            let conditionList = quotationConditionContainer.getElementsByTagName('li')            
-            for (let i =0; i<conditionList.length ; i++){
+            let conditionList = quotationConditionContainer.getElementsByTagName('li')
+            for (let i = 0; i < conditionList.length; i++) {
                 quotationCondition.push(conditionList[i].innerText)
             }
             const data = {
@@ -600,12 +600,12 @@
                 TQUODETA_ITMCD: itemCode,
                 TQUODETA_ITMQT: itemQty,
                 TQUODETA_USAGE: itemUsage,
-                TQUODETA_PRC: itemUsage,
+                TQUODETA_PRC: itemPrice,
                 TQUODETA_OPRPRC: itemOperatorPrice,
                 TQUODETA_MOBDEMOB: itemMobDemob,
                 TQUOCOND_CONDI: quotationCondition,
                 _token: '{{ csrf_token() }}',
-            }            
+            }
             if (confirm(`Are you sure want to save ?`)) {
                 pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
                 pthis.disabled = true
@@ -641,5 +641,152 @@
         } else {
 
         }
+    }
+
+    function btnShowQuotationModal() {
+        const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
+        quotationModal.addEventListener('shown.bs.modal', () => {
+            quotationSearch.focus()
+        })
+        myModal.show()
+    }
+
+    function quotationSearchOnKeypress(e) {
+        if (e.key === 'Enter') {
+            e.target.disabled = true
+            const data = {
+                searchBy: quotationSearchBy.value,
+                searchValue: e.target.value,
+            }
+            quotationSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4">Please wait</td></tr>`
+            $.ajax({
+                type: "GET",
+                url: "quotation",
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    e.target.disabled = false
+                    let myContainer = document.getElementById("quotationSavedTabelContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = quotationSavedTabel.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("quotationSavedTabel");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    response.data.forEach((arrayItem) => {
+                        newrow = myTableBody.insertRow(-1)
+                        newcell = newrow.insertCell(0)
+                        newcell.innerHTML = arrayItem['TQUO_QUOCD']
+                        newcell.style.cssText = 'cursor:pointer'
+                        newcell.onclick = () => {
+                            $('#quotationModal').modal('hide')
+                            quotationCode.value = arrayItem['TQUO_QUOCD']
+                            quotationIssueDate.value = arrayItem['TQUO_ISSUDT']
+                            quotationSubject.value = arrayItem['TQUO_SBJCT']
+                            quotationCustomer.value = arrayItem['MCUS_CUSNM']
+                            quotationCustomerCode.value = arrayItem['TQUO_CUSCD']
+                            quotationAttn.value = arrayItem['TQUO_ATTN']
+                            loadQuotationDetail({
+                                doc: arrayItem['TQUO_QUOCD']
+                            })
+                        }
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['MCUS_CUSNM']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['TQUO_ISSUDT']
+                        newcell = newrow.insertCell(3)
+                        newcell.innerHTML = arrayItem['TQUO_SBJCT']
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    e.target.disabled = false
+                    quotationSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4"></td></tr>`
+                }
+            });
+        }
+    }
+
+    function loadQuotationDetail(data) {
+        $.ajax({
+            type: "GET",
+            url: `quotation/${btoa(data.doc)}`,
+            dataType: "json",
+            success: function(response) {
+                let myContainer = document.getElementById("quotationTableContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = quotationTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("quotationTable");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                response.dataItem.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newrow.onclick = (event) => {
+                        const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
+                        if (selrow.title === 'selected') {
+                            selrow.title = 'not selected'
+                            selrow.classList.remove('table-info')
+                        } else {
+                            const ttlrows = quotationTable.rows.length
+                            for (let i = 1; i < ttlrows; i++) {
+                                quotationTable.rows[i].classList.remove('table-info')
+                                quotationTable.rows[i].title = 'not selected'
+                            }
+                            selrow.title = 'selected'
+                            selrow.classList.add('table-info')
+                        }
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.classList.add('d-none')
+                    newcell.innerHTML = arrayItem['id']
+                    newcell = newrow.insertCell(1)
+                    newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
+                    newcell = newrow.insertCell(2)
+                    newcell.innerHTML = arrayItem['MITM_ITMNM']
+                    newcell = newrow.insertCell(3)
+                    newcell.classList.add('text-center')
+                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                    newcell = newrow.insertCell(4)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
+                    newcell = newrow.insertCell(5)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
+                    newcell = newrow.insertCell(6)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
+                })
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+                quotationConditionContainer.innerHTML = ''
+                response.dataCondition.forEach((arrayItem) => {
+                    const liElement = document.createElement('li')
+                    liElement.title = "go ahead"
+                    liElement.classList.add(...['list-group-item', 'd-flex', 'justify-content-between', 'align-items-start'])
+                    const childLiElement = document.createElement('div')
+                    childLiElement.classList.add(...['ms-2', 'me-auto'])
+                    childLiElement.innerHTML = arrayItem['TQUOCOND_CONDI']
+                    const childLiElement2 = document.createElement('span')
+                    childLiElement2.classList.add(...['badge', 'bg-warning', 'rounded-pill'])
+                    childLiElement2.innerHTML = `<i class="fas fa-trash"></i>`
+                    childLiElement2.style.cssText = 'cursor:pointer'
+                    childLiElement2.onclick = () => {
+                        if (confirm(`Are you sure ?`)) {
+                            liElement.remove()
+                        }
+                    }
+                    liElement.appendChild(childLiElement)
+                    liElement.appendChild(childLiElement2)
+                    quotationConditionContainer.appendChild(liElement)
+                    quotationCondition.value = ``
+                })                
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+            }
+        });
     }
 </script>

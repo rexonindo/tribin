@@ -124,4 +124,26 @@ class QuotationController extends Controller
             'msg' => 'OK', 'doc' => $newQuotationCode, '$RSLast' => $LastLine, 'quotationHeader' => $quotationHeader, 'quotationDetail' => $quotationDetail
         ];
     }
+
+    function search(Request $request)
+    {
+        $columnMap = [
+            'TQUO_QUOCD',
+            'MCUS_CUSNM',
+        ];
+        $RS = T_QUOHEAD::select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
+            ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        return ['data' => $RS];
+    }
+
+    function loadById(Request $request)
+    {
+        $RS = T_QUODETA::select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB"])
+            ->leftJoin("M_ITM", "TQUODETA_ITMCD", "=", "MITM_ITMCD")
+            ->where('TQUODETA_QUOCD', base64_decode($request->id) )->get();
+        $RS1 = T_QUOCOND::select(["id", "TQUOCOND_CONDI"])
+            ->where('TQUOCOND_QUOCD', base64_decode($request->id))->get();
+        return ['dataItem' => $RS, 'dataCondition' => $RS1];
+    }
 }
