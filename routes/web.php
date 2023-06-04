@@ -72,3 +72,4 @@ Route::put('coa/{id}', [CoaController::class, 'update'])->middleware('auth');
 
 # Terkait Quotation Transaction
 Route::get('quotation/form', [QuotationController::class, 'index'])->middleware('auth');
+Route::post('quotation', [QuotationController::class, 'save'])->middleware('auth');

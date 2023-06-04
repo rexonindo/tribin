@@ -548,11 +548,98 @@
         const ttlrows = quotationTable.rows.length
         for (let i = 1; i < ttlrows; i++) {
             if (quotationTable.rows[i].title === 'selected') {
-                if(confirm(`Are you sure ?`)){
+                if (confirm(`Are you sure ?`)) {
                     quotationTable.rows[i].remove()
                     break;
                 }
             }
+        }
+    }
+
+    function btnSaveOnclick(pthis) {
+        if (quotationCode.value.length === 0) {
+            let itemCode = []
+            let itemQty = []
+            let itemUsage = []
+            let itemPrice = []
+            let itemOperatorPrice = []
+            let itemMobDemob = []
+            let quotationCondition = []
+            const ttlrows = quotationTable.rows.length
+            for (let i = 1; i < ttlrows; i++) {
+                itemCode.push(quotationTable.rows[i].cells[1].innerText.trim())
+                itemUsage.push(quotationTable.rows[i].cells[3].innerText.trim())
+                itemQty.push(1)
+                itemPrice.push(numeral(quotationTable.rows[i].cells[4].innerText.trim()).value())
+                itemOperatorPrice.push(numeral(quotationTable.rows[i].cells[5].innerText.trim()).value())
+                itemMobDemob.push(numeral(quotationTable.rows[i].cells[6].innerText.trim()).value())
+            }
+            if (ttlrows === 1) {
+                alertify.message('nothing to be saved')
+                return
+            }
+            if (quotationIssueDate.value.length === 0) {
+                alertify.message('issue date is required')
+                quotationIssueDate.focus()
+                return
+            }
+            if (quotationSubject.value.length === 0) {
+                alertify.message('Subject is required')
+                quotationIssueDate.focus()
+                return
+            }
+            let conditionList = quotationConditionContainer.getElementsByTagName('li')            
+            for (let i =0; i<conditionList.length ; i++){
+                quotationCondition.push(conditionList[i].innerText)
+            }
+            const data = {
+                TQUO_CUSCD: quotationCustomerCode.value.trim(),
+                TQUO_ATTN: quotationAttn.value.trim(),
+                TQUO_SBJCT: quotationSubject.value.trim(),
+                TQUO_ISSUDT: quotationIssueDate.value.trim(),
+                TQUODETA_ITMCD: itemCode,
+                TQUODETA_ITMQT: itemQty,
+                TQUODETA_USAGE: itemUsage,
+                TQUODETA_PRC: itemUsage,
+                TQUODETA_OPRPRC: itemOperatorPrice,
+                TQUODETA_MOBDEMOB: itemMobDemob,
+                TQUOCOND_CONDI: quotationCondition,
+                _token: '{{ csrf_token() }}',
+            }            
+            if (confirm(`Are you sure want to save ?`)) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "POST",
+                    url: "quotation",
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+                        quotationCode.value = response.doc
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
+        } else {
+
         }
     }
 </script>
