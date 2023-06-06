@@ -544,15 +544,48 @@
         quotationConditionContainer.innerHTML = ``
     }
 
-    function btnRemoveLineOnclick() {
+    function btnRemoveLineOnclick(pthis) {
         const ttlrows = quotationTable.rows.length
+        let idItem = ''
+        let iFounded = 0
         for (let i = 1; i < ttlrows; i++) {
             if (quotationTable.rows[i].title === 'selected') {
-                if (confirm(`Are you sure ?`)) {
-                    quotationTable.rows[i].remove()
-                    break;
+                idItem = quotationTable.rows[i].cells[0].innerText.trim()
+                iFounded = i
+                break
+            }
+        }
+
+        if (iFounded > 0) {
+            if (confirm(`Are you sure ?`)) {
+                if (idItem.length >= 1) {
+                    pthis.disabled = true
+                    pthis.innerHTML = `Please wait`
+                    $.ajax({
+                        type: "DELETE",
+                        url: `quotation/items/${idItem}`,
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        dataType: "json",
+                        success: function(response) {
+                            pthis.innerHTML = `Remove line`
+                            pthis.disabled = false
+                            quotationTable.rows[iFounded].remove()
+                            alertify.message(response.msg)
+                        },
+                        error: function(xhr, xopt, xthrow) {
+                            alertify.warning(xthrow);
+                            pthis.disabled = false
+                            pthis.innerHTML = `Remove line`
+                        }
+                    });
+                } else {
+                    quotationTable.rows[iFounded].remove()
                 }
             }
+        } else {
+            alertify.message('nothing selected item')
         }
     }
 
@@ -618,6 +651,9 @@
                         pthis.innerHTML = `<i class="fas fa-save"></i>`
                         alertify.success(response.msg)
                         quotationCode.value = response.doc
+                        loadQuotationDetail({
+                            doc: response.doc
+                        })
                         pthis.disabled = false
                         document.getElementById('div-alert').innerHTML = ''
                     },
@@ -764,7 +800,7 @@
                 quotationConditionContainer.innerHTML = ''
                 response.dataCondition.forEach((arrayItem) => {
                     const liElement = document.createElement('li')
-                    liElement.title = "go ahead"
+                    liElement.title = arrayItem['id']
                     liElement.classList.add(...['list-group-item', 'd-flex', 'justify-content-between', 'align-items-start'])
                     const childLiElement = document.createElement('div')
                     childLiElement.classList.add(...['ms-2', 'me-auto'])
@@ -775,14 +811,28 @@
                     childLiElement2.style.cssText = 'cursor:pointer'
                     childLiElement2.onclick = () => {
                         if (confirm(`Are you sure ?`)) {
-                            liElement.remove()
+                            $.ajax({
+                                type: "DELETE",
+                                url: `quotation/conditions/${liElement.title}`,
+                                data: {
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                dataType: "json",
+                                success: function(response) {
+                                    liElement.remove()
+                                    alertify.message(response.msg)
+                                },
+                                error: function(xhr, xopt, xthrow) {
+                                    alertify.warning(xthrow);
+                                }
+                            });
                         }
                     }
                     liElement.appendChild(childLiElement)
                     liElement.appendChild(childLiElement2)
                     quotationConditionContainer.appendChild(liElement)
                     quotationCondition.value = ``
-                })                
+                })
             },
             error: function(xhr, xopt, xthrow) {
                 alertify.warning(xthrow);

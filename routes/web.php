@@ -75,3 +75,5 @@ Route::get('quotation/form', [QuotationController::class, 'index'])->middleware(
 Route::post('quotation', [QuotationController::class, 'save'])->middleware('auth');
 Route::get('quotation', [QuotationController::class, 'search'])->middleware('auth');
 Route::get('quotation/{id}', [QuotationController::class, 'loadById'])->middleware('auth');
+Route::delete('quotation/conditions/{id}', [QuotationController::class, 'deleteConditionById'])->middleware('auth');
+Route::delete('quotation/items/{id}', [QuotationController::class, 'deleteItemById'])->middleware('auth');

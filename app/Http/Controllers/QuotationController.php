@@ -141,9 +141,29 @@ class QuotationController extends Controller
     {
         $RS = T_QUODETA::select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB"])
             ->leftJoin("M_ITM", "TQUODETA_ITMCD", "=", "MITM_ITMCD")
-            ->where('TQUODETA_QUOCD', base64_decode($request->id) )->get();
+            ->where('TQUODETA_QUOCD', base64_decode($request->id))
+            ->whereNull('deleted_at')->get();
         $RS1 = T_QUOCOND::select(["id", "TQUOCOND_CONDI"])
-            ->where('TQUOCOND_QUOCD', base64_decode($request->id))->get();
+            ->where('TQUOCOND_QUOCD', base64_decode($request->id))
+            ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS, 'dataCondition' => $RS1];
+    }
+
+    function deleteConditionById(Request $request)
+    {
+        $affectedRow = T_QUOCOND::where('id', $request->id)
+            ->update([
+                'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
+    }
+
+    function deleteItemById(Request $request)
+    {
+        $affectedRow = T_QUODETA::where('id', $request->id)
+            ->update([
+                'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
     }
 }
