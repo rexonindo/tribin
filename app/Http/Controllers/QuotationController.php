@@ -166,4 +166,27 @@ class QuotationController extends Controller
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
     }
+
+    function toApproveList()
+    {
+        $data = [];
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $RSDetail = DB::table('T_QUODETA')
+                ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
+                ->groupBy("TQUODETA_QUOCD")
+                ->whereNull('deleted_at');
+            $data = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
+                })
+                ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
+                ->whereNull("TQUO_APPRVDT")->groupBy('TQUO_QUOCD')->get();
+        }
+        return ['data' => $data];
+    }
+
+    public function formApproval()
+    {
+        return view('transaction.approval');
+    }
 }

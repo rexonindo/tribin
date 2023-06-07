@@ -77,3 +77,7 @@ Route::get('quotation', [QuotationController::class, 'search'])->middleware('aut
 Route::get('quotation/{id}', [QuotationController::class, 'loadById'])->middleware('auth');
 Route::delete('quotation/conditions/{id}', [QuotationController::class, 'deleteConditionById'])->middleware('auth');
 Route::delete('quotation/items/{id}', [QuotationController::class, 'deleteItemById'])->middleware('auth');
+
+#Terkait Approval
+Route::get('approval/quotation', [QuotationController::class, 'toApproveList'])->middleware('auth');
+Route::get('approval/form/quotation', [QuotationController::class, 'formApproval'])->middleware('auth');

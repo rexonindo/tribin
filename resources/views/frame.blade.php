@@ -18,6 +18,7 @@
     <script src="{{ url('assets/alertify/alertify.min.js') }} "></script>
     <script src="{{ url('assets/gijgo/js/gijgo.min.js') }} "></script>
     <script src="{{ url('assets/js/tribin.js') }} "></script>
+    <script src="{{ url('assets/js/moment.min.js') }} "></script>
     <script src="{{ url('assets/numeral/numeral.min.js') }} "></script>
     <!-- Favicons -->
     <meta name="theme-color" content="#712cf9">
@@ -130,15 +131,10 @@
             <div class="nav-item dropdown text-nowrap">
                 <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown">
                     <span data-feather="mail" class="align-text-bottom"></span>
-                    <span class="badge text-bg-info">3</span>
+                    <span class="badge text-bg-info" id="labelNotifAll"></span>
                 </a>
                 <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovalOnclick(event)">Quotation Approval <span class="badge text-bg-info" id="labelNotifApprovalQuotation"></span></a></li>
                 </ul>
             </div>
         </div>
@@ -170,21 +166,21 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
     <script>
         feather.replace()
-
+        const ContentContainer = document.getElementById('konten-div')
         const mainTree = $('#tree').tree({
             uiLibrary: 'bootstrap5',
             iconsLibrary: 'fontawesome',
             imageCssClassField: 'faCssClass',
             dataSource: '/menu',
             primaryKey: 'id',
-            icons : {
-                expand : `<span style="color: Tomato"><i class="fas fa-folder" /></span>`,
-                collapse : `<span style="color: Tomato"><i class="fas fa-folder-open" /></span>`,
+            icons: {
+                expand: `<span style="color: Tomato"><i class="fas fa-folder" /></span>`,
+                collapse: `<span style="color: Tomato"><i class="fas fa-folder-open" /></span>`,
             }
         });
         mainTree.on('select', function(e, node, id) {
             const SelectedData = mainTree.getDataById(id)
-            const ContentContainer = document.getElementById('konten-div')
+            
             if (SelectedData.appUrl) {
                 ContentContainer.innerHTML = 'Please wait'
                 $.ajax({
@@ -218,7 +214,37 @@
                     }
                 });
             }
-        }        
+        }
+
+        function showNotificationToApprove() {
+            $.ajax({
+                type: "GET",
+                url: "/approval/quotation",
+                dataType: "json",
+                success: function(response) {
+                    const totalNotifQT = response.data.length
+                    labelNotifAll.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
+                    labelNotifApprovalQuotation.innerHTML = response.data.length === 0 ? '' : response.data.length
+                }
+            });
+        }
+
+        showNotificationToApprove()
+
+        function liApprovalOnclick(e) {
+            e.preventDefault()
+            if (labelNotifApprovalQuotation.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/approval/form/quotation",
+                    data: "data",                    
+                    success: function (response) {
+                        setInnerHTML(ContentContainer, response)                        
+                    }
+                });
+            }
+        }
     </script>
 </body>
 
