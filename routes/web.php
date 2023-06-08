@@ -81,3 +81,8 @@ Route::delete('quotation/items/{id}', [QuotationController::class, 'deleteItemBy
 #Terkait Approval
 Route::get('approval/quotation', [QuotationController::class, 'toApproveList'])->middleware('auth');
 Route::get('approval/form/quotation', [QuotationController::class, 'formApproval'])->middleware('auth');
+Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
+
+
+#Terkait laporan berupa Pdf
+Route::get('PDF/quotation', [QuotationController::class, 'toPDF'])->middleware('auth');

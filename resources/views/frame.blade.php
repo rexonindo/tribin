@@ -129,7 +129,7 @@
         <div class="navbar-nav w-100"></div>
         <div class="navbar-nav">
             <div class="nav-item dropdown text-nowrap">
-                <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown">
+                <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown" onclick="showNotificationToApprove()">
                     <span data-feather="mail" class="align-text-bottom"></span>
                     <span class="badge text-bg-info" id="labelNotifAll"></span>
                 </a>
@@ -180,7 +180,7 @@
         });
         mainTree.on('select', function(e, node, id) {
             const SelectedData = mainTree.getDataById(id)
-            
+
             if (SelectedData.appUrl) {
                 ContentContainer.innerHTML = 'Please wait'
                 $.ajax({
@@ -238,9 +238,8 @@
                 $.ajax({
                     type: "GET",
                     url: "/approval/form/quotation",
-                    data: "data",                    
-                    success: function (response) {
-                        setInnerHTML(ContentContainer, response)                        
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
                     }
                 });
             }

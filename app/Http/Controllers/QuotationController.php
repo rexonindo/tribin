@@ -9,12 +9,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Codedge\Fpdf\Fpdf\Fpdf;
 
 class QuotationController extends Controller
 {
+    protected $fpdf;
     public function __construct()
     {
         date_default_timezone_set('Asia/Jakarta');
+        $this->fpdf = new Fpdf;
     }
     public function index()
     {
@@ -188,5 +191,38 @@ class QuotationController extends Controller
     public function formApproval()
     {
         return view('transaction.approval');
+    }
+
+    public function toPDF()
+    {
+        $this->fpdf->SetFont('Arial', 'BU', 24);
+        $this->fpdf->AddPage("P", 'A4');
+        $this->fpdf->SetXY(7, 5);
+        $this->fpdf->Cell(0, 8, 'JAYA ABADI TEKNIK', 0, 0, 'C');
+        $this->fpdf->SetFont('Arial', 'B', 12);
+        $this->fpdf->SetXY(7, 13);
+        $this->fpdf->Cell(0, 5, 'SALES & RENTAL DIESEL GENSET - FORKLIF - TRAVOLAS - TRUK', 0, 0, 'C');
+
+        $this->fpdf->SetFont('Arial', 'B', 10);
+        $this->fpdf->SetXY(7, 18);
+        $this->fpdf->MultiCell(0, 5, 'Alamat Kantor : Jl. Tembusan Terminal No.19-20 Km. 12 Alang-alang Lebar,  Palembang - Indonesia Telp. (0711) 5645971 - 5645108  fax. (0711) 5645972', 0, 'C');
+
+        $this->fpdf->Output();
+
+        exit;
+    }
+
+    function approve(Request $request)
+    {
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $affectedRow = T_QUOHEAD::where('TQUO_QUOCD', base64_decode($request->id))
+                ->update([
+                    'TQUO_APPRVBY' => Auth::user()->nick_name, 'TQUO_APPRVDT' => date('Y-m-d H:i:s')
+                ]);
+            $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+            return ['message' => $message];
+        } else {
+            return response()->json(['message' => 'forbidden'], 403);
+        }
     }
 }
