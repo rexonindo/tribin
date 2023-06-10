@@ -44,19 +44,26 @@
                     elFlex.classList.add(...['d-flex', 'justify-content-between', 'align-items-center'])
 
                     const elButtonGrup = document.createElement('div')
-                    elButtonGrup.classList.add(...['btn-group', 'btn-group-sm'])                                
+                    elButtonGrup.classList.add(...['btn-group', 'btn-group-sm'])
 
                     const elButton2 = document.createElement('button')
                     elButton2.classList.add(...['btn', 'btn-outline-primary'])
                     elButton2.innerHTML = 'Create Receive Order'
                     elButton2.onclick = () => {
                         event.preventDefault()
-                        labelQuotationInModal.innerHTML = arrayItem['TQUO_QUOCD']
-                        const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
-                        myModal.show()
-                        loadQuotationDetail({
-                            doc: arrayItem['TQUO_QUOCD']
-                        })
+                        ContentContainer.innerHTML = 'Please wait'
+                        $.ajax({
+                            type: "GET",
+                            url: 'receive-order/form',
+                            dataType: "text",
+                            success: function(response) {
+                                setInnerHTML(ContentContainer, response)
+                                if (!myCollapse.classList.contains('collapsed')) {
+                                    mybsCollapse.toggle()
+                                }
+
+                            }
+                        });
                     }
 
                     const elSmalltext = document.createElement('small')
