@@ -137,8 +137,10 @@ class QuotationController extends Controller
 
         $RS = $request->approval == '1' ? T_QUOHEAD::select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
+            ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->whereNotNull("TQUO_APPRVDT")
+            ->whereNull("TSLO_QUOCD")
             ->get()
             : T_QUOHEAD::select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
@@ -203,7 +205,11 @@ class QuotationController extends Controller
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
-                ->whereNotNull("TQUO_APPRVDT")->groupBy('TQUO_QUOCD')->get();
+                ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
+                ->whereNotNull("TQUO_APPRVDT")
+                ->whereNull("TSLO_QUOCD")
+                ->groupBy('TQUO_QUOCD')
+                ->get();
         }
 
         return ['data' => $dataTobeApproved, 'dataApproved' => $dataApproved];
