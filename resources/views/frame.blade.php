@@ -123,7 +123,7 @@
 
     <header class="navbar bg-white sticky-top flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="{{ url ('home')}}">JAT Online System</a>
-        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler position-absolute d-md-none collapsed" id="myCollapse" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="navbar-nav w-100"></div>
@@ -135,6 +135,7 @@
                 </a>
                 <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
                     <li><a class="dropdown-item" href="#" onclick="liApprovalOnclick(event)">Quotation Approval <span class="badge text-bg-info" id="labelNotifApprovalQuotation"></span></a></li>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovedQuotationOnclick(event)">Approved Quotation <span class="badge text-bg-info" id="labelNotifApprovedQuotation"></span></a></li>
                 </ul>
             </div>
         </div>
@@ -165,6 +166,9 @@
     <script src="{{ url('assets/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
     <script>
+        const mybsCollapse = new bootstrap.Collapse(sidebarMenu, {
+            toggle: false
+        })
         feather.replace()
         const ContentContainer = document.getElementById('konten-div')
         const mainTree = $('#tree').tree({
@@ -189,6 +193,10 @@
                     dataType: "text",
                     success: function(response) {
                         setInnerHTML(ContentContainer, response)
+                        if (!myCollapse.classList.contains('collapsed')) {
+                            mybsCollapse.toggle()
+                        }
+
                     }
                 });
             }
@@ -223,8 +231,11 @@
                 dataType: "json",
                 success: function(response) {
                     const totalNotifQT = response.data.length
-                    labelNotifAll.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
-                    labelNotifApprovalQuotation.innerHTML = response.data.length === 0 ? '' : response.data.length
+                    const totalNotifApprovedQT = response.dataApproved.length
+                    const totalNotif = totalNotifQT + totalNotifApprovedQT
+                    labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
+                    labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
+                    labelNotifApprovedQuotation.innerHTML = totalNotifApprovedQT === 0 ? '' : totalNotifApprovedQT
                 }
             });
         }
@@ -238,6 +249,20 @@
                 $.ajax({
                     type: "GET",
                     url: "/approval/form/quotation",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
+        }
+
+        function liApprovedQuotationOnclick(e) {
+            e.preventDefault()
+            if (labelNotifApprovedQuotation.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/approved/form/quotation",
                     success: function(response) {
                         setInnerHTML(ContentContainer, response)
                     }

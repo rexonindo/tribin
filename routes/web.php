@@ -79,9 +79,12 @@ Route::delete('quotation/conditions/{id}', [QuotationController::class, 'deleteC
 Route::delete('quotation/items/{id}', [QuotationController::class, 'deleteItemById'])->middleware('auth');
 
 #Terkait Approval
-Route::get('approval/quotation', [QuotationController::class, 'toApproveList'])->middleware('auth');
+Route::get('approval/quotation', [QuotationController::class, 'notifications'])->middleware('auth');
 Route::get('approval/form/quotation', [QuotationController::class, 'formApproval'])->middleware('auth');
+
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
+Route::get('approved/form/quotation', [QuotationController::class, 'formApproved'])->middleware('auth');
+
 
 
 #Terkait laporan berupa Pdf

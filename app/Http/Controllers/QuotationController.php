@@ -170,22 +170,36 @@ class QuotationController extends Controller
         return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
     }
 
-    function toApproveList()
+    function notifications()
     {
-        $data = [];
+        $dataTobeApproved = [];
+        $dataApproved = [];
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
             $RSDetail = DB::table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
                 ->whereNull('deleted_at');
-            $data = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT"))
+            $dataTobeApproved = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
                 ->whereNull("TQUO_APPRVDT")->groupBy('TQUO_QUOCD')->get();
         }
-        return ['data' => $data];
+        if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
+            $RSDetail = DB::table('T_QUODETA')
+                ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
+                ->groupBy("TQUODETA_QUOCD")
+                ->whereNull('deleted_at');
+            $dataApproved = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
+                })
+                ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
+                ->whereNotNull("TQUO_APPRVDT")->groupBy('TQUO_QUOCD')->get();            
+        }
+
+        return ['data' => $dataTobeApproved, 'dataApproved' => $dataApproved];
     }
 
     public function formApproval()
@@ -225,4 +239,9 @@ class QuotationController extends Controller
             return response()->json(['message' => 'forbidden'], 403);
         }
     }
+
+    function formApproved()
+    {
+        return view('transaction.approved_quotation');
+    }    
 }
