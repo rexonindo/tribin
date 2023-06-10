@@ -8,6 +8,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\ReceiveOrderController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -50,7 +51,6 @@ Route::get('item', [ItemController::class, 'search'])->middleware('auth');
 Route::post('item', [ItemController::class, 'simpan'])->middleware('auth');
 Route::put('item/{id}', [ItemController::class, 'update'])->middleware('auth');
 
-
 # Terkait Customer Master
 Route::get('customer/form', [CustomerController::class, 'index'])->middleware('auth');
 Route::get('customer', [CustomerController::class, 'search'])->middleware('auth');
@@ -85,7 +85,12 @@ Route::get('approval/form/quotation', [QuotationController::class, 'formApproval
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
 Route::get('approved/form/quotation', [QuotationController::class, 'formApproved'])->middleware('auth');
 
-
+#Terkait Receive Order
+Route::get('receive-order/form', [ReceiveOrderController::class, 'index'])->middleware('auth');
+Route::post('receive-order', [ReceiveOrderController::class, 'save'])->middleware('auth');
+Route::get('receive-order', [ReceiveOrderController::class, 'search'])->middleware('auth');
+Route::get('receive-order/{id}', [ReceiveOrderController::class, 'loadById'])->middleware('auth');
+Route::delete('receive-order/items/{id}', [ReceiveOrderController::class, 'deleteItemById'])->middleware('auth');
 
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation', [QuotationController::class, 'toPDF'])->middleware('auth');
