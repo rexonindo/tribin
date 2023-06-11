@@ -45,6 +45,7 @@ class ReceiveOrderController extends Controller
         $quotationHeader = [];
         $newDocumentCode = '';
         if (!$LastLine) {
+            $LastLine = 1;
             $newDocumentCode = '001/PT/SLO/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         } else {
             $LastLine++;
@@ -53,7 +54,7 @@ class ReceiveOrderController extends Controller
         $quotationHeader = [
             'TSLO_SLOCD' => $newDocumentCode,
             'TSLO_CUSCD' => $request->TSLO_CUSCD,
-            'TSLO_LINE' => 1,
+            'TSLO_LINE' => $LastLine,
             'TSLO_ATTN' => $request->TSLO_ATTN,
             'TSLO_QUOCD' => $request->TSLO_QUOCD,
             'TSLO_POCD' => $request->TSLO_POCD,
