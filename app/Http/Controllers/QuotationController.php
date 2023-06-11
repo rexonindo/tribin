@@ -296,43 +296,48 @@ class QuotationController extends Controller
 
     function report(Request $request)
     {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('QUOTATION');
-        $sheet->freezePane('A2');
-        $RS = T_QUOHEAD::select(DB::raw("T_QUOHEAD.*,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
+        $RS = T_QUOHEAD::select(DB::raw("T_QUOHEAD.*,MCUS_CUSNM,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
             ->leftJoin('T_QUODETA', 'TQUO_QUOCD', '=', 'TQUODETA_QUOCD')
             ->leftJoin('M_ITM', 'TQUODETA_ITMCD', '=', 'MITM_ITMCD')
             ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
             ->where("TQUO_ISSUDT", ">=", $request->dateFrom)
             ->where("TQUO_ISSUDT", "<=", $request->dateTo)
             ->get()->toArray();
-        $sheet->fromArray(array_keys($RS[0]), null, 'A1');
-        $sheet->fromArray($RS, null, 'A2');
+        if ($request->fileType === 'json') {
+            return ['data' => $RS];
+        } else {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('QUOTATION');
+            $sheet->freezePane('A2');
 
-        foreach (range('A', 'Z') as $r) {
-            $sheet->getColumnDimension($r)->setAutoSize(true);
+            $sheet->fromArray(array_keys($RS[0]), null, 'A1');
+            $sheet->fromArray($RS, null, 'A2');
+
+            foreach (range('A', 'Z') as $r) {
+                $sheet->getColumnDimension($r)->setAutoSize(true);
+            }
+
+            $sheet = $spreadsheet->createSheet();
+            $sheet->setTitle('CONDITION');
+            $RS = T_QUOHEAD::select(DB::raw("T_QUOCOND.*"))
+                ->leftJoin('T_QUOCOND', 'TQUO_QUOCD', '=', 'TQUOCOND_QUOCD')
+                ->where("TQUO_ISSUDT", ">=", $request->dateFrom)
+                ->where("TQUO_ISSUDT", "<=", $request->dateTo)
+                ->get()->toArray();
+            $sheet->fromArray(array_keys($RS[0]), null, 'A1');
+            $sheet->fromArray($RS, null, 'A2');
+            foreach (range('A', 'Z') as $r) {
+                $sheet->getColumnDimension($r)->setAutoSize(true);
+            }
+
+            $stringjudul = "Quotation Report " . date('Y-m-d H:i:s');
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $filename = $stringjudul;
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save('php://output');
         }
-
-        $sheet = $spreadsheet->createSheet();
-        $sheet->setTitle('CONDITION');
-        $RS = T_QUOHEAD::select(DB::raw("T_QUOCOND.*"))
-            ->leftJoin('T_QUOCOND', 'TQUO_QUOCD', '=', 'TQUOCOND_QUOCD')
-            ->where("TQUO_ISSUDT", ">=", $request->dateFrom)
-            ->where("TQUO_ISSUDT", "<=", $request->dateTo)
-            ->get()->toArray();
-        $sheet->fromArray(array_keys($RS[0]), null, 'A1');
-        $sheet->fromArray($RS, null, 'A2');
-        foreach (range('A', 'Z') as $r) {
-            $sheet->getColumnDimension($r)->setAutoSize(true);
-        }
-
-        $stringjudul = "Quotation Report " . date('Y-m-d H:i:s');
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $filename = $stringjudul;
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');
     }
 }
