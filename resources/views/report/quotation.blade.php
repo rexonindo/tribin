@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" id="rowStack0">
     <h1 class="h2">Quotation Report</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
 
@@ -6,11 +6,11 @@
 </div>
 <form id="item-form">
     <div class="container-fluid">
-        <div class="row">
+        <div class="row" >
             <div class="col mb-1" id="div-alert">
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="rowStack1">
             <div class="col-md-6 mb-1">
                 <label for="quotationIssueDateFrom" class="form-label">Issue date from</label>
                 <input type="text" id="quotationIssueDateFrom" class="form-control" maxlength="10" readonly>
@@ -20,7 +20,7 @@
                 <input type="text" id="quotationIssueDateTo" class="form-control" maxlength="10" readonly>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="rowStack2">
             <div class="col mb-1">
                 <div class="btn-group btn-group-sm">
                     <button type="button" class="btn btn-outline-primary" id="btnExport" title="Export to spreadsheet file" onclick="btnExportOnclick(this)"><i class="fas fa-file-excel"></i></button>
@@ -58,6 +58,11 @@
     </div>
 </form>
 <script>
+    $("#divQuotationReportContainer").css('height', $(window).height()   
+    -document.getElementById('rowStack0').offsetHeight 
+    -document.getElementById('rowStack1').offsetHeight 
+    -document.getElementById('rowStack2').offsetHeight     
+    -100);
     var $dateFrom = $("#quotationIssueDateFrom").datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,

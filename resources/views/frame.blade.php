@@ -97,6 +97,11 @@
             z-index: 1500;
         }
 
+        thead tr.first th, thead tr.first td {
+            position: sticky;
+            top: 0;        
+        }
+
         /* sidebar custom */
     </style>
 
