@@ -141,7 +141,7 @@
                                 <div class="col-md-12 mb-1">
                                     <div class="input-group mb-1">
                                         <input type="text" id="quotationCondition" class="form-control" onkeypress="quotationConditionOnKeyPress(event)" maxlength="450">
-                                        <button class="btn btn-primary" type="button" onclick="addCondition()"><i class="fas fa-plus"></i></button>
+                                        <button class="btn btn-primary" type="button" id="btnAddCondition" onclick="addCondition()"><i class="fas fa-plus"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -332,27 +332,69 @@
     }
 
     function addCondition() {
-        const condition = quotationCondition.value.trim()
-        if (condition.length > 2) {
-            const liElement = document.createElement('li')
-            liElement.title = "go ahead"
-            liElement.classList.add(...['list-group-item', 'd-flex', 'justify-content-between', 'align-items-start'])
-            const childLiElement = document.createElement('div')
-            childLiElement.classList.add(...['ms-2', 'me-auto'])
-            childLiElement.innerHTML = condition
-            const childLiElement2 = document.createElement('span')
-            childLiElement2.classList.add(...['badge', 'bg-warning', 'rounded-pill'])
-            childLiElement2.innerHTML = `<i class="fas fa-trash"></i>`
-            childLiElement2.style.cssText = 'cursor:pointer'
-            childLiElement2.onclick = () => {
-                if (confirm(`Are you sure ?`)) {
-                    liElement.remove()
+        if(quotationCode.value.trim().length === 0){
+            const condition = quotationCondition.value.trim()
+            if (condition.length > 2) {
+                const liElement = document.createElement('li')
+                liElement.title = "go ahead"
+                liElement.classList.add(...['list-group-item', 'd-flex', 'justify-content-between', 'align-items-start'])
+                const childLiElement = document.createElement('div')
+                childLiElement.classList.add(...['ms-2', 'me-auto'])
+                childLiElement.innerHTML = condition
+                const childLiElement2 = document.createElement('span')
+                childLiElement2.classList.add(...['badge', 'bg-warning', 'rounded-pill'])
+                childLiElement2.innerHTML = `<i class="fas fa-trash"></i>`
+                childLiElement2.style.cssText = 'cursor:pointer'
+                childLiElement2.onclick = () => {
+                    if (confirm(`Are you sure ?`)) {
+                        liElement.remove()
+                    }
                 }
+                liElement.appendChild(childLiElement)
+                liElement.appendChild(childLiElement2)
+                quotationConditionContainer.appendChild(liElement)
+                quotationCondition.value = ``
             }
-            liElement.appendChild(childLiElement)
-            liElement.appendChild(childLiElement2)
-            quotationConditionContainer.appendChild(liElement)
-            quotationCondition.value = ``
+        } else {
+            if(confirm('Are you sure ?.')){
+                const data = {
+                    TQUOCOND_QUOCD: quotationCode.value,
+                    TQUOCOND_CONDI: quotationCondition.value,
+                    _token: '{{ csrf_token() }}',
+                }
+                quotationCondition.disabled = true
+                btnAddCondition.disabled = true
+                $.ajax({
+                    type: "POST",
+                    url: "quotation-condition",
+                    data: data,
+                    dataType: "JSON",
+                    success: function (response) {
+                        quotationCondition.disabled = false
+                        btnAddCondition.disabled = false
+                        loadQuotationDetail({
+                            doc: quotationCode.value
+                        })
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        quotationCondition.disabled = false
+                        btnAddCondition.disabled = false
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
         }
     }
 

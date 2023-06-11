@@ -74,6 +74,7 @@ Route::put('coa/{id}', [CoaController::class, 'update'])->middleware('auth');
 Route::get('quotation/form', [QuotationController::class, 'index'])->middleware('auth');
 Route::post('quotation', [QuotationController::class, 'save'])->middleware('auth');
 Route::post('quotation-item', [QuotationController::class, 'saveItem'])->middleware('auth');
+Route::post('quotation-condition', [QuotationController::class, 'saveCondition'])->middleware('auth');
 Route::put('quotation/{id}', [QuotationController::class, 'update'])->middleware('auth');
 Route::get('quotation', [QuotationController::class, 'search'])->middleware('auth');
 Route::get('quotation/{id}', [QuotationController::class, 'loadById'])->middleware('auth');

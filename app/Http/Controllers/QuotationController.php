@@ -129,6 +129,24 @@ class QuotationController extends Controller
         ];
     }
 
+    public function saveCondition(Request $request)
+    {
+        $quotationCondition[] = [
+            'TQUOCOND_QUOCD' => $request->TQUOCOND_QUOCD,
+            'TQUOCOND_CONDI' => $request->TQUOCOND_CONDI,
+            'created_by' => Auth::user()->nick_name,
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+        if (!empty($quotationCondition)) {
+            T_QUOCOND::insert($quotationCondition);
+        }
+        
+        return [
+            'msg' => 'OK'
+        ];
+    }
+
+
     public function update(Request $request)
     {
         # ubah data header
