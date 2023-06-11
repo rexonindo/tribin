@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Codedge\Fpdf\Fpdf\Fpdf;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class QuotationController extends Controller
 {
@@ -21,7 +23,12 @@ class QuotationController extends Controller
     }
     public function index()
     {
-        return view('transaction.quotation');
+        return view('report.quotation');
+    }
+
+    public function formReport()
+    {
+        return view('report.quotation');
     }
 
     public function save(Request $request)
@@ -140,7 +147,7 @@ class QuotationController extends Controller
         if (!empty($quotationCondition)) {
             T_QUOCOND::insert($quotationCondition);
         }
-        
+
         return [
             'msg' => 'OK'
         ];
@@ -285,5 +292,47 @@ class QuotationController extends Controller
     function formApproved()
     {
         return view('transaction.approved_quotation');
+    }
+
+    function report(Request $request)
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('QUOTATION');
+        $sheet->freezePane('A2');
+        $RS = T_QUOHEAD::select(DB::raw("T_QUOHEAD.*,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
+            ->leftJoin('T_QUODETA', 'TQUO_QUOCD', '=', 'TQUODETA_QUOCD')
+            ->leftJoin('M_ITM', 'TQUODETA_ITMCD', '=', 'MITM_ITMCD')
+            ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
+            ->where("TQUO_ISSUDT", ">=", $request->dateFrom)
+            ->where("TQUO_ISSUDT", "<=", $request->dateTo)
+            ->get()->toArray();
+        $sheet->fromArray(array_keys($RS[0]), null, 'A1');
+        $sheet->fromArray($RS, null, 'A2');
+
+        foreach (range('A', 'Z') as $r) {
+            $sheet->getColumnDimension($r)->setAutoSize(true);
+        }
+
+        $sheet = $spreadsheet->createSheet();
+        $sheet->setTitle('CONDITION');
+        $RS = T_QUOHEAD::select(DB::raw("T_QUOCOND.*"))
+            ->leftJoin('T_QUOCOND', 'TQUO_QUOCD', '=', 'TQUOCOND_QUOCD')
+            ->where("TQUO_ISSUDT", ">=", $request->dateFrom)
+            ->where("TQUO_ISSUDT", "<=", $request->dateTo)
+            ->get()->toArray();
+        $sheet->fromArray(array_keys($RS[0]), null, 'A1');
+        $sheet->fromArray($RS, null, 'A2');
+        foreach (range('A', 'Z') as $r) {
+            $sheet->getColumnDimension($r)->setAutoSize(true);
+        }
+
+        $stringjudul = "Quotation Report " . date('Y-m-d H:i:s');
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = $stringjudul;
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
     }
 }
