@@ -17,11 +17,11 @@
                 <div class="card-body">
                     <div class="container">
                         <div class="row">
-                            <div class="col text-end border-bottom">
+                            <div class="col text-end border-bottom" id="divCreatedSales">
                             -
                             </div>
                             <div class="col border-start border-bottom">
-                            Potential sales
+                            Created
                             </div>
                         </div>
                         <div class="row">
@@ -103,6 +103,7 @@
             divCreatedQuotations.innerText = response.data.createdQuotations
             divApprovedQuotations.innerText = response.data.approvedQuotations
             divTimeQuotations.innerText = moment(response.data.lastCreatedQuotationDateTime).startOf('hour').fromNow()
+            divCreatedSales.innerText = response.data.createdSales
         }
     });
 </script>
