@@ -73,6 +73,8 @@ Route::put('coa/{id}', [CoaController::class, 'update'])->middleware('auth');
 # Terkait Quotation Transaction
 Route::get('quotation/form', [QuotationController::class, 'index'])->middleware('auth');
 Route::post('quotation', [QuotationController::class, 'save'])->middleware('auth');
+Route::post('quotation-item', [QuotationController::class, 'saveItem'])->middleware('auth');
+Route::put('quotation/{id}', [QuotationController::class, 'update'])->middleware('auth');
 Route::get('quotation', [QuotationController::class, 'search'])->middleware('auth');
 Route::get('quotation/{id}', [QuotationController::class, 'loadById'])->middleware('auth');
 Route::delete('quotation/conditions/{id}', [QuotationController::class, 'deleteConditionById'])->middleware('auth');
@@ -91,6 +93,10 @@ Route::post('receive-order', [ReceiveOrderController::class, 'save'])->middlewar
 Route::get('receive-order', [ReceiveOrderController::class, 'search'])->middleware('auth');
 Route::get('receive-order/{id}', [ReceiveOrderController::class, 'loadById'])->middleware('auth');
 Route::delete('receive-order/items/{id}', [ReceiveOrderController::class, 'deleteItemById'])->middleware('auth');
+
+#Terkait Dasbor
+Route::get('dashboard-resource', [HomeController::class, 'supportDashboard'])->middleware('auth');
+
 
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation', [QuotationController::class, 'toPDF'])->middleware('auth');

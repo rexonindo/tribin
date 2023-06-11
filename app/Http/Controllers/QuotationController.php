@@ -48,6 +48,7 @@ class QuotationController extends Controller
         $quotationHeader = [];
         $newQuotationCode = '';
         if (!$LastLine) {
+            $LastLine = 1;
             $newQuotationCode = '001/PT/PNW/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         } else {
             $LastLine++;
@@ -56,7 +57,7 @@ class QuotationController extends Controller
         $quotationHeader = [
             'TQUO_QUOCD' => $newQuotationCode,
             'TQUO_CUSCD' => $request->TQUO_CUSCD,
-            'TQUO_LINE' => 1,
+            'TQUO_LINE' => $LastLine,
             'TQUO_ATTN' => $request->TQUO_ATTN,
             'TQUO_SBJCT' => $request->TQUO_SBJCT,
             'TQUO_ISSUDT' => $request->TQUO_ISSUDT,
@@ -126,6 +127,16 @@ class QuotationController extends Controller
         return [
             'msg' => 'OK', 'doc' => $newQuotationCode, '$RSLast' => $LastLine, 'quotationHeader' => $quotationHeader, 'quotationDetail' => $quotationDetail
         ];
+    }
+
+    public function update(Request $request)
+    {
+        # ubah data header
+        $affectedRow = T_QUOHEAD::where('TQUO_QUOCD', base64_decode($request->id))
+            ->update([
+                'TQUO_CUSCD' => $request->TQUO_CUSCD, 'TQUO_ATTN' => $request->TQUO_ATTN, 'TQUO_SBJCT' => $request->TQUO_SBJCT, 'TQUO_ISSUDT' => $request->TQUO_ISSUDT
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
     function search(Request $request)
