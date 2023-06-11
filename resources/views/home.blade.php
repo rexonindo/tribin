@@ -7,22 +7,104 @@
 
     </div>
 </div>
-
-<div class="row">
-    <div class="col mb-1">
-        <div class="card text-center">
-            <div class="card-header">
-                Sales
+<div class="container">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header text-center">
+                    Sales
+                </div>
+                <div class="card-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col text-end border-bottom">
+                            -
+                            </div>
+                            <div class="col border-start border-bottom">
+                            Potential sales
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end ">
+                            -
+                            </div>
+                            <div class="col border-start ">
+                            Need to deliver
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-body-secondary text-center">
+                    -
+                </div>
             </div>
-            <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">More info >></a>
+        </div>            
+        <div class="col">
+            <div class="card">
+                <div class="card-header  text-center">
+                    Rent Status
+                </div>
+                <div class="card-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col text-end">
+                            -
+                            </div>
+                            <div class="col border-start bg-warning border-info">
+                            Need to be returned
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+                <div class="card-footer text-body-secondary text-center">
+                    -
+                </div>
             </div>
-            <div class="card-footer text-body-secondary">
-                2 days ago
+        </div>            
+        <div class="col">
+            <div class="card">
+                <div class="card-header  text-center">
+                    Quotation Status
+                </div>
+                <div class="card-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col text-end border-bottom" id="divCreatedQuotations">
+                            ?
+                            </div>
+                            <div class="col border-start border-bottom">
+                            Created
+                            </div>
+                        </div>                        
+                        <div class="row">
+                            <div class="col text-end" id="divApprovedQuotations">
+                            7
+                            </div>
+                            <div class="col border-start">
+                            Approved
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+                <div class="card-footer text-body-secondary text-center" id="divTimeQuotations">
+                    -
+                </div>
             </div>
-        </div>
-    </div>    
+        </div>            
+    </div>
+    
 </div>
+<script>
+    $.ajax({
+        type: "GET",
+        url: "dashboard-resource",        
+        dataType: "json",
+        success: function (response) {
+            divCreatedQuotations.innerText = response.data.createdQuotations
+            divApprovedQuotations.innerText = response.data.approvedQuotations
+            divTimeQuotations.innerText = moment(response.data.lastCreatedQuotationDateTime).startOf('hour').fromNow()
+        }
+    });
+</script>
+
 @endsection
