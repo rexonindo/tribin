@@ -23,7 +23,7 @@ class QuotationController extends Controller
     }
     public function index()
     {
-        return view('report.quotation');
+        return view('transaction.quotation');
     }
 
     public function formReport()
