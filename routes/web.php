@@ -98,6 +98,11 @@ Route::delete('receive-order/items/{id}', [ReceiveOrderController::class, 'delet
 #Terkait Dasbor
 Route::get('dashboard-resource', [HomeController::class, 'supportDashboard'])->middleware('auth');
 
+#Terkait laporan berupa xls
+Route::get('report-form/item-master', [ItemController::class, 'formReport'])->middleware('auth');
+Route::get('report-form/quotation', [QuotationController::class, 'formReport'])->middleware('auth');
+Route::get('report/item-master', [ItemController::class, 'report'])->middleware('auth');
+
 
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation', [QuotationController::class, 'toPDF'])->middleware('auth');
