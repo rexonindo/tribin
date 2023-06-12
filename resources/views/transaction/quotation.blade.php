@@ -332,7 +332,7 @@
     }
 
     function addCondition() {
-        if(quotationCode.value.trim().length === 0){
+        if (quotationCode.value.trim().length === 0) {
             const condition = quotationCondition.value.trim()
             if (condition.length > 2) {
                 const liElement = document.createElement('li')
@@ -356,7 +356,7 @@
                 quotationCondition.value = ``
             }
         } else {
-            if(confirm('Are you sure ?.')){
+            if (confirm('Are you sure ?.')) {
                 const data = {
                     TQUOCOND_QUOCD: quotationCode.value,
                     TQUOCOND_CONDI: quotationCondition.value,
@@ -369,7 +369,7 @@
                     url: "quotation-condition",
                     data: data,
                     dataType: "JSON",
-                    success: function (response) {
+                    success: function(response) {
                         quotationCondition.disabled = false
                         btnAddCondition.disabled = false
                         loadQuotationDetail({
@@ -721,7 +721,7 @@
                 TQUO_CUSCD: quotationCustomerCode.value.trim(),
                 TQUO_ATTN: quotationAttn.value.trim(),
                 TQUO_SBJCT: quotationSubject.value.trim(),
-                TQUO_ISSUDT: quotationIssueDate.value.trim(),                
+                TQUO_ISSUDT: quotationIssueDate.value.trim(),
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -734,7 +734,7 @@
                     dataType: "json",
                     success: function(response) {
                         pthis.innerHTML = `<i class="fas fa-save"></i>`
-                        alertify.success(response.msg)                                                
+                        alertify.success(response.msg)
                         pthis.disabled = false
                         document.getElementById('div-alert').innerHTML = ''
                     },
@@ -917,5 +917,13 @@
                 alertify.warning(xthrow);
             }
         });
+    }
+
+    function btnPrintOnclick() {
+        if(quotationCode.value.trim().length === 0){
+            alertify.message('Quotation Code is required')
+            return
+        }
+        window.open(`PDF/quotation/${btoa(quotationCode.value)}`,'_blank');
     }
 </script>

@@ -107,4 +107,4 @@ Route::get('report/quotation', [QuotationController::class, 'report'])->middlewa
 
 
 #Terkait laporan berupa Pdf
-Route::get('PDF/quotation', [QuotationController::class, 'toPDF'])->middleware('auth');
+Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');

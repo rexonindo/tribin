@@ -256,8 +256,37 @@ class QuotationController extends Controller
         return view('transaction.approval');
     }
 
-    public function toPDF()
+    public function toPDF(Request $request)
     {
+        $doc = base64_decode($request->id);
+        $RSHeader = T_QUOHEAD::select('MCUS_CUSNM', 'TQUO_ATTN', 'MCUS_TELNO', 'TQUO_SBJCT', 'TQUO_ISSUDT')
+            ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
+            ->where("TQUO_QUOCD", $doc)
+            ->get()->toArray();
+        $MCUS_CUSNM = '';
+        $TQUO_ATTN = '';
+        $TQUO_SBJCT = '';
+        $TQUO_ISSUDT = '';
+        foreach ($RSHeader as $r) {
+            $MCUS_CUSNM = $r['MCUS_CUSNM'];
+            $TQUO_ATTN = $r['TQUO_ATTN'];
+            $MCUS_TELNO = $r['MCUS_TELNO'];
+            $TQUO_SBJCT = $r['TQUO_SBJCT'];
+            $_ISSUDT = explode('-', $r['TQUO_ISSUDT']);
+            $TQUO_ISSUDT = $_ISSUDT[2] . '/' . $_ISSUDT[1] . '/' . $_ISSUDT[0];
+        }
+
+        $RSDetail = T_QUODETA::select('TQUODETA_ITMCD', 'MITM_BRAND', 'MITM_ITMNM', 'MITM_MODEL', 'TQUODETA_USAGE', 'TQUODETA_PRC', 'TQUODETA_OPRPRC', 'TQUODETA_MOBDEMOB')
+            ->leftJoin("M_ITM", "TQUODETA_ITMCD", "=", "MITM_ITMCD")
+            ->whereNull("deleted_at")
+            ->where("TQUODETA_QUOCD", $doc)
+            ->get()->toArray();
+
+        $RSCondition = T_QUOCOND::select('TQUOCOND_CONDI')
+            ->where('TQUOCOND_QUOCD', $doc)
+            ->whereNull("deleted_at")
+            ->get()->toArray();
+
         $this->fpdf->SetFont('Arial', 'BU', 24);
         $this->fpdf->AddPage("P", 'A4');
         $this->fpdf->SetXY(7, 5);
@@ -269,8 +298,108 @@ class QuotationController extends Controller
         $this->fpdf->SetFont('Arial', 'B', 10);
         $this->fpdf->SetXY(7, 18);
         $this->fpdf->MultiCell(0, 5, 'Alamat Kantor : Jl. Tembusan Terminal No.19-20 Km. 12 Alang-alang Lebar,  Palembang - Indonesia Telp. (0711) 5645971 - 5645108  fax. (0711) 5645972', 0, 'C');
+        $this->fpdf->line(7, 29, 202, 29);
 
-        $this->fpdf->Output();
+        $this->fpdf->SetFont('Arial', '', 9);
+        $this->fpdf->SetXY(7, 31);
+        $this->fpdf->Cell(15, 5, 'To', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $MCUS_CUSNM, 0, 0, 'L');
+        $this->fpdf->SetXY(7, 36);
+        $this->fpdf->Cell(15, 5, 'Attn', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $TQUO_ATTN, 0, 0, 'L');
+        $this->fpdf->SetXY(7, 41);
+        $this->fpdf->Cell(15, 5, 'Telp', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $MCUS_TELNO, 0, 0, 'L');
+        $this->fpdf->SetXY(7, 46);
+        $this->fpdf->Cell(15, 5, 'Email', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ':', 0, 0, 'L');
+        $this->fpdf->SetXY(7, 51);
+        $this->fpdf->Cell(15, 5, 'Subject', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $TQUO_SBJCT, 0, 0, 'L');
+
+        $this->fpdf->SetFont('Arial', '', 9);
+        $this->fpdf->SetXY(140, 31);
+        $this->fpdf->Cell(15, 5, 'Date', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $TQUO_ISSUDT, 0, 0, 'L');
+        $this->fpdf->SetXY(140, 36);
+        $this->fpdf->Cell(15, 5, 'Our Ref', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $doc, 0, 0, 'L');
+        $this->fpdf->SetXY(140, 41);
+        $this->fpdf->Cell(15, 5, 'From', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $_COOKIE['JOS_BNM'], 0, 0, 'L');
+        $this->fpdf->SetXY(140, 46);
+        $this->fpdf->Cell(15, 5, 'Telp', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ':', 0, 0, 'L');
+        $this->fpdf->SetXY(140, 51);
+        $this->fpdf->Cell(15, 5, 'Fax', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': (0711) 5645972', 0, 0, 'L');
+
+        $this->fpdf->SetXY(7, 61);
+        $this->fpdf->MultiCell(0, 5, 'Dengan hormat,', 0, 'J');
+        $this->fpdf->SetXY(7, 66);
+        $this->fpdf->MultiCell(0, 5, 'Bersama ini kami sampaikan ' . $TQUO_SBJCT . ' dengan data sebagai berikut :', 0, 'J');
+
+        $this->fpdf->SetXY(6, 72);
+        $this->fpdf->Cell(20, 5, 'MERK', 1, 0, 'L');
+        $this->fpdf->Cell(45, 5, 'CAPACITY', 1, 0, 'L');
+        $this->fpdf->Cell(35, 5, 'MODEL', 1, 0, 'C');
+        $this->fpdf->Cell(21, 5, 'PEMAKAIAN', 1, 0, 'C');
+        $this->fpdf->Cell(25, 5, 'HARGA SEWA', 1, 0, 'C');
+        $this->fpdf->Cell(25, 5, 'OPERATOR', 1, 0, 'C');
+        $this->fpdf->Cell(20, 5, 'MOBDEMOB', 1, 0, 'C');
+        $y = 77;
+        foreach ($RSDetail as $r) {
+            $this->fpdf->SetXY(6, $y);
+            $this->fpdf->Cell(20, 5, $r['MITM_BRAND'], 1, 0, 'L');
+            $this->fpdf->Cell(45, 5, $r['MITM_ITMNM'], 1, 0, 'L');
+            $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_MODEL']);
+            if ($ttlwidth > 35) {
+                $ukuranfont = 8.5;
+                while ($ttlwidth > 35) {
+                    $this->fpdf->SetFont('Times', '', $ukuranfont);
+                    $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_MODEL']);
+                    $ukuranfont = $ukuranfont - 0.5;
+                }
+            }
+            $this->fpdf->Cell(35, 5, $r['MITM_MODEL'], 1, 0, 'C');
+            $this->fpdf->SetFont('Arial', '', 9);
+            $this->fpdf->Cell(21, 5, $r['TQUODETA_USAGE'] . ' Jam', 1, 0, 'C');
+            $this->fpdf->Cell(25, 5, number_format($r['TQUODETA_PRC']), 1, 0, 'C');
+            $this->fpdf->Cell(25, 5, number_format($r['TQUODETA_OPRPRC']), 1, 0, 'C');
+            $this->fpdf->Cell(20, 5, number_format($r['TQUODETA_MOBDEMOB']), 1, 0, 'C');
+            $y += 5;
+        }
+        $y += 5;
+        $this->fpdf->SetXY(7, $y);
+        $this->fpdf->Cell(20, 5, 'RENTAL CONDITION :', 0, 0, 'L');
+        $y += 5;
+        $orderNo = 1;
+        foreach ($RSCondition as $r) {
+            $this->fpdf->SetXY(9, $y);
+            $this->fpdf->Cell(5, 5, $orderNo . '.', 0, 0, 'L');
+            $this->fpdf->MultiCell(0, 5, $r['TQUOCOND_CONDI'], 0, 'J');
+            $YExtra_candidate = $this->fpdf->GetY();
+            $YExtra = $YExtra_candidate != $y ? $YExtra = $YExtra_candidate - $y - 5 : 0;
+            $y += 5 + $YExtra;
+            $orderNo++;
+        }
+
+        $y += 5;
+        $this->fpdf->SetXY(7, $y);
+        $this->fpdf->MultiCell(0, 5, 'Besar harapan kami penawaran ini dapat menjadi pertimbangan prioritas untuk pengadaan kebutuhan Diesel Genset di Perusahaan Bapak / Ibu
+Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, atas perhatian dan kerjasama yang baik kami ucapkan banyak terima kasih.', 0, 'J');
+        $y += 25;
+        $this->fpdf->SetXY(7, $y);
+        $this->fpdf->Cell(20, 5, 'Hormat kami', 1, 0, 'L');
+        $y+=5;
+        $this->fpdf->SetXY(7, $y);
+        $this->fpdf->Cell(20, 5, 'Dibuat oleh', 1, 0, 'L');
+        $this->fpdf->Cell(130, 5, ' Diketahui oleh,', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, ' Disetujui oleh,', 1, 0, 'C');
+        
+
+
+        $this->fpdf->Output('quotation ' . $doc . '.pdf', 'I');
 
         exit;
     }
