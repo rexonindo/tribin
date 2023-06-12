@@ -31,6 +31,7 @@ class ReceiveOrderController extends Controller
             'TSLO_QUOCD' => 'required',
             'TSLO_POCD' => 'required',
             'TSLO_ISSUDT' => 'required|date',
+            'TSLO_PLAN_DLVDT' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -59,6 +60,7 @@ class ReceiveOrderController extends Controller
             'TSLO_QUOCD' => $request->TSLO_QUOCD,
             'TSLO_POCD' => $request->TSLO_POCD,
             'TSLO_ISSUDT' => $request->TSLO_ISSUDT,
+            'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
             'created_by' => Auth::user()->nick_name,
         ];
         T_SLOHEAD::create($quotationHeader);
@@ -113,7 +115,7 @@ class ReceiveOrderController extends Controller
             'TSLO_POCD',
         ];
 
-        $RS = T_SLOHEAD::select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN"])
+        $RS = T_SLOHEAD::select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN","TSLO_PLAN_DLVDT"])
             ->leftJoin("M_CUS", "TSLO_CUSCD", "=", "MCUS_CUSCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
@@ -136,6 +138,20 @@ class ReceiveOrderController extends Controller
                 'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
+    }
+
+    public function update(Request $request)
+    {
+        # ubah data header
+        $affectedRow = T_SLOHEAD::where('TSLO_SLOCD', base64_decode($request->id))
+            ->update([
+                'TSLO_CUSCD' => $request->TSLO_CUSCD
+                , 'TSLO_ATTN' => $request->TSLO_ATTN
+                , 'TSLO_POCD' => $request->TSLO_POCD
+                , 'TSLO_ISSUDT' => $request->TSLO_ISSUDT
+                , 'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
 }

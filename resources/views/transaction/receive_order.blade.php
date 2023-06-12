@@ -22,16 +22,20 @@
                     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
                         <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                             <div class="row">
-                                <div class="col-md-6 mb-1">
+                                <div class="col-md-4 mb-1">
                                     <label for="orderCode" class="form-label">Code</label>
                                     <div class="input-group mb-1">
                                         <input type="text" id="orderCode" class="form-control" placeholder="RO..." maxlength="17" disabled>
                                         <button class="btn btn-primary" type="button" onclick="btnShowReceiveModal()"><i class="fas fa-search"></i></button>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-1">
+                                <div class="col-md-4 mb-1">
                                     <label for="orderIssueDate" class="form-label">Issue Date</label>
                                     <input type="text" id="orderIssueDate" class="form-control" maxlength="10" readonly>
+                                </div>
+                                <div class="col-md-4 mb-1">
+                                    <label for="orderPlanDeliveryDate" class="form-label">Plan Delivery Date</label>
+                                    <input type="text" id="orderPlanDeliveryDate" class="form-control" maxlength="10" readonly>
                                 </div>
                             </div>
                             <div class="row">
@@ -193,6 +197,7 @@
                                             <th>Issue Date</th>
                                             <th>Quotation</th>
                                             <th>PO Number</th>
+                                            <th>Delivery Plan Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -351,6 +356,11 @@
 </div>
 <script>
     $("#orderIssueDate").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        uiLibrary: 'bootstrap5'
+    })
+    $("#orderPlanDeliveryDate").datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
         uiLibrary: 'bootstrap5'
@@ -589,43 +599,48 @@
     }
 
     function btnSaveOnclick(pthis) {
+        let itemCode = []
+        let itemQty = []
+        let itemUsage = []
+        let itemPrice = []
+        let itemOperatorPrice = []
+        let itemMobDemob = []
+        const ttlrows = orderTable.rows.length
+        for (let i = 1; i < ttlrows; i++) {
+            itemCode.push(orderTable.rows[i].cells[1].innerText.trim())
+            itemUsage.push(orderTable.rows[i].cells[3].innerText.trim())
+            itemQty.push(1)
+            itemPrice.push(numeral(orderTable.rows[i].cells[4].innerText.trim()).value())
+            itemOperatorPrice.push(numeral(orderTable.rows[i].cells[5].innerText.trim()).value())
+            itemMobDemob.push(numeral(orderTable.rows[i].cells[6].innerText.trim()).value())
+        }
+        if (ttlrows === 1) {
+            alertify.message('nothing to be saved')
+            return
+        }
+        if (orderIssueDate.value.length === 0) {
+            alertify.message('issue date is required')
+            orderIssueDate.focus()
+            return
+        }
+        if (orderPONumber.value.trim().length <= 1) {
+            alertify.message('PO Number is required')
+            orderPONumber.focus()
+            return
+        }
+        if (orderPlanDeliveryDate.value.trim().length <= 1) {
+            alertify.message('Plan Delivery date is required')
+            orderPlanDeliveryDate.focus()
+            return
+        }
         if (orderCode.value.length === 0) {
-            let itemCode = []
-            let itemQty = []
-            let itemUsage = []
-            let itemPrice = []
-            let itemOperatorPrice = []
-            let itemMobDemob = []            
-            const ttlrows = orderTable.rows.length
-            for (let i = 1; i < ttlrows; i++) {
-                itemCode.push(orderTable.rows[i].cells[1].innerText.trim())
-                itemUsage.push(orderTable.rows[i].cells[3].innerText.trim())
-                itemQty.push(1)
-                itemPrice.push(numeral(orderTable.rows[i].cells[4].innerText.trim()).value())
-                itemOperatorPrice.push(numeral(orderTable.rows[i].cells[5].innerText.trim()).value())
-                itemMobDemob.push(numeral(orderTable.rows[i].cells[6].innerText.trim()).value())
-            }
-            if (ttlrows === 1) {
-                alertify.message('nothing to be saved')
-                return
-            }
-            if (orderIssueDate.value.length === 0) {
-                alertify.message('issue date is required')
-                orderIssueDate.focus()
-                return
-            }
-            if(orderPONumber.value.trim().length <= 1){
-                alertify.message('PO Number is required')
-                orderPONumber.focus()
-                return 
-            }
-
             const data = {
                 TSLO_CUSCD: orderCustomerCode.value.trim(),
                 TSLO_ATTN: orderAttn.value.trim(),
                 TSLO_QUOCD: orderQuotation.value.trim(),
                 TSLO_POCD: orderPONumber.value.trim(),
                 TSLO_ISSUDT: orderIssueDate.value.trim(),
+                TSLO_PLAN_DLVDT: orderPlanDeliveryDate.value.trim(),
                 TSLODETA_ITMCD: itemCode,
                 TSLODETA_ITMQT: itemQty,
                 TSLODETA_USAGE: itemUsage,
@@ -660,9 +675,9 @@
                             msg += `<p>${xhr.responseJSON[item]}</p>`
                         }
                         div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    ${msg}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>`
+                        ${msg}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
                         pthis.innerHTML = `<i class="fas fa-save"></i>`
                         alertify.warning(xthrow);
                         pthis.disabled = false
@@ -670,7 +685,45 @@
                 });
             }
         } else {
-
+            const data = {
+                TSLO_CUSCD: orderCustomerCode.value.trim(),
+                TSLO_ATTN: orderAttn.value.trim(),
+                TSLO_POCD: orderPONumber.value.trim(),
+                TSLO_ISSUDT: orderIssueDate.value.trim(),
+                TSLO_PLAN_DLVDT: orderPlanDeliveryDate.value.trim(),
+                _token: '{{ csrf_token() }}',
+            }
+            if (confirm(`Are you sure want to update ?`)) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "PUT",
+                    url: `receive-order/${btoa(orderCode.value)}`,
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        ${msg}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
         }
     }
 
@@ -689,7 +742,7 @@
                 searchBy: orderSearchBy.value,
                 searchValue: e.target.value,
             }
-            orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="5">Please wait</td></tr>`
+            orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please wait</td></tr>`
             $.ajax({
                 type: "GET",
                 url: "receive-order",
@@ -718,6 +771,7 @@
                             orderCustomer.value = arrayItem['MCUS_CUSNM']
                             orderCustomerCode.value = arrayItem['TSLO_CUSCD']
                             orderAttn.value = arrayItem['TSLO_ATTN']
+                            orderPlanDeliveryDate.value = arrayItem['TSLO_PLAN_DLVDT']
                             loadReceiveDetail({
                                 doc: arrayItem['TSLO_SLOCD']
                             })
@@ -730,6 +784,8 @@
                         newcell.innerHTML = arrayItem['TSLO_QUOCD']
                         newcell = newrow.insertCell(4)
                         newcell.innerHTML = arrayItem['TSLO_POCD']
+                        newcell = newrow.insertCell(5)
+                        newcell.innerHTML = arrayItem['TSLO_PLAN_DLVDT']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -737,7 +793,7 @@
                 error: function(xhr, xopt, xthrow) {
                     alertify.warning(xthrow);
                     e.target.disabled = false
-                    orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="5"></td></tr>`
+                    orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6"></td></tr>`
                 }
             });
         }

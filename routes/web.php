@@ -92,6 +92,7 @@ Route::get('approved/form/quotation', [QuotationController::class, 'formApproved
 Route::get('receive-order/form', [ReceiveOrderController::class, 'index'])->middleware('auth');
 Route::post('receive-order', [ReceiveOrderController::class, 'save'])->middleware('auth');
 Route::get('receive-order', [ReceiveOrderController::class, 'search'])->middleware('auth');
+Route::put('receive-order/{id}', [ReceiveOrderController::class, 'update'])->middleware('auth');
 Route::get('receive-order/{id}', [ReceiveOrderController::class, 'loadById'])->middleware('auth');
 Route::delete('receive-order/items/{id}', [ReceiveOrderController::class, 'deleteItemById'])->middleware('auth');
 
