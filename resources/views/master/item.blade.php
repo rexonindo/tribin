@@ -58,10 +58,21 @@
             </div>
         </div>
         <div class="row border-bottom">
-            <div class="col mb-3">
+            <div class="col-md-6 mb-3">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Specification</span>
                     <input type="text" id="itemSpec" class="form-control" placeholder="Item Spec" aria-label="Item Spec" maxlength="50">
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">COA</span>
+                    <select class="form-select" id="itemCOA">
+                        <option value="-" selected>-</option>
+                        @foreach ($coas as $coa)
+                        <option value="{{$coa->MCOA_COACD}}">{{$coa->MCOA_COANM}}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </div>
@@ -185,6 +196,7 @@
                             itemModel.value = arrayItem['MITM_MODEL']
                             itemSpec.value = arrayItem['MITM_SPEC']
                             itemCategory.value = arrayItem['MITM_ITMCAT']
+                            itemCOA.value = arrayItem['MITM_COACD']
                             switch (arrayItem['MITM_ITMTYPE']) {
                                 case '1':
                                     radio1.checked = true;
@@ -270,6 +282,7 @@
             MITM_MODEL: itemModel.value.trim(),
             MITM_SPEC: itemSpec.value.trim(),
             MITM_ITMCAT: itemCategory.value.trim(),
+            MITM_COACD: itemCOA.value.trim(),
             _token: '{{ csrf_token() }}',
         }
         if (itemInputMode.value === '0') {
@@ -313,6 +326,7 @@
                     MITM_BRAND: itemBrand.value.trim(),
                     MITM_MODEL: itemModel.value.trim(),
                     MITM_SPEC: itemSpec.value.trim(),
+                    MITM_COACD: itemCOA.value.trim(),
                     _token: '{{ csrf_token() }}',
                 }
                 pthis.innerHTML = `Please wait...`

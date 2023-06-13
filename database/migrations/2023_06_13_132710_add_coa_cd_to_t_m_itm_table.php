@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('M_COA', function (Blueprint $table) {
-            $table->string('MCOA_COACD',10)->primary();
-            $table->string('MCOA_COANM');
-            $table->timestamps();
+        Schema::table('M_ITM', function (Blueprint $table) {
+            $table->string('MITM_COACD',10)->nullable()->after('MITM_ITMCAT');
         });
     }
 
@@ -23,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('M_COA');
+        Schema::table('M_ITM', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\M_COA;
 use App\Models\M_ITM;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -16,11 +17,12 @@ class ItemController extends Controller
 {
     public function index()
     {
-        return view('master.item');
+        return view('master.item', ['coas' => M_COA::select('*')->get()]);
     }
 
     public function formReport()
     {
+
         return view('report.item');
     }
 
@@ -49,6 +51,7 @@ class ItemController extends Controller
             'MITM_MODEL' => $request->MITM_MODEL,
             'MITM_SPEC' => $request->MITM_SPEC,
             'MITM_ITMCAT' => $request->MITM_ITMCAT,
+            'MITM_COACD' => $request->MITM_COACD,
         ]);
         return ['msg' => 'OK'];
     }
@@ -68,7 +71,7 @@ class ItemController extends Controller
     {
         $affectedRow = M_ITM::where('MITM_ITMCD', base64_decode($request->id))
             ->update([
-                'MITM_ITMNM' => $request->MITM_ITMNM, 'MITM_STKUOM' => $request->MITM_STKUOM, 'MITM_ITMTYPE' => $request->MITM_ITMTYPE, 'MITM_BRAND' => $request->MITM_BRAND, 'MITM_MODEL' => $request->MITM_MODEL, 'MITM_SPEC' => $request->MITM_SPEC, 'MITM_ITMCAT' => $request->MITM_ITMCAT
+                'MITM_ITMNM' => $request->MITM_ITMNM, 'MITM_STKUOM' => $request->MITM_STKUOM, 'MITM_ITMTYPE' => $request->MITM_ITMTYPE, 'MITM_BRAND' => $request->MITM_BRAND, 'MITM_MODEL' => $request->MITM_MODEL, 'MITM_SPEC' => $request->MITM_SPEC, 'MITM_ITMCAT' => $request->MITM_ITMCAT, 'MITM_COACD' => $request->MITM_COACD,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
