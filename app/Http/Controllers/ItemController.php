@@ -76,24 +76,28 @@ class ItemController extends Controller
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
-    function report()
+    function report(Request $request)
     {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('ITEM_MASTER');
-        $sheet->freezePane('A2');
         $RS = M_ITM::select('*')->get()->toArray();
-        $sheet->fromArray(array_keys($RS[0]), null, 'A1');
-        $sheet->fromArray($RS, null, 'A2');
-        $stringjudul = "Item Master Report " . date('Y-m-d H:i:s');
-        foreach (range('A', 'Z') as $r) {
-            $sheet->getColumnDimension($r)->setAutoSize(true);
+        if ($request->fileType === 'json') {
+            return ['data' => $RS];
+        } else {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('ITEM_MASTER');
+            $sheet->freezePane('A2');
+            $sheet->fromArray(array_keys($RS[0]), null, 'A1');
+            $sheet->fromArray($RS, null, 'A2');
+            $stringjudul = "Item Master Report " . date('Y-m-d H:i:s');
+            foreach (range('A', 'Z') as $r) {
+                $sheet->getColumnDimension($r)->setAutoSize(true);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $filename = $stringjudul;
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save('php://output');
         }
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $filename = $stringjudul;
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');
     }
 }
