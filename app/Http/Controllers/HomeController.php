@@ -58,6 +58,9 @@ class HomeController extends Controller
             })            
             ->count();
         $data['createdSales'] = $RSSales;
+
+        # Waktu terakhir operasi sales order
+        $data['lastCreatedSODateTime'] = DB::table('T_SLOHEAD')->max('created_at');
         return ['data' => $data];
     }
 }

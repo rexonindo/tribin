@@ -391,12 +391,12 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
         $y += 25;
         $this->fpdf->SetXY(7, $y);
         $this->fpdf->Cell(20, 5, 'Hormat kami', 1, 0, 'L');
-        $y+=5;
+        $y += 5;
         $this->fpdf->SetXY(7, $y);
         $this->fpdf->Cell(20, 5, 'Dibuat oleh', 1, 0, 'L');
         $this->fpdf->Cell(130, 5, ' Diketahui oleh,', 1, 0, 'C');
         $this->fpdf->Cell(40, 5, ' Disetujui oleh,', 1, 0, 'C');
-        
+
 
 
         $this->fpdf->Output('quotation ' . $doc . '.pdf', 'I');

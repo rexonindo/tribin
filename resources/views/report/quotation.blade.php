@@ -6,7 +6,7 @@
 </div>
 <form id="item-form">
     <div class="container-fluid">
-        <div class="row" >
+        <div class="row">
             <div class="col mb-1" id="div-alert">
             </div>
         </div>
@@ -38,6 +38,7 @@
                                 <th class="align-middle">Customer</th>
                                 <th class="text-end">Attn</th>
                                 <th class="text-center">Subject</th>
+                                <th class="text-center">Issue Date</th>
                                 <th class="text-center">Approved by</th>
                                 <th class="text-center">Approved Date</th>
                                 <th class="text-center">Item Code</th>
@@ -58,11 +59,11 @@
     </div>
 </form>
 <script>
-    $("#divQuotationReportContainer").css('height', $(window).height()   
-    -document.getElementById('rowStack0').offsetHeight 
-    -document.getElementById('rowStack1').offsetHeight 
-    -document.getElementById('rowStack2').offsetHeight     
-    -100);
+    $("#divQuotationReportContainer").css('height', $(window).height() -
+        document.getElementById('rowStack0').offsetHeight -
+        document.getElementById('rowStack1').offsetHeight -
+        document.getElementById('rowStack2').offsetHeight -
+        100);
     var $dateFrom = $("#quotationIssueDateFrom").datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
@@ -102,34 +103,37 @@
                 response.data.forEach((arrayItem) => {
                     newrow = myTableBody.insertRow(-1)
                     newcell = newrow.insertCell(0)
-                    newcell.innerHTML = arrayItem['TQUO_QUOCD']                                    
+                    newcell.innerHTML = arrayItem['TQUO_QUOCD']
                     newcell = newrow.insertCell(1)
                     newcell.innerHTML = arrayItem['MCUS_CUSNM']
                     newcell = newrow.insertCell(2)
                     newcell.innerHTML = arrayItem['TQUO_ATTN']
                     newcell = newrow.insertCell(3)
                     newcell.innerHTML = arrayItem['TQUO_SBJCT']
+
                     newcell = newrow.insertCell(4)
-                    newcell.innerHTML = arrayItem['TQUO_APPRVBY']
+                    newcell.innerHTML = arrayItem['TQUO_ISSUDT']
                     newcell = newrow.insertCell(5)
-                    newcell.innerHTML = arrayItem['TQUO_APPRVDT']
+                    newcell.innerHTML = arrayItem['TQUO_APPRVBY']
                     newcell = newrow.insertCell(6)
-                    newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
+                    newcell.innerHTML = arrayItem['TQUO_APPRVDT']
                     newcell = newrow.insertCell(7)
-                    newcell.innerHTML = arrayItem['MITM_ITMNM']
+                    newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
                     newcell = newrow.insertCell(8)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = arrayItem['TQUODETA_ITMQT']
+                    newcell.innerHTML = arrayItem['MITM_ITMNM']
                     newcell = newrow.insertCell(9)
                     newcell.classList.add('text-end')
-                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                    newcell.innerHTML = arrayItem['TQUODETA_ITMQT']
                     newcell = newrow.insertCell(10)
                     newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
+                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
                     newcell = newrow.insertCell(11)
                     newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
+                    newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
                     newcell = newrow.insertCell(12)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
+                    newcell = newrow.insertCell(13)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
                 })

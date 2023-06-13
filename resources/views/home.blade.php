@@ -34,7 +34,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer text-body-secondary text-center">
+                <div class="card-footer text-body-secondary text-center" id="divTimeSales">
                     -
                 </div>
             </div>
@@ -104,6 +104,7 @@
             divApprovedQuotations.innerText = response.data.approvedQuotations
             divTimeQuotations.innerText = moment(response.data.lastCreatedQuotationDateTime).startOf('hour').fromNow()
             divCreatedSales.innerText = response.data.createdSales
+            divTimeSales.innerText = moment(response.data.lastCreatedSODateTime).startOf('hour').fromNow()
         }
     });
 </script>
