@@ -104,6 +104,8 @@ Route::get('report-form/item-master', [ItemController::class, 'formReport'])->mi
 Route::get('report/item-master', [ItemController::class, 'report'])->middleware('auth');
 Route::get('report-form/quotation', [QuotationController::class, 'formReport'])->middleware('auth');
 Route::get('report/quotation', [QuotationController::class, 'report'])->middleware('auth');
+Route::get('report-form/received-order', [ReceiveOrderController::class, 'formReport'])->middleware('auth');
+Route::get('report/received-order', [ReceiveOrderController::class, 'report'])->middleware('auth');
 
 
 #Terkait laporan berupa Pdf

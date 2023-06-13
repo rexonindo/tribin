@@ -8,13 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ReceiveOrderController extends Controller
 {
     public function __construct()
     {
-        date_default_timezone_set('Asia/Jakarta');        
+        date_default_timezone_set('Asia/Jakarta');
     }
     public function index()
     {
@@ -101,7 +102,7 @@ class ReceiveOrderController extends Controller
         if (!empty($quotationDetail)) {
             T_SLODETA::insert($quotationDetail);
         }
-        
+
         return [
             'msg' => 'OK', 'doc' => $newDocumentCode, '$RSLast' => $LastLine, 'quotationHeader' => $quotationHeader, 'quotationDetail' => $quotationDetail
         ];
@@ -115,7 +116,7 @@ class ReceiveOrderController extends Controller
             'TSLO_POCD',
         ];
 
-        $RS = T_SLOHEAD::select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN","TSLO_PLAN_DLVDT"])
+        $RS = T_SLOHEAD::select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN", "TSLO_PLAN_DLVDT"])
             ->leftJoin("M_CUS", "TSLO_CUSCD", "=", "MCUS_CUSCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
@@ -127,7 +128,7 @@ class ReceiveOrderController extends Controller
         $RS = T_SLODETA::select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
             ->leftJoin("M_ITM", "TSLODETA_ITMCD", "=", "MITM_ITMCD")
             ->where('TSLODETA_SLOCD', base64_decode($request->id))
-            ->whereNull('deleted_at')->get();        
+            ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS];
     }
 
@@ -145,13 +146,45 @@ class ReceiveOrderController extends Controller
         # ubah data header
         $affectedRow = T_SLOHEAD::where('TSLO_SLOCD', base64_decode($request->id))
             ->update([
-                'TSLO_CUSCD' => $request->TSLO_CUSCD
-                , 'TSLO_ATTN' => $request->TSLO_ATTN
-                , 'TSLO_POCD' => $request->TSLO_POCD
-                , 'TSLO_ISSUDT' => $request->TSLO_ISSUDT
-                , 'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT
+                'TSLO_CUSCD' => $request->TSLO_CUSCD, 'TSLO_ATTN' => $request->TSLO_ATTN, 'TSLO_POCD' => $request->TSLO_POCD, 'TSLO_ISSUDT' => $request->TSLO_ISSUDT, 'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
+    public function formReport()
+    {
+        return view('report.receive_order');
+    }
+    function report(Request $request)
+    {
+        $RS = T_SLOHEAD::select(DB::raw("T_SLOHEAD.*,MCUS_CUSNM,TSLODETA_ITMCD,MITM_ITMNM,TSLODETA_ITMQT,TSLODETA_USAGE,TSLODETA_PRC,TSLODETA_OPRPRC,TSLODETA_MOBDEMOB"))
+            ->leftJoin('T_SLODETA', 'TSLO_SLOCD', '=', 'TSLODETA_SLOCD')
+            ->leftJoin('M_ITM', 'TSLODETA_ITMCD', '=', 'MITM_ITMCD')
+            ->join('M_CUS', 'TSLO_CUSCD', '=', 'MCUS_CUSCD')
+            ->where("TSLO_ISSUDT", ">=", $request->dateFrom)
+            ->where("TSLO_ISSUDT", "<=", $request->dateTo)
+            ->get()->toArray();
+        if ($request->fileType === 'json') {
+            return ['data' => $RS];
+        } else {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('RECEIVED-ORDER');
+            $sheet->freezePane('A2');
 
+            $sheet->fromArray(array_keys($RS[0]), null, 'A1');
+            $sheet->fromArray($RS, null, 'A2');
+
+            foreach (range('A', 'Z') as $r) {
+                $sheet->getColumnDimension($r)->setAutoSize(true);
+            }            
+
+            $stringjudul = "Recived-Order Report " . date('Y-m-d H:i:s');
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $filename = $stringjudul;
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save('php://output');
+        }
+    }
 }
