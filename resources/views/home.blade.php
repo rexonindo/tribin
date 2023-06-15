@@ -18,18 +18,18 @@
                     <div class="container">
                         <div class="row">
                             <div class="col text-end border-bottom" id="divCreatedSales">
-                            -
+                                -
                             </div>
                             <div class="col border-start border-bottom">
-                            Created
+                                Created
                             </div>
                         </div>
                         <div class="row">
                             <div class="col text-end ">
-                            -
+                                -
                             </div>
                             <div class="col border-start ">
-                            Need to deliver
+                                Need to deliver
                             </div>
                         </div>
                     </div>
@@ -38,7 +38,7 @@
                     -
                 </div>
             </div>
-        </div>            
+        </div>
         <div class="col">
             <div class="card">
                 <div class="card-header  text-center">
@@ -48,19 +48,19 @@
                     <div class="container">
                         <div class="row">
                             <div class="col text-end">
-                            -
+                                -
                             </div>
                             <div class="col border-start bg-warning border-info">
-                            Need to be returned
+                                Need to be returned
                             </div>
-                        </div>                        
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer text-body-secondary text-center">
                     -
                 </div>
             </div>
-        </div>            
+        </div>
         <div class="col">
             <div class="card">
                 <div class="card-header  text-center">
@@ -70,41 +70,43 @@
                     <div class="container">
                         <div class="row">
                             <div class="col text-end border-bottom" id="divCreatedQuotations">
-                            ?
+                                ?
                             </div>
                             <div class="col border-start border-bottom">
-                            Created
+                                Created
                             </div>
-                        </div>                        
+                        </div>
                         <div class="row">
                             <div class="col text-end" id="divApprovedQuotations">
-                            7
+                                7
                             </div>
                             <div class="col border-start">
-                            Approved
+                                Approved
                             </div>
-                        </div>                        
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer text-body-secondary text-center" id="divTimeQuotations">
                     -
                 </div>
             </div>
-        </div>            
+        </div>
     </div>
-    
+
 </div>
 <script>
     $.ajax({
         type: "GET",
-        url: "dashboard-resource",        
+        url: "dashboard-resource",
         dataType: "json",
-        success: function (response) {
+        success: function(response) {
             divCreatedQuotations.innerText = response.data.createdQuotations
             divApprovedQuotations.innerText = response.data.approvedQuotations
             divTimeQuotations.innerText = moment(response.data.lastCreatedQuotationDateTime).startOf('hour').fromNow()
+            divTimeQuotations.title = response.data.lastCreatedQuotationDateTime
             divCreatedSales.innerText = response.data.createdSales
             divTimeSales.innerText = moment(response.data.lastCreatedSODateTime).startOf('hour').fromNow()
+            divTimeSales.title = response.data.lastCreatedSODateTime
         }
     });
 </script>

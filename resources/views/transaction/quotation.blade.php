@@ -55,10 +55,17 @@
                                                     <th class="text-end">Price</th>
                                                     <th class="text-end">Operator</th>
                                                     <th class="text-end">MOB DEMOB</th>
+                                                    <th class="text-end">SUB TOTAL</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                             </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="6" class="text-end"> <b>Grand Total</b></td>
+                                                    <td class="text-end"><strong id="strongGrandTotal">0</strong></td>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
                                 </div>
@@ -331,6 +338,8 @@
         }
     }
 
+    var grandTotal = 0
+
     function addCondition() {
         if (quotationCode.value.trim().length === 0) {
             const condition = quotationCondition.value.trim()
@@ -535,6 +544,9 @@
             return
         }
         const quotationTableBody = quotationTable.getElementsByTagName('tbody')[0]
+        const subTotal = numeral(quotationPrice.value).value() +
+            numeral(quotationOperator.value).value() +
+            numeral(quotationMOBDEMOB.value).value()
         newrow = quotationTableBody.insertRow(-1)
         newrow.title = 'not selected'
         newrow.onclick = (event) => {
@@ -577,6 +589,12 @@
         newcell.innerHTML = numeral(quotationMOBDEMOB.value).format(',')
         newcell.classList.add('text-end')
 
+        newcell = newrow.insertCell(7)
+        newcell.innerHTML = numeral(subTotal).format(',')
+        newcell.classList.add('text-end')
+
+        grandTotal += subTotal
+        strongGrandTotal.innerText = numeral(grandTotal).format(',')
         tribinClearTextBoxByClassName('quotationInputItem')
     }
 
@@ -584,6 +602,8 @@
         tribinClearTextBox()
         quotationTable.getElementsByTagName('tbody')[0].innerHTML = ``
         quotationConditionContainer.innerHTML = ``
+        grandTotal = 0
+        tdGrandTotal.innerText = grandTotal
     }
 
     function btnRemoveLineOnclick(pthis) {
@@ -613,6 +633,8 @@
                         success: function(response) {
                             pthis.innerHTML = `Remove line`
                             pthis.disabled = false
+                            grandTotal -= numeral(quotationTable.rows[iFounded].cells[7].innerText).value()
+                            strongGrandTotal.innerText = numeral(grandTotal).format(',')
                             quotationTable.rows[iFounded].remove()
                             alertify.message(response.msg)
                         },
@@ -623,6 +645,8 @@
                         }
                     });
                 } else {
+                    grandTotal -= numeral(quotationTable.rows[iFounded].cells[7].innerText).value()
+                    strongGrandTotal.innerText = numeral(grandTotal).format(',')
                     quotationTable.rows[iFounded].remove()
                 }
             }
@@ -835,9 +859,14 @@
                 let cln = quotationTable.cloneNode(true);
                 myfrag.appendChild(cln);
                 let myTable = myfrag.getElementById("quotationTable");
+                let myStrong = myfrag.getElementById("strongGrandTotal");
                 let myTableBody = myTable.getElementsByTagName("tbody")[0];
                 myTableBody.innerHTML = ''
+                grandTotal = 0
                 response.dataItem.forEach((arrayItem) => {
+                    const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() +
+                        numeral(arrayItem['TQUODETA_OPRPRC']).value() +
+                        numeral(arrayItem['TQUODETA_MOBDEMOB']).value()
                     newrow = myTableBody.insertRow(-1)
                     newrow.onclick = (event) => {
                         const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
@@ -873,7 +902,13 @@
                     newcell = newrow.insertCell(6)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
+                    newcell = newrow.insertCell(7)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(subTotal).format(',')
+
+                    grandTotal += subTotal
                 })
+                myStrong.innerText = numeral(grandTotal).format(',')
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
                 quotationConditionContainer.innerHTML = ''
@@ -920,10 +955,10 @@
     }
 
     function btnPrintOnclick() {
-        if(quotationCode.value.trim().length === 0){
+        if (quotationCode.value.trim().length === 0) {
             alertify.message('Quotation Code is required')
             return
         }
-        window.open(`PDF/quotation/${btoa(quotationCode.value)}`,'_blank');
+        window.open(`PDF/quotation/${btoa(quotationCode.value)}`, '_blank');
     }
 </script>
