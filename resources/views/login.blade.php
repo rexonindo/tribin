@@ -111,6 +111,11 @@
                         alert(response.message)
                         inputUserid.value = ''
                         inputPassword.value = ''
+                        $("#ln2").hide('slow', function() {
+                            $("#ln1").show();
+                            $("#inputUserid").focus();
+                            $("#inputUserid").select();
+                        });
                     } else {
                         sessionStorage.setItem('tokenGue', response.tokennya)
                         location.href = '/home'
