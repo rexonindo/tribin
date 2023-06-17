@@ -663,7 +663,7 @@
         let itemOperatorPrice = []
         let itemMobDemob = []
         let quotationCondition = []
-        const ttlrows = quotationTable.rows.length
+        const ttlrows = quotationTable.rows.length-1
         for (let i = 1; i < ttlrows; i++) {
             itemCode.push(quotationTable.rows[i].cells[1].innerText.trim())
             itemUsage.push(quotationTable.rows[i].cells[3].innerText.trim())

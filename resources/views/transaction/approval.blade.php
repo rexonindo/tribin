@@ -109,10 +109,23 @@
                     const elButtonGrup = document.createElement('div')
                     elButtonGrup.classList.add(...['btn-group', 'btn-group-sm'])
 
+                    const elButtonGrup2= document.createElement('div')
+                    elButtonGrup2.classList.add(...['btn-group', 'btn-group-sm'])
+                    
                     const elButton1 = document.createElement('button')
-                    elButton1.classList.add(...['btn', 'btn-outline-secondary'])
-                    elButton1.innerHTML = 'Approve'
-                    elButton1.onclick = () => {
+                    elButton1.classList.add(...['btn', 'btn-outline-primary', 'dropdown-toggle'])
+                    elButton1.innerHTML = 'Action'
+                    elButton1.setAttribute('data-bs-toggle',"dropdown") 
+                    
+                    elButtonGrup2.appendChild(elButton1)
+
+                    const elUl = document.createElement('ul')
+                    elUl.classList.add('dropdown-menu')
+                    let elLi = document.createElement('li')
+                    let elA = document.createElement('a')
+                    elA.classList.add('dropdown-item')
+                    elA.innerHTML = '<i class="fas fa-check text-success"></i> Approve'
+                    elA.onclick = () => {
                         event.preventDefault()
                         if (confirm('Are you sure ?')) {
                             elButton1.disabled = true
@@ -146,9 +159,55 @@
                             });
                         }
                     }
+                    elLi.appendChild(elA)
+                    elUl.appendChild(elLi)
+                    
+                    elLi = document.createElement('li')                   
+                    elA = document.createElement('a')
+                    elA.classList.add('dropdown-item')
+                    elA.innerHTML = '<i class="fas fa-xmark text-danger"></i> Reject'
+                    elA.onclick = () => {
+                        event.preventDefault()
+                        if (confirm('Are you sure want to reject ?')) {
+                            elButton1.disabled = true
+                            $.ajax({
+                                type: "PUT",
+                                url: `reject/quotations/${btoa(arrayItem['TQUO_QUOCD'])}`,
+                                data: {
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                dataType: "json",
+                                success: function(response) {
+                                    elButton1.disabled = false
+                                    loadApprovalList()
+                                    showNotificationToApprove()
+                                },
+                                error: function(xhr, xopt, xthrow) {
+                                    elButton1.disabled = false
+                                    const respon = Object.keys(xhr.responseJSON)
+                                    const div_alert = document.getElementById('div-alert')
+                                    let msg = ''
+                                    for (const item of respon) {
+                                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                                    }
+                                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                            ${msg}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>`
+
+                                    alertify.warning(xthrow);
+                                }
+                            });
+                        }
+                    }
+                    elLi.appendChild(elA)
+                    elUl.appendChild(elLi)
+                                        
+                    elButtonGrup2.appendChild(elUl)
+                    elButtonGrup.appendChild(elButtonGrup2)
 
                     const elButton2 = document.createElement('button')
-                    elButton2.classList.add(...['btn', 'btn-outline-secondary'])
+                    elButton2.classList.add(...['btn', 'btn-outline-primary'])
                     elButton2.innerHTML = 'Preview'
                     elButton2.onclick = () => {
                         event.preventDefault()
@@ -164,8 +223,7 @@
                     elSmalltext.classList.add('text-body-secondary')
                     elSmalltext.innerText = moment(arrayItem['CREATED_AT']).startOf('hour').fromNow()
 
-                    // combine
-                    elButtonGrup.appendChild(elButton1)
+                    // combine                    
                     elButtonGrup.appendChild(elButton2)
                     elFlex.appendChild(elButtonGrup)
                     elFlex.appendChild(elSmalltext)

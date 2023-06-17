@@ -141,7 +141,7 @@
                 </a>
                 <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
                     <li><a class="dropdown-item" href="#" onclick="liApprovalOnclick(event)">Quotation Approval <span class="badge text-bg-info" id="labelNotifApprovalQuotation"></span></a></li>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovedQuotationOnclick(event)">Recent Approved Quotation <span class="badge text-bg-info" id="labelNotifApprovedQuotation"></span></a></li>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovedQuotationOnclick(event)">Recent Quotation Updates <span class="badge text-bg-info" id="labelNotifApprovedQuotation"></span></a></li>
                 </ul>
             </div>
         </div>

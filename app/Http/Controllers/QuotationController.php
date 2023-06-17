@@ -229,23 +229,23 @@ class QuotationController extends Controller
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
-                ->whereNull("TQUO_APPRVDT")->groupBy('TQUO_QUOCD')->get();
+                ->whereNull("TQUO_APPRVDT")
+                ->whereNull("TQUO_REJCTDT")
+                ->groupBy('TQUO_QUOCD')->get();
         }
         if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
                 ->whereNull('deleted_at');
-            $dataApproved = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT"))
+            $dataApproved = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
                 ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
-                ->whereNotNull("TQUO_APPRVDT")
                 ->whereNull("TSLO_QUOCD")
-                ->groupBy('TQUO_QUOCD')
-                ->get();
+                ->groupBy('TQUO_QUOCD')->get();
         }
 
         return ['data' => $dataTobeApproved, 'dataApproved' => $dataApproved];
@@ -410,6 +410,20 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
             $affectedRow = T_QUOHEAD::where('TQUO_QUOCD', base64_decode($request->id))
                 ->update([
                     'TQUO_APPRVBY' => Auth::user()->nick_name, 'TQUO_APPRVDT' => date('Y-m-d H:i:s')
+                ]);
+            $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+            return ['message' => $message];
+        } else {
+            return response()->json(['message' => 'forbidden'], 403);
+        }
+    }
+
+    function reject(Request $request)
+    {
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $affectedRow = T_QUOHEAD::where('TQUO_QUOCD', base64_decode($request->id))
+                ->update([
+                    'TQUO_REJCTBY' => Auth::user()->nick_name, 'TQUO_REJCTDT' => date('Y-m-d H:i:s')
                 ]);
             $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
             return ['message' => $message];

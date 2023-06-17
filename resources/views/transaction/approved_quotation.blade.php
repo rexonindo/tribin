@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Approved Quotation</h1>
+    <h1 class="h2">Quotation Status</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
 
     </div>
@@ -40,30 +40,48 @@
                     elCardBodyText.classList.add('card-text')
                     elCardBodyText.innerHTML = '<b>' + arrayItem['TQUO_QUOCD'] + '</b><br>' + arrayItem['TQUO_SBJCT']
 
+                    const elCardBodyText2 = document.createElement('p')
+                    let quotationStatus = 0
+                    elCardBodyText2.classList.add('card-text')
+                    if (!arrayItem['TQUO_APPRVDT'] && !arrayItem['TQUO_REJCTDT']) {
+                        elCardBodyText2.innerHTML = '<span class="badge bg-warning">Being reviewed</span>'
+                    } else {
+                        if (arrayItem['TQUO_APPRVDT']) {
+                            elCardBodyText2.innerHTML = '<span class="badge bg-success">Approved</span>'
+                            quotationStatus = 1
+                        } else {
+                            elCardBodyText2.innerHTML = '<span class="badge bg-danger">Rejected</span>'
+                            quotationStatus = -1
+                        }
+                    }
+
                     const elFlex = document.createElement('div')
                     elFlex.classList.add(...['d-flex', 'justify-content-between', 'align-items-center'])
 
                     const elButtonGrup = document.createElement('div')
                     elButtonGrup.classList.add(...['btn-group', 'btn-group-sm'])
 
-                    const elButton2 = document.createElement('button')
-                    elButton2.classList.add(...['btn', 'btn-outline-primary'])
-                    elButton2.innerHTML = 'Create Receive Order'
-                    elButton2.onclick = () => {
-                        event.preventDefault()
-                        ContentContainer.innerHTML = 'Please wait'
-                        $.ajax({
-                            type: "GET",
-                            url: 'receive-order/form',
-                            dataType: "text",
-                            success: function(response) {
-                                setInnerHTML(ContentContainer, response)
-                                if (!myCollapse.classList.contains('collapsed')) {
-                                    mybsCollapse.toggle()
-                                }
+                    if (quotationStatus === 1) {
+                        const elButton2 = document.createElement('button')
+                        elButton2.classList.add(...['btn', 'btn-outline-primary'])
+                        elButton2.innerHTML = 'Create Receive Order'
+                        elButton2.onclick = () => {
+                            event.preventDefault()
+                            ContentContainer.innerHTML = 'Please wait'
+                            $.ajax({
+                                type: "GET",
+                                url: 'receive-order/form',
+                                dataType: "text",
+                                success: function(response) {
+                                    setInnerHTML(ContentContainer, response)
+                                    if (!myCollapse.classList.contains('collapsed')) {
+                                        mybsCollapse.toggle()
+                                    }
 
-                            }
-                        });
+                                }
+                            });
+                        }
+                        elButtonGrup.appendChild(elButton2)
                     }
 
                     const elSmalltext = document.createElement('small')
@@ -71,10 +89,10 @@
                     elSmalltext.innerText = moment(arrayItem['CREATED_AT']).startOf('hour').fromNow()
 
                     // combine                    
-                    elButtonGrup.appendChild(elButton2)
                     elFlex.appendChild(elButtonGrup)
                     elFlex.appendChild(elSmalltext)
                     elCardBody.appendChild(elCardBodyText)
+                    elCardBody.appendChild(elCardBodyText2)
                     elCardBody.appendChild(elFlex)
                     elCard.appendChild(elCardBody)
                     col.appendChild(elCard)
