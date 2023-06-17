@@ -201,6 +201,7 @@
                 },
                 dataType: "json",
                 success: function(response) {
+                    $("#quotationModal").modal('hide')
                     btnAction.disabled = false
                     loadApprovalList()
                     showNotificationToApprove()
@@ -235,6 +236,7 @@
                 },
                 dataType: "json",
                 success: function(response) {
+                    $("#quotationModal").modal('hide')
                     btnAction.disabled = false
                     loadApprovalList()
                     showNotificationToApprove()
