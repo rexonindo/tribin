@@ -14,8 +14,7 @@
             <div class="col">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Item</button>
-                        <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false"><i class="fa fa-users-rectangle"></i> Customer</button>
+                        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Item</button>                        
                         <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Condition</button>
                     </div>
                 </nav>
@@ -33,6 +32,20 @@
                                 <div class="col-md-6 mb-1">
                                     <label for="quotationIssueDate" class="form-label">Issue Date</label>
                                     <input type="text" id="quotationIssueDate" class="form-control" maxlength="10" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-1">
+                                    <label for="quotationCustomer" class="form-label">Customer Name</label>
+                                    <div class="input-group input-group-sm mb-1">
+                                        <input type="text" id="quotationCustomer" class="form-control" maxlength="50" disabled>
+                                        <input type="hidden" id="quotationCustomerCode">
+                                        <button class="btn btn-primary" type="button" onclick="btnShowQuotationCustomerModal()"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-1">
+                                    <label for="quotationAttn" class="form-label">Attn.</label>
+                                    <input type="text" id="quotationAttn" class="form-control form-control-sm" maxlength="50">
                                 </div>
                             </div>
                             <div class="row">
@@ -123,25 +136,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
-                        <div class="container-fluid mt-2 border-start border-bottom rounded-start">
-                            <div class="row">
-                                <div class="col-md-6 mb-1">
-                                    <label for="quotationCustomer" class="form-label">Customer Name</label>
-                                    <div class="input-group mb-1">
-                                        <input type="text" id="quotationCustomer" class="form-control" maxlength="50" disabled>
-                                        <input type="hidden" id="quotationCustomerCode">
-                                        <button class="btn btn-primary" type="button" onclick="btnShowQuotationCustomerModal()"><i class="fas fa-search"></i></button>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-1">
-                                    <label for="quotationAttn" class="form-label">Attn.</label>
-                                    <input type="text" id="quotationAttn" class="form-control" maxlength="50">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </div>                    
                     <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
                         <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                             <div class="row">

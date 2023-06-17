@@ -6,10 +6,6 @@
 </div>
 <form id="coa-form">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col mb-1" id="div-alert">
-            </div>
-        </div>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3" id="approvalContainer">
 
         </div>
@@ -26,6 +22,10 @@
             <div class="modal-body">
                 <div class="container">
                     <div class="row">
+                        <div class="col mb-1" id="div-alert">
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col">
                             <nav>
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -36,6 +36,24 @@
                             <div class="tab-content" id="nav-tabContent">
                                 <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
                                     <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-1">
+                                                <label for="quotationCustomer" class="form-label">Customer Name</label>
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <input type="text" id="quotationCustomer" class="form-control" maxlength="50" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-1">
+                                                <label for="quotationAttn" class="form-label">Attn.</label>
+                                                <input type="text" id="quotationAttn" class="form-control form-control-sm" maxlength="50" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label for="quotationSubject" class="form-label">Subject</label>
+                                                <input type="text" id="quotationSubject" class="form-control" placeholder="Penawaran ..." maxlength="100" disabled>
+                                            </div>
+                                        </div>
                                         <div class="row border-top">
                                             <div class="col-md-12 mb-1">
                                                 <div class="table-responsive" id="quotationTableContainer">
@@ -50,10 +68,17 @@
                                                                 <th class="text-end">Price</th>
                                                                 <th class="text-end">Operator</th>
                                                                 <th class="text-end">MOB DEMOB</th>
+                                                                <th class="text-end">SUB TOTAL</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                         </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <td colspan="6" class="text-end"><strong>Grand Total</strong></td>
+                                                                <td class="text-end"><strong id="strongGrandTotal">a</strong></td>
+                                                            </tr>
+                                                        </tfoot>
                                                     </table>
                                                 </div>
                                             </div>
@@ -70,6 +95,21 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col text-center">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" id="btnAction">Action</button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Approve</a></li>
+                                    <li><a class="dropdown-item" onclick="rejectQuotation(this)"><i class="fas fa-xmark text-danger"></i> Reject</a></li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -109,109 +149,18 @@
                     const elButtonGrup = document.createElement('div')
                     elButtonGrup.classList.add(...['btn-group', 'btn-group-sm'])
 
-                    const elButtonGrup2= document.createElement('div')
+                    const elButtonGrup2 = document.createElement('div')
                     elButtonGrup2.classList.add(...['btn-group', 'btn-group-sm'])
-                    
-                    const elButton1 = document.createElement('button')
-                    elButton1.classList.add(...['btn', 'btn-outline-primary', 'dropdown-toggle'])
-                    elButton1.innerHTML = 'Action'
-                    elButton1.setAttribute('data-bs-toggle',"dropdown") 
-                    
-                    elButtonGrup2.appendChild(elButton1)
-
-                    const elUl = document.createElement('ul')
-                    elUl.classList.add('dropdown-menu')
-                    let elLi = document.createElement('li')
-                    let elA = document.createElement('a')
-                    elA.classList.add('dropdown-item')
-                    elA.innerHTML = '<i class="fas fa-check text-success"></i> Approve'
-                    elA.onclick = () => {
-                        event.preventDefault()
-                        if (confirm('Are you sure ?')) {
-                            elButton1.disabled = true
-                            $.ajax({
-                                type: "PUT",
-                                url: `approve/quotations/${btoa(arrayItem['TQUO_QUOCD'])}`,
-                                data: {
-                                    _token: '{{ csrf_token() }}'
-                                },
-                                dataType: "json",
-                                success: function(response) {
-                                    elButton1.disabled = false
-                                    loadApprovalList()
-                                    showNotificationToApprove()
-                                },
-                                error: function(xhr, xopt, xthrow) {
-                                    elButton1.disabled = false
-                                    const respon = Object.keys(xhr.responseJSON)
-                                    const div_alert = document.getElementById('div-alert')
-                                    let msg = ''
-                                    for (const item of respon) {
-                                        msg += `<p>${xhr.responseJSON[item]}</p>`
-                                    }
-                                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
-                                            ${msg}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                            </div>`
-
-                                    alertify.warning(xthrow);
-                                }
-                            });
-                        }
-                    }
-                    elLi.appendChild(elA)
-                    elUl.appendChild(elLi)
-                    
-                    elLi = document.createElement('li')                   
-                    elA = document.createElement('a')
-                    elA.classList.add('dropdown-item')
-                    elA.innerHTML = '<i class="fas fa-xmark text-danger"></i> Reject'
-                    elA.onclick = () => {
-                        event.preventDefault()
-                        if (confirm('Are you sure want to reject ?')) {
-                            elButton1.disabled = true
-                            $.ajax({
-                                type: "PUT",
-                                url: `reject/quotations/${btoa(arrayItem['TQUO_QUOCD'])}`,
-                                data: {
-                                    _token: '{{ csrf_token() }}'
-                                },
-                                dataType: "json",
-                                success: function(response) {
-                                    elButton1.disabled = false
-                                    loadApprovalList()
-                                    showNotificationToApprove()
-                                },
-                                error: function(xhr, xopt, xthrow) {
-                                    elButton1.disabled = false
-                                    const respon = Object.keys(xhr.responseJSON)
-                                    const div_alert = document.getElementById('div-alert')
-                                    let msg = ''
-                                    for (const item of respon) {
-                                        msg += `<p>${xhr.responseJSON[item]}</p>`
-                                    }
-                                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
-                                            ${msg}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                            </div>`
-
-                                    alertify.warning(xthrow);
-                                }
-                            });
-                        }
-                    }
-                    elLi.appendChild(elA)
-                    elUl.appendChild(elLi)
-                                        
-                    elButtonGrup2.appendChild(elUl)
-                    elButtonGrup.appendChild(elButtonGrup2)
 
                     const elButton2 = document.createElement('button')
                     elButton2.classList.add(...['btn', 'btn-outline-primary'])
                     elButton2.innerHTML = 'Preview'
                     elButton2.onclick = () => {
                         event.preventDefault()
+                        quotationCustomer.value = arrayItem['MCUS_CUSNM']
                         labelQuotationInModal.innerHTML = arrayItem['TQUO_QUOCD']
+                        quotationAttn.value = arrayItem['TQUO_ATTN']
+                        quotationSubject.value = arrayItem['TQUO_SBJCT']
                         const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
                         myModal.show()
                         loadQuotationDetail({
@@ -241,6 +190,74 @@
     }
     loadApprovalList()
 
+    function approveQuotation(pthis) {
+        if (confirm('Are you sure ?')) {
+            btnAction.disabled = true
+            $.ajax({
+                type: "PUT",
+                url: `approve/quotations/${btoa(labelQuotationInModal.innerText)}`,
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                dataType: "json",
+                success: function(response) {
+                    btnAction.disabled = false
+                    loadApprovalList()
+                    showNotificationToApprove()
+                },
+                error: function(xhr, xopt, xthrow) {
+                    btnAction.disabled = false
+                    const respon = Object.keys(xhr.responseJSON)
+                    const div_alert = document.getElementById('div-alert')
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${msg}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+
+                    alertify.warning(xthrow);
+                }
+            });
+        }
+    }
+
+    function rejectQuotation(pthis) {
+        if (confirm('Are you sure want to reject ?')) {
+            btnAction.disabled = true
+            $.ajax({
+                type: "PUT",
+                url: `reject/quotations/${btoa(labelQuotationInModal.innerText)}`,
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                dataType: "json",
+                success: function(response) {
+                    btnAction.disabled = false
+                    loadApprovalList()
+                    showNotificationToApprove()
+                },
+                error: function(xhr, xopt, xthrow) {
+                    btnAction.disabled = false
+                    const respon = Object.keys(xhr.responseJSON)
+                    const div_alert = document.getElementById('div-alert')
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                            ${msg}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>`
+
+                    alertify.warning(xthrow);
+                }
+            });
+        }
+    }
+
     function loadQuotationDetail(data) {
         $.ajax({
             type: "GET",
@@ -253,8 +270,14 @@
                 myfrag.appendChild(cln);
                 let myTable = myfrag.getElementById("quotationTable");
                 let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                let myStrong = myfrag.getElementById("strongGrandTotal");
                 myTableBody.innerHTML = ''
+                let grandTotal = 0
                 response.dataItem.forEach((arrayItem) => {
+                    const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() +
+                        numeral(arrayItem['TQUODETA_OPRPRC']).value() +
+                        numeral(arrayItem['TQUODETA_MOBDEMOB']).value()
+                    grandTotal += subTotal
                     newrow = myTableBody.insertRow(-1)
                     newrow.onclick = (event) => {
                         const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
@@ -290,7 +313,12 @@
                     newcell = newrow.insertCell(6)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
+                    newcell = newrow.insertCell(7)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(subTotal).format(',')
                 })
+                myStrong.innerText = numeral(grandTotal).format(',')
+               
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
                 quotationConditionContainer.innerHTML = ''
