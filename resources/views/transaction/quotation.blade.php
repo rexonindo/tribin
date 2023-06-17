@@ -14,7 +14,7 @@
             <div class="col">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Item</button>                        
+                        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Item</button>
                         <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Condition</button>
                     </div>
                 </nav>
@@ -136,7 +136,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>                    
+                    </div>
                     <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
                         <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                             <div class="row">
@@ -144,6 +144,7 @@
                                     <div class="input-group mb-1">
                                         <input type="text" id="quotationCondition" class="form-control" onkeypress="quotationConditionOnKeyPress(event)" maxlength="450">
                                         <button class="btn btn-primary" type="button" id="btnAddCondition" onclick="addCondition()"><i class="fas fa-plus"></i></button>
+                                        <button class="btn btn-primary" type="button" id="btnModalCondition" onclick="btnShowConditionModal()" title="pick from template"><i class="fas fa-search"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -320,6 +321,46 @@
         </div>
     </div>
 </div>
+<!-- Condition Modal -->
+<div class="modal fade" id="conditionModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Conditions List</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+                            <div class="table-responsive" id="conditionTabelContainer">
+                                <table id="conditionTabel" class="table table-sm table-striped table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>...</th>
+                                            <th>Condition</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col text-center">
+                            <button class="btn btn-primary btn-sm" onclick="addSelectedConditionsToList()">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     $("#quotationIssueDate").datepicker({
         format: 'yyyy-mm-dd',
@@ -339,25 +380,7 @@
         if (quotationCode.value.trim().length === 0) {
             const condition = quotationCondition.value.trim()
             if (condition.length > 2) {
-                const liElement = document.createElement('li')
-                liElement.title = "go ahead"
-                liElement.classList.add(...['list-group-item', 'd-flex', 'justify-content-between', 'align-items-start'])
-                const childLiElement = document.createElement('div')
-                childLiElement.classList.add(...['ms-2', 'me-auto'])
-                childLiElement.innerHTML = condition
-                const childLiElement2 = document.createElement('span')
-                childLiElement2.classList.add(...['badge', 'bg-warning', 'rounded-pill'])
-                childLiElement2.innerHTML = `<i class="fas fa-trash"></i>`
-                childLiElement2.style.cssText = 'cursor:pointer'
-                childLiElement2.onclick = () => {
-                    if (confirm(`Are you sure ?`)) {
-                        liElement.remove()
-                    }
-                }
-                liElement.appendChild(childLiElement)
-                liElement.appendChild(childLiElement2)
-                quotationConditionContainer.appendChild(liElement)
-                quotationCondition.value = ``
+                addConditionImplementation(condition)
             }
         } else {
             if (confirm('Are you sure ?.')) {
@@ -658,7 +681,7 @@
         let itemOperatorPrice = []
         let itemMobDemob = []
         let quotationCondition = []
-        const ttlrows = quotationTable.rows.length-1
+        const ttlrows = quotationTable.rows.length - 1
         for (let i = 1; i < ttlrows; i++) {
             itemCode.push(quotationTable.rows[i].cells[1].innerText.trim())
             itemUsage.push(quotationTable.rows[i].cells[3].innerText.trim())
@@ -955,5 +978,122 @@
             return
         }
         window.open(`PDF/quotation/${btoa(quotationCode.value)}`, '_blank');
+    }
+
+    function btnShowConditionModal() {
+        const myModal = new bootstrap.Modal(document.getElementById('conditionModal'), {})
+        myModal.show()
+    }
+
+    function loadAllCondition() {
+        $.ajax({
+            type: "GET",
+            url: "condition",
+            dataType: "json",
+            success: function(response) {
+                let myContainer = document.getElementById("conditionTabelContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = conditionTabel.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("conditionTabel");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                grandTotal = 0
+                response.data.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newcell = newrow.insertCell(0)
+                    const checkBox = document.createElement('input')
+                    checkBox.classList.add('form-check-input')
+                    checkBox.type = "checkbox"
+                    newcell.appendChild(checkBox)
+                    newcell = newrow.insertCell(1)
+                    newcell.innerHTML = arrayItem['MCONDITION_DESCRIPTION']
+                })
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+            }
+        });
+    }
+
+    loadAllCondition()
+
+    function addSelectedConditionsToList() {
+        const ttlrows = conditionTabel.rows.length - 1
+        let isSelectedRowsFound = false
+        let conditions = []
+        for (let i = 1; i < ttlrows; i++) {
+            const _elCheckBox = conditionTabel.rows[i].cells[0].getElementsByTagName('input')[0]
+            if (_elCheckBox.checked) {
+                isSelectedRowsFound = true
+                conditions.push(conditionTabel.rows[i].cells[1].innerText)
+                addConditionImplementation(conditionTabel.rows[i].cells[1].innerText)
+            }
+        }
+        if (!isSelectedRowsFound) {
+            alertify.message('nothing selected')
+        } else {
+            $("#conditionModal").modal('hide')
+            if (quotationCode.value.trim().length != 0) {
+                let functionListPhysic_adj = []
+                conditions.forEach((dataCondition) => {
+                    functionListPhysic_adj.push($.ajax({
+                        type: "POST",
+                        url: "quotation-condition",
+                        data: {
+                            TQUOCOND_QUOCD: quotationCode.value,
+                            TQUOCOND_CONDI: dataCondition,
+                            _token: '{{ csrf_token() }}',
+                        },
+                        dataType: "JSON",
+                        success: function(response) {
+
+                        },
+                        error: function(xhr, xopt, xthrow) {
+                            const respon = Object.keys(xhr.responseJSON)
+                            const div_alert = document.getElementById('div-alert')
+                            let msg = ''
+                            for (const item of respon) {
+                                msg += `<p>${xhr.responseJSON[item]}</p>`
+                            }
+                            div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        ${msg}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                            alertify.warning(xthrow);
+                        }
+                    }))
+                })
+                $.when.apply($,functionListPhysic_adj).then(function() {
+                    loadQuotationDetail({
+                        doc: quotationCode.value
+                    })
+                })
+            }
+        }
+    }
+
+    function addConditionImplementation(data) {
+        const liElement = document.createElement('li')
+        liElement.title = "go ahead"
+        liElement.classList.add(...['list-group-item', 'd-flex', 'justify-content-between', 'align-items-start'])
+        const childLiElement = document.createElement('div')
+        childLiElement.classList.add(...['ms-2', 'me-auto'])
+        childLiElement.innerHTML = data
+        const childLiElement2 = document.createElement('span')
+        childLiElement2.classList.add(...['badge', 'bg-warning', 'rounded-pill'])
+        childLiElement2.innerHTML = `<i class="fas fa-trash"></i>`
+        childLiElement2.style.cssText = 'cursor:pointer'
+        childLiElement2.onclick = () => {
+            if (confirm(`Are you sure ?`)) {
+                liElement.remove()
+            }
+        }
+        liElement.appendChild(childLiElement)
+        liElement.appendChild(childLiElement2)
+        quotationConditionContainer.appendChild(liElement)
+        quotationCondition.value = ``
     }
 </script>

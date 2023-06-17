@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\M_Condition;
 use App\Models\T_QUOCOND;
 use App\Models\T_QUODETA;
 use App\Models\T_QUOHEAD;
@@ -396,11 +397,7 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
         $this->fpdf->Cell(20, 5, 'Dibuat oleh', 1, 0, 'L');
         $this->fpdf->Cell(130, 5, ' Diketahui oleh,', 1, 0, 'C');
         $this->fpdf->Cell(40, 5, ' Disetujui oleh,', 1, 0, 'C');
-
-
-
         $this->fpdf->Output('quotation ' . $doc . '.pdf', 'I');
-
         exit;
     }
 
@@ -482,5 +479,9 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
             header('Cache-Control: max-age=0');
             $writer->save('php://output');
         }
+    }
+
+    function getAllCondition(){
+        return ['data' => M_Condition::select('MCONDITION_DESCRIPTION')->orderBy('MCONDITION_DESCRIPTION')->get()];
     }
 }

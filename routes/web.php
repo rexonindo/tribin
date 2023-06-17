@@ -81,6 +81,9 @@ Route::get('quotation/{id}', [QuotationController::class, 'loadById'])->middlewa
 Route::delete('quotation/conditions/{id}', [QuotationController::class, 'deleteConditionById'])->middleware('auth');
 Route::delete('quotation/items/{id}', [QuotationController::class, 'deleteItemById'])->middleware('auth');
 
+# Terkait Quotation Condition
+Route::get('condition', [QuotationController::class, 'getAllCondition'])->middleware('auth');
+
 #Terkait Approval
 Route::get('approval/quotation', [QuotationController::class, 'notifications'])->middleware('auth');
 Route::get('approval/form/quotation', [QuotationController::class, 'formApproval'])->middleware('auth');
