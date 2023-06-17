@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('t_quohead', function (Blueprint $table) {
+        Schema::table('T_QUOHEAD', function (Blueprint $table) {
             $table->string('TQUO_REJCTBY', 16)->nullable()->after('TQUO_APPRVDT');
             $table->dateTime('TQUO_REJCTDT')->nullable()->after('TQUO_REJCTBY');
         });
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('t_quohead', function (Blueprint $table) {
+        Schema::table('T_QUOHEAD', function (Blueprint $table) {
             //
         });
     }
