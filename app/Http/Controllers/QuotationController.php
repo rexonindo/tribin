@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Codedge\Fpdf\Fpdf\Fpdf;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
@@ -260,7 +261,7 @@ class QuotationController extends Controller
     public function toPDF(Request $request)
     {
         $doc = base64_decode($request->id);
-        $RSHeader = T_QUOHEAD::select('MCUS_CUSNM', 'TQUO_ATTN', 'MCUS_TELNO', 'TQUO_SBJCT', 'TQUO_ISSUDT')
+        $RSHeader = T_QUOHEAD::select('MCUS_CUSNM', 'TQUO_ATTN', 'MCUS_TELNO', 'TQUO_SBJCT', 'TQUO_ISSUDT', 'TQUO_APPRVDT')
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where("TQUO_QUOCD", $doc)
             ->get()->toArray();
@@ -268,6 +269,7 @@ class QuotationController extends Controller
         $TQUO_ATTN = '';
         $TQUO_SBJCT = '';
         $TQUO_ISSUDT = '';
+        $TQUO_APPRVDT = '';
         foreach ($RSHeader as $r) {
             $MCUS_CUSNM = $r['MCUS_CUSNM'];
             $TQUO_ATTN = $r['TQUO_ATTN'];
@@ -275,6 +277,7 @@ class QuotationController extends Controller
             $TQUO_SBJCT = $r['TQUO_SBJCT'];
             $_ISSUDT = explode('-', $r['TQUO_ISSUDT']);
             $TQUO_ISSUDT = $_ISSUDT[2] . '/' . $_ISSUDT[1] . '/' . $_ISSUDT[0];
+            $TQUO_APPRVDT = $r['TQUO_APPRVDT'];
         }
 
         $RSDetail = T_QUODETA::select('TQUODETA_ITMCD', 'MITM_BRAND', 'MITM_ITMNM', 'MITM_MODEL', 'TQUODETA_USAGE', 'TQUODETA_PRC', 'TQUODETA_OPRPRC', 'TQUODETA_MOBDEMOB')
@@ -391,13 +394,26 @@ class QuotationController extends Controller
 Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, atas perhatian dan kerjasama yang baik kami ucapkan banyak terima kasih.', 0, 'J');
         $y += 25;
         $this->fpdf->SetXY(7, $y);
-        $this->fpdf->Cell(20, 5, 'Hormat kami', 1, 0, 'L');
+        $this->fpdf->Cell(20, 5, 'Hormat kami,', 0, 0, 'L');
         $y += 5;
         $this->fpdf->SetXY(7, $y);
-        $this->fpdf->Cell(20, 5, 'Dibuat oleh', 1, 0, 'L');
-        $this->fpdf->Cell(130, 5, ' Diketahui oleh,', 1, 0, 'C');
-        $this->fpdf->Cell(40, 5, ' Disetujui oleh,', 1, 0, 'C');
+        $this->fpdf->Cell(20, 5, 'Dibuat oleh', 0, 0, 'L');
+        $this->fpdf->Cell(130, 5, ' Diketahui oleh,', 0, 0, 'C');
+        $this->fpdf->Cell(40, 5, ' Disetujui oleh,', 0, 0, 'C');
+
+        $y += 25;
+        $this->fpdf->SetXY(7, $y);
+        $this->fpdf->Image(storage_path('app/public/mkt_sign.jpg'), 7, $y - 19, 15, 15);
+        $this->fpdf->Cell(20, 5, 'Marketing Dept.', 0, 0, 'L');
+
+        if (!empty($TQUO_APPRVDT)) {
+            $this->fpdf->Image(storage_path('app/public/dir_sign.jpg'), 85, $y - 19, 15, 15);
+        }
+        $this->fpdf->Cell(130, 5, ' Pimpinan,', 0, 0, 'C');
+        $this->fpdf->Cell(40, 5, ' Penyewa/pembeli', 0, 0, 'C');
         $this->fpdf->Output('quotation ' . $doc . '.pdf', 'I');
+
+
         exit;
     }
 
@@ -481,7 +497,8 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
         }
     }
 
-    function getAllCondition(){
+    function getAllCondition()
+    {
         return ['data' => M_Condition::select('MCONDITION_DESCRIPTION')->orderBy('MCONDITION_DESCRIPTION')->get()];
     }
 }

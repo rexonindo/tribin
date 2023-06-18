@@ -286,8 +286,8 @@
                             <div class="input-group input-group-sm mb-1">
                                 <span class="input-group-text">Search by</span>
                                 <select id="itemSearchBy" class="form-select" onchange="itemSearch.focus()">
-                                    <option value="0">Item Code</option>
                                     <option value="1">Item Name</option>
+                                    <option value="0">Item Code</option>
                                     <option value="2">Specification</option>
                                 </select>
                                 <input type="text" id="itemSearch" class="form-control" placeholder="Item Search" aria-label="Item Search" maxlength="50" onkeypress="itemSearchOnKeypress(event)">
