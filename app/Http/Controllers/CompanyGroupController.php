@@ -93,7 +93,7 @@ class CompanyGroupController extends Controller
         }
 
         if (
-            DB::table('company_group_accesses')
+            DB::table('COMPANY_GROUP_ACCESSES')
             ->where('nick_name', $request->nick_name)
             ->where('connection', $request->connection)
             ->whereNull('deleted_at')
