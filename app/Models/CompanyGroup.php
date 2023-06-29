@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class CompanyGroup extends Model
 {
     use HasFactory;
+    protected $table = 'COMPANY_GROUPS';
     protected $fillable = ['name', 'connection', 'address', 'phone', 'fax'];
 }
