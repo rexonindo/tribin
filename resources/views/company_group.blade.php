@@ -225,8 +225,12 @@
             }]
         });
         varRegisteredTable.on('search.dt', function() {
-            tribinClearTextBox()
-            companyId.value = "";
+            companyName.value = ''
+            companyId.value = ''
+            companyConnection.value = '-'
+            companyAddress.value = "";
+            companyPhone.value = ''
+            companyFax.value = ''
         });
     }
 
