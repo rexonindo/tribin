@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->string('parent_code');
-            $table->string('url');
+            $table->string('url')->nullable();
             $table->string('icon');
         });
     }
