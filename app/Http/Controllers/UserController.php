@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroupAccess;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -39,6 +43,37 @@ class UserController extends Controller
             'active' => 1,
             'role' => $request->role,
         ]);
+
+        # sekalian daftarkan ke Company Group
+        $selectedConnection = Crypt::decryptString($_COOKIE['CGID']);
+        $validator = Validator::make([
+            'nick_name' => $request->nick_name,
+            'connection' => $selectedConnection,
+        ], [
+            'nick_name' => 'required',
+            'connection' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        if (
+            DB::table('COMPANY_GROUP_ACCESSES')
+            ->where('nick_name', $request->nick_name)
+            ->where('connection', $selectedConnection)
+            ->whereNull('deleted_at')
+            ->count() > 0
+        ) {
+            return response()->json(['message' => 'Already registered'], 406);
+        }
+
+        CompanyGroupAccess::create([
+            'nick_name' => $request->nick_name,
+            'connection' => $selectedConnection,
+            'created_by' => Auth::user()->nick_name,
+        ]);
+
         return ['msg' => 'OK'];
     }
 
@@ -50,5 +85,10 @@ class UserController extends Controller
         ];
         $RS = User::select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
         return ['data' => $RS];
+    }
+
+    function tes()
+    {
+        return ['data' => Auth::user()->nick_name];
     }
 }

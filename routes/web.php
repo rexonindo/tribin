@@ -131,7 +131,7 @@ Route::delete('company/access/{id}', [CompanyGroupController::class, 'deleteAcce
 
 # Terkait User Master
 Route::get('user', [UserController::class, 'search'])->middleware('auth');
-
+Route::post('user', [UserController::class, 'simpan'])->middleware('auth');
 #Terkait config
 Route::get('ACL/database', function () {
     $ConnectionList = [];
@@ -143,3 +143,5 @@ Route::get('ACL/database', function () {
     }
     return ['data' => $ConnectionList];
 });
+
+Route::get('tes', [UserController::class, 'tes'])->middleware('auth');

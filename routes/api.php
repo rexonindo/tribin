@@ -26,7 +26,7 @@ use App\Http\Controllers\UserController;
 Route::put('/user/{id}', function (Request $request, $id) {
     return $id;
 });
-Route::post('/user', [UserController::class, 'simpan']);
+
 Route::get('/logout', function (Request $request) {
     $request->user()->currentAccessToken()->delete();
     return ['message' => 'ok logout'];

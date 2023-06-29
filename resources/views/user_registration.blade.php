@@ -64,9 +64,10 @@
     </div>
 </form>
 <script>
-    function userName_eKeyUp(e){
-        userNickName.value = e.target.value.replace(' ', '_').substr(0,16)
+    function userName_eKeyUp(e) {
+        userNickName.value = e.target.value.replace(' ', '_').substr(0, 16)
     }
+
     function btnSaveOnclick(pthis) {
 
         if (password.value != passwordConfirmation.value) {
@@ -85,8 +86,7 @@
             return
         }
 
-        if(userNickName.value.includes(' '))
-        {
+        if (userNickName.value.includes(' ')) {
             alertify.message('should not contain space')
             return
         }
@@ -103,7 +103,7 @@
             pthis.disabled = true
             $.ajax({
                 type: "post",
-                url: "/api/user",
+                url: "user",
                 data: data,
                 dataType: "json",
                 success: function(response) {
