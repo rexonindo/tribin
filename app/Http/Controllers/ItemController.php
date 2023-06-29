@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\M_COA;
 use App\Models\M_ITM;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -15,6 +17,12 @@ use PhpOffice\PhpSpreadsheet\Style\Color;
 
 class ItemController extends Controller
 {
+    protected $dedicatedConnection;
+
+    public function __construct()
+    {
+        $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
+    }
     public function index()
     {
         return view('master.item', ['coas' => M_COA::select('*')->get()]);
@@ -29,7 +37,10 @@ class ItemController extends Controller
     public function simpan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'MITM_ITMCD' => 'required|unique:App\Models\M_ITM',
+            'MITM_ITMCD' => 'required',
+            'MITM_ITMCD' => [
+                Rule::unique($this->dedicatedConnection . '.M_ITM', 'MITM_ITMCD')
+            ],
             'MITM_ITMNM' => 'required',
             'MITM_STKUOM' => 'required',
             'MITM_ITMTYPE' => 'required',
@@ -42,7 +53,7 @@ class ItemController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
-        M_ITM::create([
+        M_ITM::on($this->dedicatedConnection)->create([
             'MITM_ITMCD' => $request->MITM_ITMCD,
             'MITM_ITMNM' => $request->MITM_ITMNM,
             'MITM_STKUOM' => $request->MITM_STKUOM,
@@ -63,13 +74,15 @@ class ItemController extends Controller
             'MITM_ITMNM',
             'MITM_SPEC',
         ];
-        $RS = M_ITM::select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $DataSet = new M_ITM();
+        $DataSet->setConnection($this->dedicatedConnection);
+        $RS = $DataSet->select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
         return ['data' => $RS];
     }
 
     function update(Request $request)
     {
-        $affectedRow = M_ITM::where('MITM_ITMCD', base64_decode($request->id))
+        $affectedRow = M_ITM::on($this->dedicatedConnection)->where('MITM_ITMCD', base64_decode($request->id))
             ->update([
                 'MITM_ITMNM' => $request->MITM_ITMNM, 'MITM_STKUOM' => $request->MITM_STKUOM, 'MITM_ITMTYPE' => $request->MITM_ITMTYPE, 'MITM_BRAND' => $request->MITM_BRAND, 'MITM_MODEL' => $request->MITM_MODEL, 'MITM_SPEC' => $request->MITM_SPEC, 'MITM_ITMCAT' => $request->MITM_ITMCAT, 'MITM_COACD' => $request->MITM_COACD,
             ]);
@@ -78,7 +91,7 @@ class ItemController extends Controller
 
     function report(Request $request)
     {
-        $RS = M_ITM::select('*')->get()->toArray();
+        $RS = M_ITM::on($this->dedicatedConnection)->select('*')->get()->toArray();
         if ($request->fileType === 'json') {
             return ['data' => $RS];
         } else {

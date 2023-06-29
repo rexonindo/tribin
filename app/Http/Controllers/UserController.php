@@ -26,10 +26,10 @@ class UserController extends Controller
             'password' => 'required|min:8',
             'role' => 'required',
         ]);
-        
-        if($validator->fails()){
+
+        if ($validator->fails()) {
             return response()->json($validator->errors(), 406);
-        } 
+        }
 
         User::create([
             'name' => $request->name,
@@ -40,5 +40,15 @@ class UserController extends Controller
             'role' => $request->role,
         ]);
         return ['msg' => 'OK'];
+    }
+
+    function search(Request $request)
+    {
+        $columnMap = [
+            'email',
+            'name',
+        ];
+        $RS = User::select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        return ['data' => $RS];
     }
 }

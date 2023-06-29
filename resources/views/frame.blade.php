@@ -14,6 +14,7 @@
     <link href="{{ url('assets/alertify/css/themes/semantic.min.css') }}" rel="stylesheet">
     <link href="{{ url('assets/fontaw/css/all.css') }}" rel="stylesheet">
     <link href="{{ url('assets/gijgo/css/gijgo.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/DataTables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
     <script src="{{ url('assets/jquery/jquery.min.js') }} "></script>
     <script src="{{ url('assets/alertify/alertify.min.js') }} "></script>
     <script src="{{ url('assets/gijgo/js/gijgo.min.js') }} "></script>
@@ -21,6 +22,8 @@
     <script src="{{ url('assets/js/moment.min.js') }} "></script>
     <script src="{{ url('assets/js/FileSaver.js') }} "></script>
     <script src="{{ url('assets/numeral/numeral.min.js') }} "></script>
+    <script src="{{ url('assets/DataTables/datatables.min.js') }} "></script>
+    <script type="text/javascript" src="{{ url('assets/js/js.cookie.min.js') }}"></script>
     <!-- Favicons -->
     <meta name="theme-color" content="#712cf9">
     <style>
@@ -97,9 +100,10 @@
             z-index: 1500;
         }
 
-        thead tr.first th, thead tr.first td {
+        thead tr.first th,
+        thead tr.first td {
             position: sticky;
-            top: 0;        
+            top: 0;
         }
 
         /* sidebar custom */
@@ -146,6 +150,20 @@
             </div>
         </div>
         <div class="navbar-nav">
+            <div class="nav-item dropdown text-nowrap">
+                <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown" title="Company">
+                    <span class="align-text-bottom fas fa-building"></span>
+                    <span class="badge bg-info" id="labelCompany">-</span>
+                </a>
+                <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
+                    <li><a class="dropdown-item" href="#" onclick="lishowCompanySelectionModal(event)">Select Company</a></li>
+                    @if (Auth::user()->role === 'root')
+                    <li><a class="dropdown-item" href="#" onclick="lishowCompanyAccessControlForm(event)">Company Access Control</a></li>
+                    @endif
+                </ul>
+            </div>
+        </div>
+        <div class="navbar-nav">
             <div class="nav-item text-nowrap">
                 <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6 text-danger" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
                     <span data-feather="log-out" class="align-text-bottom"></span>
@@ -165,6 +183,47 @@
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="konten-div">
                 @yield('konten')
             </main>
+        </div>
+    </div>
+
+    <!-- Item Modal -->
+    <div class="modal fade" id="companyModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Company Group</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col">
+                                <div class="table-responsive" id="companyTabelContainer">
+                                    <table id="companyTabel" class="table table-sm table-striped table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="d-none">...</th>
+                                                <th>Company Name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col text-center">
+                                <button class="btn btn-primary btn-sm" onclick="frameSetCompany()">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -188,6 +247,7 @@
                 collapse: `<span style="color: Tomato"><i class="fas fa-folder-open" /></span>`,
             }
         });
+        let CGID = ''
         mainTree.on('select', function(e, node, id) {
             const SelectedData = mainTree.getDataById(id)
 
@@ -274,6 +334,114 @@
                     }
                 });
             }
+        }
+
+        function lishowCompanySelectionModal() {
+            const myModal = new bootstrap.Modal(document.getElementById('companyModal'), {})
+            myModal.show()
+        }
+
+        function lishowCompanyAccessControlForm() {
+            ContentContainer.innerHTML = 'Please wait'
+            $.ajax({
+                type: "GET",
+                url: '/company/form',
+                dataType: "text",
+                success: function(response) {
+                    setInnerHTML(ContentContainer, response)
+                    if (!myCollapse.classList.contains('collapsed')) {
+                        mybsCollapse.toggle()
+                    }
+
+                }
+            });
+        }
+
+        showCompanyAcess()
+
+        function showCompanyAcess() {
+            companyTabel.getElementsByTagName('tbody')[0].innerHTML = '<tr><td colspan="2">Please wait</td></tr>'
+            $.ajax({
+                type: "get",
+                url: `company/access/{{ base64_encode(Auth::user()->nick_name) }}`,
+                dataType: "JSON",
+                success: function(response) {
+                    let myContainer = document.getElementById("companyTabelContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = companyTabel.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("companyTabel");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    response.data.forEach((arrayItem) => {
+                        newrow = myTableBody.insertRow(-1)
+                        newrow.onclick = (event) => {
+                            const selrow = companyTabel.rows[event.target.parentElement.rowIndex]
+                            if (selrow.title === 'selected') {
+                                selrow.title = 'not selected'
+                                selrow.classList.remove('table-info')
+                            } else {
+                                const ttlrows = companyTabel.rows.length
+                                for (let i = 1; i < ttlrows; i++) {
+                                    companyTabel.rows[i].classList.remove('table-info')
+                                    companyTabel.rows[i].title = 'not selected'
+                                }
+                                selrow.title = 'selected'
+                                selrow.classList.add('table-info')
+                            }
+                        }
+                        newcell = newrow.insertCell(0)
+                        newcell.classList.add('d-none')
+                        newcell.innerHTML = arrayItem['connection']
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['name']
+
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+
+                    // pilih berdasarkan cookie
+                    const ttlrows = companyTabel.rows.length
+                    let nm = ''
+                    for (let i = 1; i < ttlrows; i++) {
+                        nm = companyTabel.rows[i].cells[1].innerText.trim()
+                        if (nm === Cookies.get('CGNM')) {
+                            companyTabel.rows[i].classList.add('table-info')
+                            companyTabel.rows[i].title = 'selected'
+                            labelCompany.innerText = nm
+                            break
+                        }
+                    }
+                }
+            });
+        }
+
+        function frameSetCompany() {
+            const ttlrows = companyTabel.rows.length
+            let id = ''
+            let companyName = ''
+            let iFounded = 0
+            for (let i = 1; i < ttlrows; i++) {
+                if (companyTabel.rows[i].title === 'selected') {
+                    id = companyTabel.rows[i].cells[0].innerText.trim()
+                    companyName = companyTabel.rows[i].cells[1].innerText.trim()
+                    iFounded = i
+                    break
+                }
+            }
+            if (iFounded === 0) {
+                alertify.warning('Please select a company first')
+                return
+            }
+            labelCompany.innerText = companyName
+            Cookies.set('CGID', id, {
+                expires: 365
+            });
+            Cookies.set('CGNM', companyName, {
+                expires: 365
+            });
+            $('#companyModal').modal('hide')
+            location.href = '/home'
         }
     </script>
 </body>

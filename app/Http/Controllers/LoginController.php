@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroupAccess;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Crypt;
 
 class LoginController extends Controller
 {
@@ -14,7 +15,11 @@ class LoginController extends Controller
         if (Auth::check()) {
             return redirect('home');
         } else {
-            return isset($_COOKIE['JOS_BNM']) ? view('login') : redirect('/');
+            unset($_COOKIE['CGID']);
+            unset($_COOKIE['CGNM']);
+            setcookie('CGID', '-', -1, '/');
+            setcookie('CGNM', '-', -1, '/');
+            return view('login');
         }
     }
 
@@ -29,7 +34,19 @@ class LoginController extends Controller
         if (Auth::attempt($data)) {
             $request->session()->regenerate();
             $user  = User::where('email', $request->input('inputUserid'))->first();
-            return ['tokennya' => $user->createToken($request->input('inputUserid') . 'bebas')->plainTextToken];
+            $RSCompany = CompanyGroupAccess::select('COMPANY_GROUP_ACCESSES.connection', 'name')
+                ->leftJoin("COMPANY_GROUPS", "COMPANY_GROUP_ACCESSES.connection", "=", "COMPANY_GROUPS.connection")
+                ->whereNull('deleted_at')
+                ->where('nick_name', Auth::user()->nick_name)
+                ->get();
+            $company = ['connection' => '-', 'name' => '-'];
+            foreach ($RSCompany as $r) {
+                $company['connection'] = Crypt::encryptString($r->connection);
+                $company['name'] = $r->name;
+            }
+            return [
+                'tokennya' => $user->createToken($request->input('inputUserid') . 'bebas')->plainTextToken, 'data' => $company
+            ];
         } else {
             return ['message' => 'invalid login'];
         }
@@ -38,6 +55,10 @@ class LoginController extends Controller
     function actionLogout(Request $request)
     {
         Auth::logout();
+        unset($_COOKIE['CGID']);
+        unset($_COOKIE['CGNM']);
+        setcookie('CGID', '-', -1, '/');
+        setcookie('CGNM', '-', -1, '/');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');

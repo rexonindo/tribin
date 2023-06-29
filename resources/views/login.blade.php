@@ -13,7 +13,7 @@
     <link href="{{ url('assets/fontaw/css/all.css') }}" rel="stylesheet">
     <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <script src="{{ url('assets/jquery/jquery.min.js') }} "></script>
-
+    <script type="text/javascript" src="{{ url('assets/js/js.cookie.min.js') }}"></script>
     <style>
         .bd-placeholder-img {
             font-size: 1.125rem;
@@ -52,7 +52,7 @@
                     <div class="row">
                         <div class="col mb-4">
                             <h1 class="display-4 text-primary mb-0"><a href="/">JOS</a></h1>
-                            JAT Online System <i class="fas fa-link"></i> <span class="badge bg-info">{{ $_COOKIE['JOS_BNM']}}</span>
+                            JAT Integrated Online System <i class="fas fa-link"></i>
                         </div>
                     </div>
                     <div class="row" id="lnwarning">
@@ -117,7 +117,14 @@
                             $("#inputUserid").select();
                         });
                     } else {
+                        console.log(response)
                         sessionStorage.setItem('tokenGue', response.tokennya)
+                        Cookies.set('CGID', response.data.connection, {
+                            expires: 365
+                        });
+                        Cookies.set('CGNM', response.data.name, {
+                            expires: 365
+                        });
                         location.href = '/home'
                     }
                 },

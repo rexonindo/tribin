@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccessRulesController;
 use App\Http\Controllers\CoaController;
+use App\Http\Controllers\CompanyGroupController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Cookie;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,3 +119,27 @@ Route::get('report/received-order', [ReceiveOrderController::class, 'report'])->
 
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');
+
+# Terkait Company Group
+Route::get('company/form', [CompanyGroupController::class, 'index'])->middleware('auth');
+Route::get('company', [CompanyGroupController::class, 'search'])->middleware('auth');
+Route::post('company', [CompanyGroupController::class, 'save'])->middleware('auth');
+Route::put('company/{id}', [CompanyGroupController::class, 'update'])->middleware('auth');
+Route::get('company/access/{id}', [CompanyGroupController::class, 'loadByNickName'])->middleware('auth');
+Route::post('company/access', [CompanyGroupController::class, 'saveAccess'])->middleware('auth');
+Route::delete('company/access/{id}', [CompanyGroupController::class, 'deleteAccess'])->middleware('auth');
+
+# Terkait User Master
+Route::get('user', [UserController::class, 'search'])->middleware('auth');
+
+#Terkait config
+Route::get('ACL/database', function () {
+    $ConnectionList = [];
+    $Configs = Config::get('database');
+    foreach ($Configs['connections'] as $key => $value) {
+        if (str_contains($key, 'jos')) {
+            $ConnectionList[] = [$key => $value];
+        }
+    }
+    return ['data' => $ConnectionList];
+});

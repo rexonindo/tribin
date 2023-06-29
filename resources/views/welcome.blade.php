@@ -10,8 +10,7 @@
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.111.3">
     <title>Welcome · JOS</title>
-    <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-    <script type="text/javascript" src="{{ url('assets/js/js.cookie.min.js') }}"></script>
+    <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">    
     <meta name="theme-color" content="#712cf9">
 
 
@@ -90,9 +89,10 @@
         }
 
         #jos_head {
-            background-image: linear-gradient(black, black), url("{{ url('assets/fiximgs/banner.jpeg') }}");
+            background-image: linear-gradient(black, black),
+            url("{{ url('assets/fiximgs/banner.jpeg') }}");
             background-size: cover;
-            background-blend-mode: saturation;            
+            background-blend-mode: saturation;
         }
     </style>
 
@@ -124,6 +124,11 @@
                     <div class="col-sm-8 col-md-7 py-4">
                         <h4>About</h4>
                         <p class="text-body-secondary">JOS stands for JAT Integrated Online System</p>
+                        <p>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="enter_jat_power(this)">Enter</button>
+                        </div>
+                        </p>
                     </div>
                     <div class="col-sm-4 offset-md-1 py-4">
                         <h4>Contact</h4>
@@ -177,10 +182,7 @@
                             </svg>
                             <div class="card-body">
                                 <p class="card-text">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" josCD='{{base64_encode("jatpt")}}' josNM='PT. JAT Powerindo' onclick="enter_jat_power(this)">Enter</button>
-                                    </div>
+                                <div class="d-flex justify-content-between align-items-center">                                    
                                     <small class="text-body-secondary"></small>
                                 </div>
                             </div>
@@ -194,10 +196,7 @@
                             </svg>
                             <div class="card-body">
                                 <p class="card-text"></p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" josCD='{{base64_encode("jatcv")}}' josNM='CV. Jaya Abadi Teknik' onclick="enter_jat_power(this)">Enter</button>
-                                    </div>
+                                <div class="d-flex justify-content-between align-items-center">                                   
                                     <small class="text-body-secondary"></small>
                                 </div>
                             </div>
@@ -211,10 +210,7 @@
                             </svg>
                             <div class="card-body">
                                 <p class="card-text"></p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" josCD='{{base64_encode("retail")}}' josNM='JAT Sales Retail' onclick="enter_jat_power(this)">Enter</button>
-                                    </div>
+                                <div class="d-flex justify-content-between align-items-center">                                    
                                     <small class="text-body-secondary"></small>
                                 </div>
                             </div>
@@ -228,10 +224,7 @@
                             </svg>
                             <div class="card-body">
                                 <p class="card-text"></p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" josCD='{{base64_encode("service")}}' josNM='JAT Sparepart and Service' onclick="enter_jat_power(this)">Enter</button>
-                                    </div>
+                                <div class="d-flex justify-content-between align-items-center">                                    
                                     <small class="text-body-secondary"></small>
                                 </div>
                             </div>
@@ -251,14 +244,11 @@
         </div>
     </footer>
     <script src="{{ url('assets/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
-<script>
-
-    function enter_jat_power(pthis){
-        window.location.href = '/welcome'
-        Cookies.set('JOS_BCD', pthis.attributes['joscd'].nodeValue, {expires:365});
-        Cookies.set('JOS_BNM', pthis.attributes['josnm'].nodeValue, {expires:365});        
-    }
-</script>
+    <script>
+        function enter_jat_power(pthis) {
+            window.location.href = '/welcome'
+        }
+    </script>
 
 </body>
 
