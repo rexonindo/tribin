@@ -6,9 +6,18 @@ use App\Models\M_SUP;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
 {
+    protected $dedicatedConnection;
+
+    public function __construct()
+    {
+        $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
+    }
+
     public function index()
     {
         return view('master.supplier');
@@ -16,7 +25,10 @@ class SupplierController extends Controller
     public function simpan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'MSUP_SUPCD' => 'required|unique:App\Models\M_SUP',
+            'MSUP_SUPCD' => 'required',
+            'MSUP_SUPCD' => [
+                Rule::unique($this->dedicatedConnection . '.M_SUP', 'MSUP_SUPCD')
+            ],
             'MSUP_SUPNM' => 'required',
             'MSUP_CURCD' => 'required',
             'MSUP_TAXREG' => 'required',
@@ -28,7 +40,7 @@ class SupplierController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
-        M_SUP::create([
+        M_SUP::on($this->dedicatedConnection)->create([
             'MSUP_SUPCD' => $request->MSUP_SUPCD,
             'MSUP_SUPNM' => $request->MSUP_SUPNM,
             'MSUP_CURCD' => $request->MSUP_CURCD,
@@ -47,13 +59,13 @@ class SupplierController extends Controller
             'MSUP_SUPNM',
             'MSUP_ADDR1',
         ];
-        $RS = M_SUP::select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $RS = M_SUP::on($this->dedicatedConnection)->select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
         return ['data' => $RS];
     }
 
     function update(Request $request)
     {
-        $affectedRow = M_SUP::where('MSUP_SUPCD', base64_decode($request->id))
+        $affectedRow = M_SUP::on($this->dedicatedConnection)->where('MSUP_SUPCD', base64_decode($request->id))
             ->update([
                 'MSUP_SUPNM' => $request->MSUP_SUPNM
                 ,'MSUP_CURCD' => $request->MSUP_CURCD                

@@ -6,17 +6,30 @@ use App\Models\M_CUS;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
+    protected $dedicatedConnection;
+
+    public function __construct()
+    {
+        $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
+    }
+
     public function index()
     {
         return view('master.customer');
     }
+
     public function simpan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'MCUS_CUSCD' => 'required|unique:App\Models\M_CUS',
+            'MCUS_CUSCD' => 'required',
+            'MCUS_CUSCD' => [
+                Rule::unique($this->dedicatedConnection . '.M_CUS', 'MCUS_CUSCD')
+            ],
             'MCUS_CUSNM' => 'required',
             'MCUS_CURCD' => 'required',
             'MCUS_TAXREG' => 'required',
@@ -28,7 +41,7 @@ class CustomerController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
-        M_CUS::create([
+        M_CUS::on($this->dedicatedConnection)->create([
             'MCUS_CUSCD' => $request->MCUS_CUSCD,
             'MCUS_CUSNM' => $request->MCUS_CUSNM,
             'MCUS_CURCD' => $request->MCUS_CURCD,
@@ -47,13 +60,13 @@ class CustomerController extends Controller
             'MCUS_CUSNM',
             'MCUS_ADDR1',
         ];
-        $RS = M_CUS::select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $RS = M_CUS::on($this->dedicatedConnection)->select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
         return ['data' => $RS];
     }
 
     function update(Request $request)
     {
-        $affectedRow = M_CUS::where('MCUS_CUSCD', base64_decode($request->id))
+        $affectedRow = M_CUS::on($this->dedicatedConnection)->where('MCUS_CUSCD', base64_decode($request->id))
             ->update([
                 'MCUS_CUSNM' => $request->MCUS_CUSNM
                 ,'MCUS_CURCD' => $request->MCUS_CURCD                

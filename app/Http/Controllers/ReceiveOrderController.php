@@ -8,14 +8,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ReceiveOrderController extends Controller
 {
+    protected $dedicatedConnection;
     public function __construct()
     {
         date_default_timezone_set('Asia/Jakarta');
+        $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
     }
     public function index()
     {
@@ -39,7 +42,7 @@ class ReceiveOrderController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
-        $LastLine = DB::table('T_SLOHEAD')
+        $LastLine = DB::connection($this->dedicatedConnection)->table('T_SLOHEAD')
             ->whereMonth('created_at', '=', date('m'))
             ->whereYear('created_at', '=', date('Y'))
             ->max('TSLO_LINE');
@@ -64,7 +67,7 @@ class ReceiveOrderController extends Controller
             'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
             'created_by' => Auth::user()->nick_name,
         ];
-        T_SLOHEAD::create($quotationHeader);
+        T_SLOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
 
         # data quotation detail item
         $validator = Validator::make($request->all(), [
@@ -100,7 +103,7 @@ class ReceiveOrderController extends Controller
             ];
         }
         if (!empty($quotationDetail)) {
-            T_SLODETA::insert($quotationDetail);
+            T_SLODETA::on($this->dedicatedConnection)->insert($quotationDetail);
         }
 
         return [
@@ -116,7 +119,7 @@ class ReceiveOrderController extends Controller
             'TSLO_POCD',
         ];
 
-        $RS = T_SLOHEAD::select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN", "TSLO_PLAN_DLVDT"])
+        $RS = T_SLOHEAD::on($this->dedicatedConnection)->select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN", "TSLO_PLAN_DLVDT"])
             ->leftJoin("M_CUS", "TSLO_CUSCD", "=", "MCUS_CUSCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
@@ -125,7 +128,7 @@ class ReceiveOrderController extends Controller
 
     function loadById(Request $request)
     {
-        $RS = T_SLODETA::select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
+        $RS = T_SLODETA::on($this->dedicatedConnection)->select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
             ->leftJoin("M_ITM", "TSLODETA_ITMCD", "=", "MITM_ITMCD")
             ->where('TSLODETA_SLOCD', base64_decode($request->id))
             ->whereNull('deleted_at')->get();
@@ -134,7 +137,7 @@ class ReceiveOrderController extends Controller
 
     function deleteItemById(Request $request)
     {
-        $affectedRow = T_SLODETA::where('id', $request->id)
+        $affectedRow = T_SLODETA::on($this->dedicatedConnection)->where('id', $request->id)
             ->update([
                 'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
             ]);
@@ -144,7 +147,7 @@ class ReceiveOrderController extends Controller
     public function update(Request $request)
     {
         # ubah data header
-        $affectedRow = T_SLOHEAD::where('TSLO_SLOCD', base64_decode($request->id))
+        $affectedRow = T_SLOHEAD::on($this->dedicatedConnection)->where('TSLO_SLOCD', base64_decode($request->id))
             ->update([
                 'TSLO_CUSCD' => $request->TSLO_CUSCD, 'TSLO_ATTN' => $request->TSLO_ATTN, 'TSLO_POCD' => $request->TSLO_POCD, 'TSLO_ISSUDT' => $request->TSLO_ISSUDT, 'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT
             ]);
@@ -156,7 +159,7 @@ class ReceiveOrderController extends Controller
     }
     function report(Request $request)
     {
-        $RS = T_SLOHEAD::select(DB::raw("T_SLOHEAD.*,MCUS_CUSNM,TSLODETA_ITMCD,MITM_ITMNM,TSLODETA_ITMQT,TSLODETA_USAGE,TSLODETA_PRC,TSLODETA_OPRPRC,TSLODETA_MOBDEMOB"))
+        $RS = T_SLOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_SLOHEAD.*,MCUS_CUSNM,TSLODETA_ITMCD,MITM_ITMNM,TSLODETA_ITMQT,TSLODETA_USAGE,TSLODETA_PRC,TSLODETA_OPRPRC,TSLODETA_MOBDEMOB"))
             ->leftJoin('T_SLODETA', 'TSLO_SLOCD', '=', 'TSLODETA_SLOCD')
             ->leftJoin('M_ITM', 'TSLODETA_ITMCD', '=', 'MITM_ITMCD')
             ->join('M_CUS', 'TSLO_CUSCD', '=', 'MCUS_CUSCD')
@@ -176,7 +179,7 @@ class ReceiveOrderController extends Controller
 
             foreach (range('A', 'Z') as $r) {
                 $sheet->getColumnDimension($r)->setAutoSize(true);
-            }            
+            }
 
             $stringjudul = "Recived-Order Report " . date('Y-m-d H:i:s');
             $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');

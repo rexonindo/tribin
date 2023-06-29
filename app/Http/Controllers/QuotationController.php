@@ -11,17 +11,20 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Codedge\Fpdf\Fpdf\Fpdf;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class QuotationController extends Controller
 {
     protected $fpdf;
+    protected $dedicatedConnection;
+
     public function __construct()
     {
         date_default_timezone_set('Asia/Jakarta');
         $this->fpdf = new Fpdf;
+        $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
     }
     public function index()
     {
@@ -49,7 +52,7 @@ class QuotationController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
-        $LastLine = DB::table('T_QUOHEAD')
+        $LastLine = DB::connection($this->dedicatedConnection)->table('T_QUOHEAD')
             ->whereMonth('created_at', '=', date('m'))
             ->whereYear('created_at', '=', date('Y'))
             ->max('TQUO_LINE');
@@ -72,7 +75,7 @@ class QuotationController extends Controller
             'TQUO_ISSUDT' => $request->TQUO_ISSUDT,
             'created_by' => Auth::user()->nick_name,
         ];
-        T_QUOHEAD::create($quotationHeader);
+        T_QUOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
 
         # data quotation detail item
         $validator = Validator::make($request->all(), [
@@ -108,7 +111,7 @@ class QuotationController extends Controller
             ];
         }
         if (!empty($quotationDetail)) {
-            T_QUODETA::insert($quotationDetail);
+            T_QUODETA::on($this->dedicatedConnection)->insert($quotationDetail);
         }
 
         # data quotation condition
@@ -131,7 +134,7 @@ class QuotationController extends Controller
             ];
         }
         if (!empty($quotationCondition)) {
-            T_QUOCOND::insert($quotationCondition);
+            T_QUOCOND::on($this->dedicatedConnection)->insert($quotationCondition);
         }
         return [
             'msg' => 'OK', 'doc' => $newQuotationCode, '$RSLast' => $LastLine, 'quotationHeader' => $quotationHeader, 'quotationDetail' => $quotationDetail
@@ -147,7 +150,7 @@ class QuotationController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
         ];
         if (!empty($quotationCondition)) {
-            T_QUOCOND::insert($quotationCondition);
+            T_QUOCOND::on($this->dedicatedConnection)->insert($quotationCondition);
         }
 
         return [
@@ -159,7 +162,7 @@ class QuotationController extends Controller
     public function update(Request $request)
     {
         # ubah data header
-        $affectedRow = T_QUOHEAD::where('TQUO_QUOCD', base64_decode($request->id))
+        $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
             ->update([
                 'TQUO_CUSCD' => $request->TQUO_CUSCD, 'TQUO_ATTN' => $request->TQUO_ATTN, 'TQUO_SBJCT' => $request->TQUO_SBJCT, 'TQUO_ISSUDT' => $request->TQUO_ISSUDT
             ]);
@@ -173,14 +176,14 @@ class QuotationController extends Controller
             'MCUS_CUSNM',
         ];
 
-        $RS = $request->approval == '1' ? T_QUOHEAD::select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
+        $RS = $request->approval == '1' ? T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->whereNotNull("TQUO_APPRVDT")
             ->whereNull("TSLO_QUOCD")
             ->get()
-            : T_QUOHEAD::select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
+            : T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
@@ -189,11 +192,11 @@ class QuotationController extends Controller
 
     function loadById(Request $request)
     {
-        $RS = T_QUODETA::select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB"])
+        $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB"])
             ->leftJoin("M_ITM", "TQUODETA_ITMCD", "=", "MITM_ITMCD")
             ->where('TQUODETA_QUOCD', base64_decode($request->id))
             ->whereNull('deleted_at')->get();
-        $RS1 = T_QUOCOND::select(["id", "TQUOCOND_CONDI"])
+        $RS1 = T_QUOCOND::on($this->dedicatedConnection)->select(["id", "TQUOCOND_CONDI"])
             ->where('TQUOCOND_QUOCD', base64_decode($request->id))
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS, 'dataCondition' => $RS1];
@@ -201,7 +204,7 @@ class QuotationController extends Controller
 
     function deleteConditionById(Request $request)
     {
-        $affectedRow = T_QUOCOND::where('id', $request->id)
+        $affectedRow = T_QUOCOND::on($this->dedicatedConnection)->where('id', $request->id)
             ->update([
                 'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
             ]);
@@ -210,7 +213,7 @@ class QuotationController extends Controller
 
     function deleteItemById(Request $request)
     {
-        $affectedRow = T_QUODETA::where('id', $request->id)
+        $affectedRow = T_QUODETA::on($this->dedicatedConnection)->where('id', $request->id)
             ->update([
                 'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
             ]);
@@ -222,11 +225,11 @@ class QuotationController extends Controller
         $dataTobeApproved = [];
         $dataApproved = [];
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
-            $RSDetail = DB::table('T_QUODETA')
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
                 ->whereNull('deleted_at');
-            $dataTobeApproved = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN"))
+            $dataTobeApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
@@ -236,11 +239,11 @@ class QuotationController extends Controller
                 ->groupBy('TQUO_QUOCD')->get();
         }
         if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
-            $RSDetail = DB::table('T_QUODETA')
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
                 ->whereNull('deleted_at');
-            $dataApproved = T_QUOHEAD::select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT"))
+            $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
@@ -261,7 +264,7 @@ class QuotationController extends Controller
     public function toPDF(Request $request)
     {
         $doc = base64_decode($request->id);
-        $RSHeader = T_QUOHEAD::select('MCUS_CUSNM', 'TQUO_ATTN', 'MCUS_TELNO', 'TQUO_SBJCT', 'TQUO_ISSUDT', 'TQUO_APPRVDT')
+        $RSHeader = T_QUOHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM', 'TQUO_ATTN', 'MCUS_TELNO', 'TQUO_SBJCT', 'TQUO_ISSUDT', 'TQUO_APPRVDT')
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where("TQUO_QUOCD", $doc)
             ->get()->toArray();
@@ -280,13 +283,13 @@ class QuotationController extends Controller
             $TQUO_APPRVDT = $r['TQUO_APPRVDT'];
         }
 
-        $RSDetail = T_QUODETA::select('TQUODETA_ITMCD', 'MITM_BRAND', 'MITM_ITMNM', 'MITM_MODEL', 'TQUODETA_USAGE', 'TQUODETA_PRC', 'TQUODETA_OPRPRC', 'TQUODETA_MOBDEMOB')
+        $RSDetail = T_QUODETA::on($this->dedicatedConnection)->select('TQUODETA_ITMCD', 'MITM_BRAND', 'MITM_ITMNM', 'MITM_MODEL', 'TQUODETA_USAGE', 'TQUODETA_PRC', 'TQUODETA_OPRPRC', 'TQUODETA_MOBDEMOB')
             ->leftJoin("M_ITM", "TQUODETA_ITMCD", "=", "MITM_ITMCD")
             ->whereNull("deleted_at")
             ->where("TQUODETA_QUOCD", $doc)
             ->get()->toArray();
 
-        $RSCondition = T_QUOCOND::select('TQUOCOND_CONDI')
+        $RSCondition = T_QUOCOND::on($this->dedicatedConnection)->select('TQUOCOND_CONDI')
             ->where('TQUOCOND_QUOCD', $doc)
             ->whereNull("deleted_at")
             ->get()->toArray();
@@ -420,7 +423,7 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
     function approve(Request $request)
     {
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
-            $affectedRow = T_QUOHEAD::where('TQUO_QUOCD', base64_decode($request->id))
+            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
                 ->update([
                     'TQUO_APPRVBY' => Auth::user()->nick_name, 'TQUO_APPRVDT' => date('Y-m-d H:i:s')
                 ]);
@@ -434,7 +437,7 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
     function reject(Request $request)
     {
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
-            $affectedRow = T_QUOHEAD::where('TQUO_QUOCD', base64_decode($request->id))
+            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
                 ->update([
                     'TQUO_REJCTBY' => Auth::user()->nick_name, 'TQUO_REJCTDT' => date('Y-m-d H:i:s')
                 ]);
@@ -452,7 +455,7 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
 
     function report(Request $request)
     {
-        $RS = T_QUOHEAD::select(DB::raw("T_QUOHEAD.*,MCUS_CUSNM,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
+        $RS = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_QUOHEAD.*,MCUS_CUSNM,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
             ->leftJoin('T_QUODETA', 'TQUO_QUOCD', '=', 'TQUODETA_QUOCD')
             ->leftJoin('M_ITM', 'TQUODETA_ITMCD', '=', 'MITM_ITMCD')
             ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
@@ -476,7 +479,7 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
 
             $sheet = $spreadsheet->createSheet();
             $sheet->setTitle('CONDITION');
-            $RS = T_QUOHEAD::select(DB::raw("T_QUOCOND.*"))
+            $RS = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_QUOCOND.*"))
                 ->leftJoin('T_QUOCOND', 'TQUO_QUOCD', '=', 'TQUOCOND_QUOCD')
                 ->where("TQUO_ISSUDT", ">=", $request->dateFrom)
                 ->where("TQUO_ISSUDT", "<=", $request->dateTo)
@@ -499,6 +502,6 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
 
     function getAllCondition()
     {
-        return ['data' => M_Condition::select('MCONDITION_DESCRIPTION')->orderBy('MCONDITION_DESCRIPTION')->get()];
+        return ['data' => M_Condition::on($this->dedicatedConnection)->select('MCONDITION_DESCRIPTION')->orderBy('MCONDITION_DESCRIPTION')->get()];
     }
 }
