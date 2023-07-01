@@ -86,9 +86,4 @@ class UserController extends Controller
         $RS = User::select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
         return ['data' => $RS];
     }
-
-    function tes()
-    {
-        return ['data' => Auth::user()->nick_name];
-    }
 }
