@@ -623,17 +623,19 @@
             orderIssueDate.focus()
             return
         }
-        if (orderPONumber.value.trim().length <= 1) {
-            alertify.message('PO Number is required')
-            orderPONumber.focus()
-            return
-        }
+
         if (orderPlanDeliveryDate.value.trim().length <= 1) {
             alertify.message('Plan Delivery date is required')
             orderPlanDeliveryDate.focus()
             return
         }
         if (orderCode.value.length === 0) {
+            if (orderPONumber.value.trim().length <= 1) {                
+                if(!confirm('Leave PO from Customer blank ?')){
+                    orderPONumber.focus()
+                    return
+                }
+            }
             const data = {
                 TSLO_CUSCD: orderCustomerCode.value.trim(),
                 TSLO_ATTN: orderAttn.value.trim(),
@@ -666,6 +668,7 @@
                         })
                         pthis.disabled = false
                         document.getElementById('div-alert').innerHTML = ''
+                        orderPONumber.value = response.newPOCode
                     },
                     error: function(xhr, xopt, xthrow) {
                         const respon = Object.keys(xhr.responseJSON)

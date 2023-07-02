@@ -32,8 +32,7 @@ class ReceiveOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'TSLO_CUSCD' => 'required',
             'TSLO_ATTN' => 'required',
-            'TSLO_QUOCD' => 'required',
-            'TSLO_POCD' => 'required',
+            'TSLO_QUOCD' => 'required',            
             'TSLO_ISSUDT' => 'required|date',
             'TSLO_PLAN_DLVDT' => 'required',
         ]);
@@ -47,8 +46,10 @@ class ReceiveOrderController extends Controller
             ->whereYear('created_at', '=', date('Y'))
             ->max('TSLO_LINE');
 
+
         $quotationHeader = [];
         $newDocumentCode = '';
+        $newPOCode = '';
         if (!$LastLine) {
             $LastLine = 1;
             $newDocumentCode = '001/PT/SLO/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
@@ -56,13 +57,33 @@ class ReceiveOrderController extends Controller
             $LastLine++;
             $newDocumentCode = substr('00' . $LastLine, -3) . '/PT/SLO/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         }
+
+
+
+        if ($request->TSLO_POCD == '') {
+            $POLastLine = DB::connection($this->dedicatedConnection)->table('T_SLOHEAD')
+                ->whereMonth('created_at', '=', date('m'))
+                ->whereYear('created_at', '=', date('Y'))
+                ->max('TSLO_POLINE');
+            if (!$POLastLine) {
+                $POLastLine = 1;
+                $newPOCode = 'A-' . date('Ym') . '-1';
+            } else {
+                $POLastLine++;
+                $newPOCode = 'A-' . date('Ym') . '-' . $POLastLine;
+            }
+        } else {
+            $POLastLine = 0;
+            $newPOCode = $request->TSLO_POCD;
+        }
         $quotationHeader = [
             'TSLO_SLOCD' => $newDocumentCode,
             'TSLO_CUSCD' => $request->TSLO_CUSCD,
             'TSLO_LINE' => $LastLine,
             'TSLO_ATTN' => $request->TSLO_ATTN,
             'TSLO_QUOCD' => $request->TSLO_QUOCD,
-            'TSLO_POCD' => $request->TSLO_POCD,
+            'TSLO_POCD' => $newPOCode,
+            'TSLO_POLINE' => $POLastLine,
             'TSLO_ISSUDT' => $request->TSLO_ISSUDT,
             'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
             'created_by' => Auth::user()->nick_name,
@@ -107,7 +128,11 @@ class ReceiveOrderController extends Controller
         }
 
         return [
-            'msg' => 'OK', 'doc' => $newDocumentCode, '$RSLast' => $LastLine, 'quotationHeader' => $quotationHeader, 'quotationDetail' => $quotationDetail
+            'msg' => 'OK', 'doc' => $newDocumentCode
+            , '$RSLast' => $LastLine
+            , 'quotationHeader' => $quotationHeader
+            , 'quotationDetail' => $quotationDetail
+            , 'newPOCode' => $newPOCode
         ];
     }
 
