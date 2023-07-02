@@ -7,15 +7,14 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReceiveOrderController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Cookie;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,8 +37,14 @@ Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('acti
 Route::get('home', [HomeController::class, 'index'])->name('home')->middleware('auth');
 Route::get('menu', [AccessRulesController::class, 'getAccessRolesByRoleName'])->middleware('auth');
 
-# Terkait tampilan user registration
+# Terkait User
 Route::get('user/registration', [UserController::class, 'index'])->middleware('auth');
+Route::get('user', [UserController::class, 'search'])->middleware('auth');
+Route::put('user/{id}', [UserController::class, 'update'])->middleware('auth');
+Route::post('user', [UserController::class, 'simpan'])->middleware('auth');
+Route::get('user/form/management', [UserController::class, 'formManagement'])->middleware('auth');
+Route::get('user/management', [UserController::class, 'getPerCompanyGroup'])->middleware('auth');
+Route::put('user/reset-password/{id}', [UserController::class, 'resetPassword'])->middleware('auth');
 
 # Terkait seting akses user
 Route::get('/setting/access', [AccessRulesController::class, 'index'])->middleware('auth');
@@ -115,7 +120,7 @@ Route::get('report-form/quotation', [QuotationController::class, 'formReport'])-
 Route::get('report/quotation', [QuotationController::class, 'report'])->middleware('auth');
 Route::get('report-form/received-order', [ReceiveOrderController::class, 'formReport'])->middleware('auth');
 Route::get('report/received-order', [ReceiveOrderController::class, 'report'])->middleware('auth');
-
+Route::get('report-form/maintenance-schedule', [MaintenanceController::class, 'formReport'])->middleware('auth');
 
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');
@@ -129,9 +134,7 @@ Route::get('company/access/{id}', [CompanyGroupController::class, 'loadByNickNam
 Route::post('company/access', [CompanyGroupController::class, 'saveAccess'])->middleware('auth');
 Route::delete('company/access/{id}', [CompanyGroupController::class, 'deleteAccess'])->middleware('auth');
 
-# Terkait User Master
-Route::get('user', [UserController::class, 'search'])->middleware('auth');
-Route::post('user', [UserController::class, 'simpan'])->middleware('auth');
+
 #Terkait config
 Route::get('ACL/database', function () {
     $ConnectionList = [];

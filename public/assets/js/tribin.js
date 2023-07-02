@@ -31,3 +31,32 @@ function tribinClearTextBoxByClassName(ClassName) {
         textBoxInputList[i].value = ''
     }
 }
+
+function tribinPWValidator(pvalue) {
+    let numberList = [...Array(10).keys()]
+    let specialCharList = ['~','!','@','#','$','%','^','&','*','(',')','_','+',':','"','<','>','?','{','}','|']
+    if(pvalue.trim().length<8){
+        return {cd: '0', msg : 'At least 8 characters'}
+    }
+    let isFound = false
+    for(let i=0; i<numberList.length; i++) {
+        if(pvalue.includes(numberList[i])) {
+            isFound = true
+            break
+        }
+    }
+    if(!isFound) {
+        return {cd: '0', msg : 'At least 1 numerical character'}
+    }
+    isFound = false
+    for(let i=0; i<specialCharList.length; i++) {
+        if(pvalue.includes(specialCharList[i])) {
+            isFound = true
+            break
+        }
+    }
+    if(!isFound) {
+        return {cd: '0', msg : 'At least 1 special character'}
+    }
+    return  {cd: '1', msg : 'OK'}
+}

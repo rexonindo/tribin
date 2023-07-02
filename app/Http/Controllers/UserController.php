@@ -11,14 +11,24 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    private $RSRoles = [];
+
+    public function __construct()
+    {
+        $this->RSRoles = Role::select('*')->get();
+    }
+
     public function index()
     {
-        $RSRoles = Role::select('*')->get();
-        return view('user_registration', ['RSRoles' => $RSRoles]);
+        return view('user_registration', ['RSRoles' => $this->RSRoles]);
+    }
+
+    function formManagement()
+    {
+        return view('user_management', ['RSRoles' => $this->RSRoles]);
     }
 
     public function simpan(Request $request)
@@ -83,7 +93,42 @@ class UserController extends Controller
             'email',
             'name',
         ];
-        $RS = User::select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $RS = User::select('*')
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
         return ['data' => $RS];
+    }
+
+    function getPerCompanyGroup()
+    {
+        $RS = User::select('users.*', 'description')
+            ->leftJoin('roles', 'role', '=', 'roles.name')
+            ->leftJoin('COMPANY_GROUP_ACCESSES', 'users.nick_name', '=', 'COMPANY_GROUP_ACCESSES.nick_name')
+            ->where('connection', Crypt::decryptString($_COOKIE['CGID']))
+            ->whereNull('deleted_at')
+            ->get();
+        return ['data' => $RS];
+    }
+
+    function update(Request $request)
+    {
+        if (User::where('id', '!=', $request->id)
+            ->where('email', '=', $request->email)->count()
+        ) {
+            return response()->json(['message' => 'email already used'], 406);
+        }
+        $affectedRow = User::where('id', $request->id)
+            ->update([
+                'name' => $request->name, 'email' => $request->email, 'active' => $request->active, 'role' => $request->role
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
+
+    function resetPassword(Request $request)
+    {
+        $affectedRow = User::where('id', $request->id)
+            ->update([
+                'password' => Hash::make($request->newPassword),
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 }
