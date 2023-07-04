@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('menus', function (Blueprint $table) {
             $table->string('code',15)->primary();
             $table->string('name');
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->string('parent_code');
             $table->string('url')->nullable();
-            $table->string('icon');
+            $table->string('icon')->nullable();
         });
     }
 
