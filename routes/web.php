@@ -9,6 +9,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReceiveOrderController;
 use App\Http\Controllers\SupplierController;
@@ -147,4 +148,5 @@ Route::get('ACL/database', function () {
     return ['data' => $ConnectionList];
 });
 
-Route::get('tes', [UserController::class, 'tes'])->middleware('auth');
+# Terkait Purchase Request Transaction
+Route::get('purchase-request/form', [PurchaseController::class, 'index'])->middleware('auth');
