@@ -701,7 +701,7 @@
         }
         if (quotationSubject.value.length === 0) {
             alertify.message('Subject is required')
-            quotationIssueDate.focus()
+            quotationSubject.focus()
             return
         }
         if (quotationCode.value.length === 0) {
