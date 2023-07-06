@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('T_PCHREQHEAD', function (Blueprint $table) {
             $table->string('TPCHREQ_PCHCD', 25)->primary();
             $table->string('TPCHREQ_PURPOSE');
+            $table->integer('TPCHREQ_LINE');
             $table->string('TPCHREQ_REMARK');
             $table->date('TPCHREQ_ISSUDT');
             $table->string('TPCHREQ_APPRVBY', 16)->nullable();
