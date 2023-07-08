@@ -9,5 +9,5 @@ class T_PCHREQHEAD extends Model
 {
     use HasFactory;
     protected $table = 'T_PCHREQHEAD';
-    protected $fillable = ['PCHREQ_PCHCD', 'PCHREQ_PURPOSE', 'PCHREQ_REMARK', 'PCHREQ_ISSUDT', 'PCHREQ_APPRVBY', 'PCHREQ_APPRVDT', 'created_by', 'updated_by'];
+    protected $fillable = ['TPCHREQ_PCHCD', 'TPCHREQ_PURPOSE', 'TPCHREQ_LINE', 'TPCHREQ_REMARK', 'TPCHREQ_ISSUDT', 'TPCHREQ_APPRVBY', 'TPCHREQ_APPRVDT', 'created_by', 'updated_by'];
 }

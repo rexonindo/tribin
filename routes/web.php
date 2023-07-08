@@ -125,6 +125,7 @@ Route::get('report-form/maintenance-schedule', [MaintenanceController::class, 'f
 
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');
+Route::get('PDF/purchase-request/{id}', [PurchaseController::class, 'toPDF'])->middleware('auth');
 
 # Terkait Company Group
 Route::get('company/form', [CompanyGroupController::class, 'index'])->middleware('auth');
@@ -150,3 +151,8 @@ Route::get('ACL/database', function () {
 
 # Terkait Purchase Request Transaction
 Route::get('purchase-request/form', [PurchaseController::class, 'index'])->middleware('auth');
+Route::post('purchase-request', [PurchaseController::class, 'save'])->middleware('auth');
+Route::get('purchase-request', [PurchaseController::class, 'search'])->middleware('auth');
+Route::put('purchase-request/{id}', [PurchaseController::class, 'update'])->middleware('auth');
+Route::get('purchase-request/{id}', [PurchaseController::class, 'loadById'])->middleware('auth');
+Route::delete('purchase-request/items/{id}', [PurchaseController::class, 'deleteItemById'])->middleware('auth');

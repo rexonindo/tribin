@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('TPCHREQ_PCHCD', 25)->primary();
             $table->string('TPCHREQ_PURPOSE');
             $table->integer('TPCHREQ_LINE');
-            $table->string('TPCHREQ_REMARK');
+            $table->string('TPCHREQ_REMARK')->nullable();
             $table->date('TPCHREQ_ISSUDT');
             $table->string('TPCHREQ_APPRVBY', 16)->nullable();
             $table->dateTime('TPCHREQ_APPRVDT')->nullable();
