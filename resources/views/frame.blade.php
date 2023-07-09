@@ -153,6 +153,7 @@
                         <h6 class="dropdown-header">Purchase Request</h6>
                     </li>
                     <li><a class="dropdown-item" href="#" onclick="liApprovalPurchaseRequestOnclick(event)">Purchase Request Approval <span class="badge text-bg-info" id="labelNotifApprovalPurchaseRequest"></span></a></li>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovedPurchaseRequestOnclick(event)">Purchase Request Recent Updates <span class="badge text-bg-info" id="labelNotifApprovedPurchaseRequest"></span></a></li>
                 </ul>
             </div>
         </div>
@@ -313,10 +314,12 @@
                     
                     const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
+                    
                     labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
                     labelNotifApprovedQuotation.innerHTML = totalNotifApprovedQT === 0 ? '' : totalNotifApprovedQT
 
                     labelNotifApprovalPurchaseRequest.innerHTML = totalNotifQTPurchaseRequest === 0 ? '' : totalNotifQTPurchaseRequest
+                    labelNotifApprovedPurchaseRequest.innerText = totalNotifApprovedQTPurchaseRequest === 0 ? '' : totalNotifApprovedQTPurchaseRequest                  
                 }
             });
         }
@@ -466,6 +469,20 @@
                 $.ajax({
                     type: "GET",
                     url: "/approval/form/purchase-request",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
+        }
+
+        function liApprovedPurchaseRequestOnclick(e){
+            e.preventDefault()
+            if (labelNotifApprovedPurchaseRequest.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/approved/form/purchase-request",
                     success: function(response) {
                         setInnerHTML(ContentContainer, response)
                     }

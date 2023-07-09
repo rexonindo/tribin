@@ -100,7 +100,7 @@ class HomeController extends Controller
             $dataPurchaseRequestTobeUpproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
-                })                
+                })
                 ->whereNull("TPCHREQ_APPRVDT")
                 ->whereNull("TPCHREQ_REJCTDT")
                 ->groupBy('TPCHREQ_PCHCD')->get();
@@ -118,6 +118,18 @@ class HomeController extends Controller
                 ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
                 ->whereNull("TSLO_QUOCD")
                 ->groupBy('TQUO_QUOCD')->get();
+        }
+
+        if (in_array(Auth::user()->role, ['purchasing'])) {
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
+                ->groupBy("TPCHREQDETA_PCHCD")
+                ->whereNull('deleted_at');
+            $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
+                })                
+                ->groupBy('TPCHREQ_PCHCD')->get();
         }
 
         return [

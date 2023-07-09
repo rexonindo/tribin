@@ -101,10 +101,13 @@ Route::get('approval/form/quotation', [QuotationController::class, 'formApproval
 Route::get('approval/form/purchase-request', [PurchaseController::class, 'formApproval'])->middleware('auth');
 
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
+Route::put('approve/purchase-request/{id}', [PurchaseController::class, 'approve'])->middleware('auth');
 Route::get('approved/form/quotation', [QuotationController::class, 'formApproved'])->middleware('auth');
+Route::get('approved/form/purchase-request', [PurchaseController::class, 'formStatus'])->middleware('auth');
 
 #Terkait Rejection
 Route::put('reject/quotations/{id}', [QuotationController::class, 'reject'])->middleware('auth');
+Route::put('reject/purchase-request/{id}', [PurchaseController::class, 'reject'])->middleware('auth');
 
 #Terkait Receive Order
 Route::get('receive-order/form', [ReceiveOrderController::class, 'index'])->middleware('auth');

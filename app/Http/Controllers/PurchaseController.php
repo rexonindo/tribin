@@ -250,8 +250,52 @@ class PurchaseController extends Controller
                 ->whereNull("TPCHREQ_REJCTDT")
                 ->groupBy('TPCHREQ_PCHCD')->get();
         }
+        if (in_array(Auth::user()->role, ['purchasing'])) {
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
+                ->groupBy("TPCHREQDETA_PCHCD")
+                ->whereNull('deleted_at');
+            $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
+                })                
+                ->groupBy('TPCHREQ_PCHCD')->get();
+        }
         return [
             'data' => $dataPurchaseRequestTobeUpproved, 'dataApproved' => $dataPurchaseRequestApproved
         ];
+    }
+
+    function approve(Request $request)
+    {
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
+                ->update([
+                    'TPCHREQ_APPRVBY' => Auth::user()->nick_name, 'TPCHREQ_APPRVDT' => date('Y-m-d H:i:s')
+                ]);
+            $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+            return ['message' => $message];
+        } else {
+            return response()->json(['message' => 'forbidden'], 403);
+        }
+    }
+
+    function reject(Request $request)
+    {
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
+                ->update([
+                    'TPCHREQ_REJCTBY' => Auth::user()->nick_name, 'TPCHREQ_REJCTDT' => date('Y-m-d H:i:s')
+                ]);
+            $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+            return ['message' => $message];
+        } else {
+            return response()->json(['message' => 'forbidden'], 403);
+        }
+    }
+
+    function formStatus()
+    {
+        return view('transaction.purchase_request_status');
     }
 }
