@@ -144,8 +144,15 @@
                     <span class="badge text-bg-info" id="labelNotifAll"></span>
                 </a>
                 <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
+                    <li>
+                        <h6 class="dropdown-header">Quotation</h6>
+                    </li>
                     <li><a class="dropdown-item" href="#" onclick="liApprovalOnclick(event)">Quotation Approval <span class="badge text-bg-info" id="labelNotifApprovalQuotation"></span></a></li>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovedQuotationOnclick(event)">Recent Quotation Updates <span class="badge text-bg-info" id="labelNotifApprovedQuotation"></span></a></li>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovedQuotationOnclick(event)">Quotation Recent Updates <span class="badge text-bg-info" id="labelNotifApprovedQuotation"></span></a></li>
+                    <li>
+                        <h6 class="dropdown-header">Purchase Request</h6>
+                    </li>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovalPurchaseRequestOnclick(event)">Purchase Request Approval <span class="badge text-bg-info" id="labelNotifApprovalPurchaseRequest"></span></a></li>
                 </ul>
             </div>
         </div>
@@ -293,15 +300,23 @@
         function showNotificationToApprove() {
             $.ajax({
                 type: "GET",
-                url: "/approval/quotation",
+                url: "/approval/notifications",
                 dataType: "json",
                 success: function(response) {
+                    // Quotations
                     const totalNotifQT = response.data.length
                     const totalNotifApprovedQT = response.dataApproved.length
-                    const totalNotif = totalNotifQT + totalNotifApprovedQT
+                    
+                    // Purchase Request
+                    const totalNotifQTPurchaseRequest = response.dataPurchaseRequest.length
+                    const totalNotifApprovedQTPurchaseRequest = response.dataPurchaseRequestApproved.length
+                    
+                    const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
                     labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
                     labelNotifApprovedQuotation.innerHTML = totalNotifApprovedQT === 0 ? '' : totalNotifApprovedQT
+
+                    labelNotifApprovalPurchaseRequest.innerHTML = totalNotifQTPurchaseRequest === 0 ? '' : totalNotifQTPurchaseRequest
                 }
             });
         }
@@ -442,6 +457,20 @@
             });
             $('#companyModal').modal('hide')
             location.href = '/home'
+        }
+
+        function liApprovalPurchaseRequestOnclick(e){
+            e.preventDefault()
+            if (labelNotifApprovalPurchaseRequest.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/approval/form/purchase-request",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
         }
     </script>
 </body>

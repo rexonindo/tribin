@@ -225,6 +225,7 @@ class QuotationController extends Controller
         $dataTobeApproved = [];
         $dataApproved = [];
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
@@ -253,7 +254,9 @@ class QuotationController extends Controller
                 ->groupBy('TQUO_QUOCD')->get();
         }
 
-        return ['data' => $dataTobeApproved, 'dataApproved' => $dataApproved];
+        return [
+            'data' => $dataTobeApproved, 'dataApproved' => $dataApproved,
+        ];
     }
 
     public function formApproval()

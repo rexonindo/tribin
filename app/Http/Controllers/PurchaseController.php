@@ -187,7 +187,7 @@ class PurchaseController extends Controller
         $this->fpdf->SetFont('Arial', 'I', 11);
         $this->fpdf->SetXY(7, 10);
         $this->fpdf->Cell(10, 8, 'Untuk Keperluan : ' . $TPCHREQ_PURPOSE, 0, 0);
-        
+
         $this->fpdf->SetXY(7, 15);
         $this->fpdf->SetFont('Arial', 'B', 11);
         $this->fpdf->Cell(10, 8, 'Tanggal : ' . $TPCHREQ_ISSUDT, 0, 0);
@@ -214,11 +214,11 @@ class PurchaseController extends Controller
         }
 
         $this->fpdf->SetFont('Arial', '', 10);
-        $this->fpdf->SetXY($this->fpdf->GetPageWidth()-70, $this->fpdf->GetPageHeight()-35);
+        $this->fpdf->SetXY($this->fpdf->GetPageWidth() - 70, $this->fpdf->GetPageHeight() - 35);
         $this->fpdf->Cell(20, 5, 'Palembang', 0, 0, 'L');
-        $this->fpdf->SetXY(6, $this->fpdf->GetPageHeight()-30);
+        $this->fpdf->SetXY(6, $this->fpdf->GetPageHeight() - 30);
         $this->fpdf->Cell(20, 5, 'Disetujui', 0, 0, 'L');
-        $this->fpdf->SetXY($this->fpdf->GetPageWidth()-70, $this->fpdf->GetPageHeight()-30);
+        $this->fpdf->SetXY($this->fpdf->GetPageWidth() - 70, $this->fpdf->GetPageHeight() - 30);
         $this->fpdf->Cell(20, 5, 'Hormat Kami', 0, 0, 'L');
 
 
@@ -226,5 +226,32 @@ class PurchaseController extends Controller
 
 
         exit;
+    }
+
+    public function formApproval()
+    {
+        return view('transaction.purchase_request_approval');
+    }
+
+    function notifications()
+    {
+        $dataPurchaseRequestTobeUpproved = [];
+        $dataPurchaseRequestApproved = [];
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
+                ->groupBy("TPCHREQDETA_PCHCD")
+                ->whereNull('deleted_at');
+            $dataPurchaseRequestTobeUpproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
+                })
+                ->whereNull("TPCHREQ_APPRVDT")
+                ->whereNull("TPCHREQ_REJCTDT")
+                ->groupBy('TPCHREQ_PCHCD')->get();
+        }
+        return [
+            'data' => $dataPurchaseRequestTobeUpproved, 'dataApproved' => $dataPurchaseRequestApproved
+        ];
     }
 }
