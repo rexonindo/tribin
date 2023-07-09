@@ -19,6 +19,8 @@ return new class extends Migration
             $table->date('TPCHREQ_ISSUDT');
             $table->string('TPCHREQ_APPRVBY', 16)->nullable();
             $table->dateTime('TPCHREQ_APPRVDT')->nullable();
+            $table->string('TPCHREQ_REJCTBY', 16)->nullable();
+            $table->dateTime('TPCHREQ_REJCTDT')->nullable();
             $table->string('created_by', 16);
             $table->string('updated_by', 16)->nullable();
             $table->timestamps();
