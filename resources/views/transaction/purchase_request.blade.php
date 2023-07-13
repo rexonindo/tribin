@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Purpose</span>
                     <input type="text" class="form-control" id="purpose" list="purposeList">
@@ -34,6 +34,16 @@
                         <option value="Perawatan Mesin">
                         <option value="Perlengkapan Kantor">
                     </datalist>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Type</span>
+                    <select class="form-select" id="purchaseRequestType">
+                        @foreach ($types as $type)
+                        <option value="{{$type->MPCHREQTYPE_ID}}">{{$type->MPCHREQTYPE_NAME}}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </div>
@@ -140,6 +150,7 @@
                                             <th>Document Number</th>
                                             <th>Issue Date</th>
                                             <th>Purpose</th>
+                                            <th>Type</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -204,6 +215,11 @@
     </div>
 </div>
 <script>
+    function btnNewOnclick() {
+        tribinClearTextBox()
+        purchaseRequestTable.getElementsByTagName('tbody')[0].innerHTML = ``
+    }
+
     $("#purchaseRequestIssueDate").datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
@@ -391,6 +407,7 @@
         if (purchaseRequestCode.value.length === 0) {
             const data = {
                 TPCHREQ_PURPOSE: purpose.value.trim(),
+                TPCHREQ_TYPE: purchaseRequestType.value.trim(),
                 TPCHREQ_ISSUDT: purchaseRequestIssueDate.value.trim(),
                 TPCHREQDETA_ITMCD: itemCode,
                 TPCHREQDETA_ITMQT: itemQty,
@@ -437,6 +454,7 @@
             const data = {
                 TPCHREQ_PURPOSE: purpose.value.trim(),
                 TPCHREQ_ISSUDT: purchaseRequestIssueDate.value.trim(),
+                TPCHREQ_TYPE: purchaseRequestType.value.trim(),
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -535,7 +553,7 @@
                 searchBy: purchaseRequestSearchBy.value,
                 searchValue: e.target.value,
             }
-            purchaseRequestSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="3">Please wait</td></tr>`
+            purchaseRequestSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4">Please wait</td></tr>`
             $.ajax({
                 type: "GET",
                 url: "purchase-request",
@@ -559,6 +577,8 @@
                             $('#purchaseRequestModal').modal('hide')
                             purchaseRequestCode.value = arrayItem['TPCHREQ_PCHCD']
                             purchaseRequestIssueDate.value = arrayItem['TPCHREQ_ISSUDT']
+                            purpose.value = arrayItem['TPCHREQ_PURPOSE']
+                            purchaseRequestType.value = arrayItem['TPCHREQ_TYPE']
                             loadPurchaseRequestDetail({
                                 doc: arrayItem['TPCHREQ_PCHCD']
                             })
@@ -567,6 +587,8 @@
                         newcell.innerHTML = arrayItem['TPCHREQ_ISSUDT']
                         newcell = newrow.insertCell(2)
                         newcell.innerHTML = arrayItem['TPCHREQ_PURPOSE']
+                        newcell = newrow.insertCell(3)
+                        newcell.innerHTML = arrayItem['MPCHREQTYPE_NAME']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -574,7 +596,7 @@
                 error: function(xhr, xopt, xthrow) {
                     alertify.warning(xthrow);
                     e.target.disabled = false
-                    purchaseRequestSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="3"></td></tr>`
+                    purchaseRequestSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4"></td></tr>`
                 }
             });
         }

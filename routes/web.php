@@ -11,6 +11,7 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\ReceiveController;
 use App\Http\Controllers\ReceiveOrderController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -162,3 +163,9 @@ Route::get('purchase-request', [PurchaseController::class, 'search'])->middlewar
 Route::put('purchase-request/{id}', [PurchaseController::class, 'update'])->middleware('auth');
 Route::get('purchase-request/{id}', [PurchaseController::class, 'loadById'])->middleware('auth');
 Route::delete('purchase-request/items/{id}', [PurchaseController::class, 'deleteItemById'])->middleware('auth');
+
+# Terkait Purchase Order Transaction
+Route::get('purchase-order/form', [PurchaseController::class, 'formOrder'])->middleware('auth');
+
+# Terkait Receive
+Route::get('receive/form', [ReceiveController::class, 'index'])->middleware('auth');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\M_PCHREQTYPE;
 use App\Models\T_PCHREQDETA;
 use App\Models\T_PCHREQHEAD;
 use Illuminate\Http\Request;
@@ -18,7 +19,12 @@ class PurchaseController extends Controller
 
     function index()
     {
-        return view('transaction.purchase_request');
+        return view('transaction.purchase_request', ['types' => M_PCHREQTYPE::on($this->dedicatedConnection)->select(["MPCHREQTYPE_ID", "MPCHREQTYPE_NAME"])->get()]);
+    }
+
+    function formOrder()
+    {
+        return view('transaction.purchase_order');
     }
 
     public function __construct()
@@ -61,6 +67,7 @@ class PurchaseController extends Controller
             $quotationHeader = [
                 'TPCHREQ_PCHCD' => $newQuotationCode,
                 'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE,
+                'TPCHREQ_TYPE' => $request->TPCHREQ_TYPE,
                 'TPCHREQ_LINE' => $LastLine,
                 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT,
                 'created_by' => Auth::user()->nick_name,
@@ -122,7 +129,7 @@ class PurchaseController extends Controller
         # ubah data header
         $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
             ->update([
-                'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE, 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT
+                'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE, 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT, 'TPCHREQ_TYPE' => $request->TPCHREQ_TYPE
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
@@ -134,7 +141,8 @@ class PurchaseController extends Controller
             'TPCHREQ_PURPOSE',
         ];
 
-        $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT"])
+        $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME"])
+            ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
         return ['data' => $RS];
@@ -258,7 +266,7 @@ class PurchaseController extends Controller
             $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
-                })                
+                })
                 ->groupBy('TPCHREQ_PCHCD')->get();
         }
         return [
