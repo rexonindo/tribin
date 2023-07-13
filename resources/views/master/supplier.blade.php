@@ -50,10 +50,21 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-3">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Telephone</span>
                 <input type="text" id="supplierTelephone" class="form-control" placeholder="021..." maxlength="20">
+            </div>
+        </div>
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text">Company</span>
+                <select class="form-select" id="companyGroup">
+                    <option value="-" selected>-</option>
+                    @foreach ($companies as $r)
+                    <option value="{{$r->connection}}">{{$r->name}}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
     </div>
@@ -142,6 +153,7 @@
             MSUP_TAXREG: supplierTax.value.trim(),
             MSUP_ADDR1: supplierAddress.value.trim(),
             MSUP_TELNO: supplierTelephone.value.trim(),
+            MSUP_CGCON: companyGroup.value.trim(),
             _token: '{{ csrf_token() }}',
         }
         if (supplierInputMode.value === '0') {
@@ -184,6 +196,7 @@
                     MSUP_TAXREG: supplierTax.value.trim(),
                     MSUP_ADDR1: supplierAddress.value.trim(),
                     MSUP_TELNO: supplierTelephone.value.trim(),
+                    MSUP_CGCON: companyGroup.value.trim(),
                     _token: '{{ csrf_token() }}',
                 }
                 pthis.innerHTML = `Please wait...`
@@ -263,6 +276,7 @@
                             supplierTax.value = arrayItem['MSUP_TAXREG']
                             supplierAddress.value = arrayItem['MSUP_ADDR1']
                             supplierTelephone.value = arrayItem['MSUP_TELNO']
+                            companyGroup.value = arrayItem['MSUP_CGCON']
                             supplierCode.disabled = true
                         }
                         newcell = newrow.insertCell(1)

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroup;
 use App\Models\M_SUP;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +22,7 @@ class SupplierController extends Controller
 
     public function index()
     {
-        return view('master.supplier');
+        return view('master.supplier', ['companies' => CompanyGroup::all()]);
     }
     public function simpan(Request $request)
     {
@@ -33,7 +35,7 @@ class SupplierController extends Controller
             'MSUP_CURCD' => 'required',
             'MSUP_TAXREG' => 'required',
             'MSUP_ADDR1' => 'required',
-            'MSUP_TELNO' => 'required',
+            'MSUP_TELNO' => 'required',            
         ]);
 
         if ($validator->fails()) {
@@ -47,6 +49,7 @@ class SupplierController extends Controller
             'MSUP_TAXREG' => $request->MSUP_TAXREG,
             'MSUP_ADDR1' => $request->MSUP_ADDR1,
             'MSUP_TELNO' => $request->MSUP_TELNO,
+            'MSUP_CGCON' => $request->MSUP_CGCON,
             'created_by' => Auth::user()->nick_name,
         ]);
         return ['msg' => 'OK'];
@@ -59,7 +62,8 @@ class SupplierController extends Controller
             'MSUP_SUPNM',
             'MSUP_ADDR1',
         ];
-        $RS = M_SUP::on($this->dedicatedConnection)->select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $RS = M_SUP::on($this->dedicatedConnection)->select('*')        
+        ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
         return ['data' => $RS];
     }
 
@@ -67,11 +71,9 @@ class SupplierController extends Controller
     {
         $affectedRow = M_SUP::on($this->dedicatedConnection)->where('MSUP_SUPCD', base64_decode($request->id))
             ->update([
-                'MSUP_SUPNM' => $request->MSUP_SUPNM
-                ,'MSUP_CURCD' => $request->MSUP_CURCD                
-                ,'MSUP_TAXREG' => $request->MSUP_TAXREG
-                ,'MSUP_ADDR1' => $request->MSUP_ADDR1
-                ,'MSUP_TELNO' => $request->MSUP_TELNO
+                'MSUP_SUPNM' => $request->MSUP_SUPNM, 'MSUP_CURCD' => $request->MSUP_CURCD, 'MSUP_TAXREG' => $request->MSUP_TAXREG, 'MSUP_ADDR1' => $request->MSUP_ADDR1
+                , 'MSUP_TELNO' => $request->MSUP_TELNO
+                , 'MSUP_CGCON' => $request->MSUP_CGCON
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
