@@ -21,7 +21,7 @@ class ItemController extends Controller
     }
     public function index()
     {
-        return view('master.item', ['coas' => M_COA::select('*')->get()]);
+        return view('master.item', ['coas' => M_COA::on($this->dedicatedConnection)->select('*')->get()]);
     }
 
     public function formReport()
