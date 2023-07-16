@@ -68,6 +68,7 @@ class PurchaseController extends Controller
                 'TPCHREQ_PCHCD' => $newQuotationCode,
                 'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE,
                 'TPCHREQ_TYPE' => $request->TPCHREQ_TYPE,
+                'TPCHREQ_SUPCD' => $request->TPCHREQ_SUPCD,
                 'TPCHREQ_LINE' => $LastLine,
                 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT,
                 'created_by' => Auth::user()->nick_name,
@@ -129,7 +130,7 @@ class PurchaseController extends Controller
         # ubah data header
         $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
             ->update([
-                'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE, 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT, 'TPCHREQ_TYPE' => $request->TPCHREQ_TYPE
+                'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE, 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT, 'TPCHREQ_TYPE' => $request->TPCHREQ_TYPE, 'TPCHREQ_SUPCD' => $request->TPCHREQ_SUPCD
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
@@ -141,8 +142,9 @@ class PurchaseController extends Controller
             'TPCHREQ_PURPOSE',
         ];
 
-        $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME"])
+        $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME", "TPCHREQ_SUPCD", "MSUP_SUPNM"])
             ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
+            ->leftJoin("M_SUP", "TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
         return ['data' => $RS];
@@ -263,11 +265,12 @@ class PurchaseController extends Controller
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
                 ->groupBy("TPCHREQDETA_PCHCD")
                 ->whereNull('deleted_at');
-            $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT"))
+            $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT,MPCHREQTYPE_NAME,TPCHREQ_TYPE"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
                 })
-                ->groupBy('TPCHREQ_PCHCD')->get();
+                ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
+                ->groupBy('TPCHREQ_PCHCD', 'MPCHREQTYPE_NAME', 'TPCHREQ_TYPE')->get();
         }
         return [
             'data' => $dataPurchaseRequestTobeUpproved, 'dataApproved' => $dataPurchaseRequestApproved

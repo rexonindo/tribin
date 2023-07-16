@@ -32,7 +32,7 @@
                     elCard.classList.add(...['card', 'shadow-sm'])
                     elCard.innerHTML = `<svg class="bd-placeholder-img card-img-top" width="100%" height="125" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
                     <title>Customer</title>
-                    <rect width="100%" height="100%" fill="#188273" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">Purchase Request</text>
+                    <rect width="100%" height="100%" fill="#188273" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">${arrayItem['MPCHREQTYPE_NAME']}</text>
                     </svg>`
                     const elCardBody = document.createElement('div')
                     elCardBody.classList.add('card-body')
@@ -43,15 +43,21 @@
                     const elCardBodyText2 = document.createElement('p')
                     let quotationStatus = 0
                     elCardBodyText2.classList.add('card-text')
-                    if (!arrayItem['TPCHREQ_APPRVDT'] && !arrayItem['TPCHREQ_REJCTDT']) {
+                    if (!arrayItem['TPCHREQ_APPRVDT'] && !arrayItem['TPCHREQ_REJCTDT'] && arrayItem['TPCHREQ_TYPE'] == '2') {
+                        // Jika PR "Auto PO" dan belum di-approve ataupun di-reject
                         elCardBodyText2.innerHTML = '<span class="badge bg-warning">Being reviewed</span>'
                     } else {
-                        if (arrayItem['TPCHREQ_APPRVDT']) {
-                            elCardBodyText2.innerHTML = '<span class="badge bg-success">Approved</span>'
+                        if (arrayItem['TPCHREQ_TYPE'] == '1') {
+                            // Jika PR "Normal", bisa langsung konversi ke PO
                             quotationStatus = 1
                         } else {
-                            elCardBodyText2.innerHTML = '<span class="badge bg-danger">Rejected</span>'
-                            quotationStatus = -1
+                            if (arrayItem['TPCHREQ_APPRVDT']) {
+                                elCardBodyText2.innerHTML = '<span class="badge bg-success">Approved</span>'
+                                quotationStatus = 1
+                            } else {
+                                elCardBodyText2.innerHTML = '<span class="badge bg-danger">Rejected</span>'
+                                quotationStatus = -1
+                            }
                         }
                     }
 
@@ -153,7 +159,7 @@
                     newcell.innerHTML = arrayItem['TPCHREQDETA_REMARK']
                 })
                 myContainer.innerHTML = ''
-                myContainer.appendChild(myfrag)                
+                myContainer.appendChild(myfrag)
             },
             error: function(xhr, xopt, xthrow) {
                 alertify.warning(xthrow);

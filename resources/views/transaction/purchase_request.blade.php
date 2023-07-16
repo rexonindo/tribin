@@ -20,14 +20,14 @@
             </div>
             <div class="col-md-6 mb-1">
                 <label for="purchaseRequestIssueDate" class="form-label">Issue Date</label>
-                <input type="text" id="purchaseRequestIssueDate" class="form-control" maxlength="10" readonly>
+                <input type="text" id="purchaseRequestIssueDate" title="Issue Date" class="form-control" maxlength="10" readonly>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 mb-1">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Purpose</span>
-                    <input type="text" class="form-control" id="purpose" list="purposeList">
+                    <input type="text" class="form-control" title="Purpose" id="purpose" list="purposeList">
                     <datalist id="purposeList">
                         <option value="Bengkel">
                         <option value="Kendaraan">
@@ -36,14 +36,23 @@
                     </datalist>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mb-1">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Type</span>
-                    <select class="form-select" id="purchaseRequestType">
+                    <select class="form-select" id="purchaseRequestType" onchange="purchaseRequestTypeOnChange(event)">
                         @foreach ($types as $type)
                         <option value="{{$type->MPCHREQTYPE_ID}}">{{$type->MPCHREQTYPE_NAME}}</option>
                         @endforeach
                     </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="input-group input-group-sm mb-1">
+                    <span class="input-group-text">Supplier</span>
+                    <input type="text" id="purchaseRequestSupplier" class="form-control" disabled>
+                    <button class="btn btn-primary" type="button" onclick="btnShowSupplierModal()"><i class="fas fa-search"></i></button>
                 </div>
             </div>
         </div>
@@ -116,6 +125,7 @@
             </div>
         </div>
         <input type="hidden" id="purchaseRequestInputMode" value="0">
+        <input type="hidden" id="purchaseRequestSupplierCode" value="0">
     </div>
 
 </form>
@@ -201,6 +211,53 @@
                                             <th>Model</th>
                                             <th>Specification</th>
                                             <th>Category</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="supplierModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Supplier List</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col mb-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <span class="input-group-text">Search by</span>
+                                <select id="supplierSearchBy" class="form-select" onchange="supplierSearch.focus()">
+                                    <option value="0">Supplier Code</option>
+                                    <option value="1">Supplier Name</option>
+                                    <option value="2">Address</option>
+                                </select>
+                                <input type="text" id="supplierSearch" class="form-control" maxlength="50" onkeypress="supplierSearchOnKeypress(event)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="table-responsive" id="supplierTabelContainer">
+                                <table id="supplierTabel" class="table table-sm table-striped table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Currency</th>
+                                            <th>Tax Reg. Number</th>
+                                            <th>Address</th>
+                                            <th>Telephone</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -394,20 +451,35 @@
             itemRequiredDate.push(purchaseRequestTable.rows[i].cells[4].innerText.trim())
             itemRemark.push(purchaseRequestTable.rows[i].cells[5].innerText.trim())
         }
-        if (ttlrows === 0) {
-            alertify.message('nothing to be saved')
-            return
-        }
+
         if (purchaseRequestIssueDate.value.length === 0) {
-            alertify.message('issue date is required')
+            alertify.message(`${purchaseRequestIssueDate.title} is required`)
             purchaseRequestIssueDate.focus()
             return
         }
+        if (purpose.value.length === 0) {
+            alertify.message(`${purpose.title} is required`)
+            purpose.focus()
+            return
+        }
+
+        if (purchaseRequestType.value === '2') {
+            if (purchaseRequestSupplier.value.trim().length === 0) {
+                alertify.warning('Supplier is required')
+                purchaseRequestSupplier.focus()
+                return
+            }
+        }
 
         if (purchaseRequestCode.value.length === 0) {
+            if (itemCode.length === 0) {
+                alertify.message('no data to be saved')
+                return
+            }
             const data = {
                 TPCHREQ_PURPOSE: purpose.value.trim(),
                 TPCHREQ_TYPE: purchaseRequestType.value.trim(),
+                TPCHREQ_SUPCD: purchaseRequestSupplierCode.value,
                 TPCHREQ_ISSUDT: purchaseRequestIssueDate.value.trim(),
                 TPCHREQDETA_ITMCD: itemCode,
                 TPCHREQDETA_ITMQT: itemQty,
@@ -453,6 +525,7 @@
         } else {
             const data = {
                 TPCHREQ_PURPOSE: purpose.value.trim(),
+                TPCHREQ_SUPCD: purchaseRequestSupplierCode.value,
                 TPCHREQ_ISSUDT: purchaseRequestIssueDate.value.trim(),
                 TPCHREQ_TYPE: purchaseRequestType.value.trim(),
                 _token: '{{ csrf_token() }}',
@@ -579,6 +652,8 @@
                             purchaseRequestIssueDate.value = arrayItem['TPCHREQ_ISSUDT']
                             purpose.value = arrayItem['TPCHREQ_PURPOSE']
                             purchaseRequestType.value = arrayItem['TPCHREQ_TYPE']
+                            purchaseRequestSupplier.value = arrayItem['MSUP_SUPNM']
+                            purchaseRequestSupplierCode.value = arrayItem['TPCHREQ_SUPCD']
                             loadPurchaseRequestDetail({
                                 doc: arrayItem['TPCHREQ_PCHCD']
                             })
@@ -654,5 +729,77 @@
             return
         }
         window.open(`PDF/purchase-request/${btoa(purchaseRequestCode.value)}`, '_blank');
+    }
+
+    function btnShowSupplierModal() {
+        const myModal = new bootstrap.Modal(document.getElementById('supplierModal'), {})
+        supplierModal.addEventListener('shown.bs.modal', () => {
+            supplierSearch.focus()
+        })
+        myModal.show()
+    }
+
+    function supplierSearchOnKeypress(e) {
+        if (e.key === 'Enter') {
+            e.target.disabled = true
+            const data = {
+                searchBy: supplierSearchBy.value,
+                searchValue: e.target.value,
+                companyGroupOnly: purchaseRequestType.value === '2' ? 2 : 1,
+            }
+            supplierTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please wait</td></tr>`
+            $.ajax({
+                type: "GET",
+                url: "supplier",
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    e.target.disabled = false
+                    let myContainer = document.getElementById("supplierTabelContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = supplierTabel.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("supplierTabel");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    response.data.forEach((arrayItem) => {
+                        newrow = myTableBody.insertRow(-1)
+                        newcell = newrow.insertCell(0)
+                        newcell.innerHTML = arrayItem['MSUP_SUPCD']
+                        newcell.style.cssText = 'cursor:pointer'
+                        newcell.onclick = () => {
+                            $('#supplierModal').modal('hide')
+                            purchaseRequestSupplierCode.value = arrayItem['MSUP_SUPCD']
+                            purchaseRequestSupplier.value = arrayItem['MSUP_SUPNM']
+                            supplierTabel.getElementsByTagName("tbody")[0].innerHTML = ''
+                        }
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['MSUP_SUPNM']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['MSUP_CURCD']
+                        newcell = newrow.insertCell(3)
+                        newcell.innerHTML = arrayItem['MSUP_TAXREG']
+                        newcell = newrow.insertCell(4)
+                        newcell.innerHTML = arrayItem['MSUP_ADDR1']
+                        newcell = newrow.insertCell(5)
+                        newcell.innerHTML = arrayItem['MSUP_TELNO']
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    e.target.disabled = false
+                    supplierTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please try again</td></tr>`
+                }
+            });
+        }
+    }
+
+    function purchaseRequestTypeOnChange(e) {
+        if (purchaseRequestCode.value.trim().length === 0) {
+            purchaseRequestSupplier.value = ''
+            purchaseRequestSupplierCode.value = ''
+        }
     }
 </script>
