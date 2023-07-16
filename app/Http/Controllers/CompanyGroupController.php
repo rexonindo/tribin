@@ -37,6 +37,8 @@ class CompanyGroupController extends Controller
             'address' => 'required|unique:App\Models\CompanyGroup',
             'phone' => 'required',
             'fax' => 'required',
+            'alias_code' => 'required',
+            'alias_group_code' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -49,6 +51,8 @@ class CompanyGroupController extends Controller
             'connection' => $request->connection,
             'phone' => $request->phone,
             'fax' => $request->fax,
+            'alias_code' => $request->alias_code,
+            'alias_group_code' => $request->alias_group_code,
         ]);
         return ['msg' => 'OK'];
     }
@@ -62,6 +66,8 @@ class CompanyGroupController extends Controller
                 'connection' => $request->connection,
                 'phone' => $request->phone,
                 'fax' => $request->fax,
+                'alias_code' => $request->alias_code,
+                'alias_group_code' => $request->alias_group_code,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }

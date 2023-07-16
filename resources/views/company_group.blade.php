@@ -62,6 +62,20 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-1">
+                                <div class="input-group input-group-sm mb-1">
+                                    <span class="input-group-text">Alias Code</span>
+                                    <input type="text" id="companyAliasCode" class="form-control" maxlength="3">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-1">
+                                <div class="input-group input-group-sm mb-1">
+                                    <span class="input-group-text">Alias Group Code</span>
+                                    <input type="text" id="companyAliasGroupCode" class="form-control" maxlength="5">
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="row">
                             <div class="col mb-1">
@@ -83,6 +97,8 @@
                                             <th>Address</th>
                                             <th>Phone</th>
                                             <th>Fax</th>
+                                            <th>Alias Code</th>
+                                            <th>Alias Group Code</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -218,6 +234,12 @@
                 {
                     "data": 'fax'
                 },
+                {
+                    "data": 'alias_code'
+                },
+                {
+                    "data": 'alias_group_code'
+                },
             ],
             columnDefs: [{
                 "targets": [0],
@@ -253,6 +275,8 @@
             connection: companyConnection.value.trim(),
             phone: companyPhone.value.trim(),
             fax: companyFax.value.trim(),
+            alias_code: companyAliasCode.value.trim(),
+            alias_group_code: companyAliasGroupCode.value.trim(),
             _token: '{{ csrf_token() }}',
         }
         if (companyId.value == "") {
@@ -341,6 +365,8 @@
             companyAddress.value = row["address"];
             companyPhone.value = row["phone"];
             companyFax.value = row["fax"];
+            companyAliasCode.value = row["alias_code"];
+            companyAliasGroupCode.value = row["alias_group_code"];
         }
     });
 
