@@ -733,11 +733,13 @@
 
     function btnShowSupplierModal() {
         const myModal = new bootstrap.Modal(document.getElementById('supplierModal'), {})
-        supplierModal.addEventListener('shown.bs.modal', () => {
-            supplierSearch.focus()
-        })
         myModal.show()
     }
+
+    supplierModal.addEventListener('shown.bs.modal', () => {
+        supplierSearch.focus()
+        supplierTabel.getElementsByTagName('tbody')[0].innerHTML = ''
+    })
 
     function supplierSearchOnKeypress(e) {
         if (e.key === 'Enter') {
