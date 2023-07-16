@@ -50,10 +50,21 @@
         </div>
     </div>
     <div class="row">
-        <div class="col mb-3">
+        <div class="col-md-6 mb-3">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Telephone</span>
                 <input type="text" id="customerTelephone" class="form-control" placeholder="021..." maxlength="20">
+            </div>
+        </div>
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text">Company</span>
+                <select class="form-select" id="companyGroup">
+                    <option value="-" selected>-</option>
+                    @foreach ($companies as $r)
+                    <option value="{{$r->connection}}">{{$r->name}}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
     </div>
@@ -142,6 +153,7 @@
             MCUS_TAXREG: customerTax.value.trim(),
             MCUS_ADDR1: customerAddress.value.trim(),
             MCUS_TELNO: customerTelephone.value.trim(),
+            MCUS_CGCON: companyGroup.value.trim(),
             _token: '{{ csrf_token() }}',
         }
         if (customerInputMode.value === '0') {
@@ -184,6 +196,7 @@
                     MCUS_TAXREG: customerTax.value.trim(),
                     MCUS_ADDR1: customerAddress.value.trim(),
                     MCUS_TELNO: customerTelephone.value.trim(),
+                    MCUS_CGCON: companyGroup.value.trim(),
                     _token: '{{ csrf_token() }}',
                 }
                 pthis.innerHTML = `Please wait...`

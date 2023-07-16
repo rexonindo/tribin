@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroup;
 use App\Models\M_CUS;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +21,7 @@ class CustomerController extends Controller
 
     public function index()
     {
-        return view('master.customer');
+        return view('master.customer', ['companies' => CompanyGroup::all()]);
     }
 
     public function simpan(Request $request)
@@ -48,6 +49,7 @@ class CustomerController extends Controller
             'MCUS_TAXREG' => $request->MCUS_TAXREG,
             'MCUS_ADDR1' => $request->MCUS_ADDR1,
             'MCUS_TELNO' => $request->MCUS_TELNO,
+            'MCUS_CGCON' => $request->MCUS_CGCON,
             'created_by' => Auth::user()->nick_name,
         ]);
         return ['msg' => 'OK'];
@@ -68,11 +70,7 @@ class CustomerController extends Controller
     {
         $affectedRow = M_CUS::on($this->dedicatedConnection)->where('MCUS_CUSCD', base64_decode($request->id))
             ->update([
-                'MCUS_CUSNM' => $request->MCUS_CUSNM
-                ,'MCUS_CURCD' => $request->MCUS_CURCD                
-                ,'MCUS_TAXREG' => $request->MCUS_TAXREG
-                ,'MCUS_ADDR1' => $request->MCUS_ADDR1
-                ,'MCUS_TELNO' => $request->MCUS_TELNO
+                'MCUS_CUSNM' => $request->MCUS_CUSNM, 'MCUS_CURCD' => $request->MCUS_CURCD, 'MCUS_TAXREG' => $request->MCUS_TAXREG, 'MCUS_ADDR1' => $request->MCUS_ADDR1, 'MCUS_TELNO' => $request->MCUS_TELNO, 'MCUS_CGCON' => $request->MCUS_CGCON
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
