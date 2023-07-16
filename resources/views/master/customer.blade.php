@@ -133,6 +133,7 @@
         customerCode.focus()
         tribinClearTextBox()
         customerInputMode.value = 0
+        companyGroup.value = '-'
     }
 
     function btnSaveOnclick(pthis) {
@@ -276,6 +277,7 @@
                             customerTax.value = arrayItem['MCUS_TAXREG']
                             customerAddress.value = arrayItem['MCUS_ADDR1']
                             customerTelephone.value = arrayItem['MCUS_TELNO']
+                            companyGroup.value = arrayItem['MCUS_CGCON']
                             customerCode.disabled = true
                         }
                         newcell = newrow.insertCell(1)
