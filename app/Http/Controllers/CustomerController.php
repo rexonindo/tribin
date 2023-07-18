@@ -21,7 +21,7 @@ class CustomerController extends Controller
 
     public function index()
     {
-        return view('master.customer', ['companies' => CompanyGroup::all()]);
+        return view('master.customer', ['companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get()]);
     }
 
     public function simpan(Request $request)
