@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroup;
+use App\Models\M_CUS;
+use App\Models\M_ITM;
 use App\Models\M_PCHREQTYPE;
+use App\Models\T_PCHORDDETA;
+use App\Models\T_PCHORDHEAD;
 use App\Models\T_PCHREQDETA;
 use App\Models\T_PCHREQHEAD;
+use App\Models\T_SLO_DRAFT_DETAIL;
+use App\Models\T_SLO_DRAFT_HEAD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -16,6 +23,7 @@ class PurchaseController extends Controller
 {
     protected $dedicatedConnection;
     protected $fpdf;
+    protected $monthOfRoma = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
     function index()
     {
@@ -248,6 +256,7 @@ class PurchaseController extends Controller
         $dataPurchaseRequestTobeUpproved = [];
         $dataPurchaseRequestApproved = [];
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            # Query untuk data Purchase Request dengan tipe "Normal" 
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
                 ->groupBy("TPCHREQDETA_PCHCD")
@@ -258,6 +267,7 @@ class PurchaseController extends Controller
                 })
                 ->whereNull("TPCHREQ_APPRVDT")
                 ->whereNull("TPCHREQ_REJCTDT")
+                ->where("TPCHREQ_TYPE", '2')
                 ->groupBy('TPCHREQ_PCHCD')->get();
         }
         if (in_array(Auth::user()->role, ['purchasing'])) {
@@ -270,6 +280,8 @@ class PurchaseController extends Controller
                     $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
                 })
                 ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
+                ->leftJoin('T_PCHORDHEAD', 'TPCHREQ_PCHCD', '=', 'TPCHORD_REQCD')
+                ->whereNull('TPCHORD_REQCD')
                 ->groupBy('TPCHREQ_PCHCD', 'MPCHREQTYPE_NAME', 'TPCHREQ_TYPE')->get();
         }
         return [
@@ -280,11 +292,144 @@ class PurchaseController extends Controller
     function approve(Request $request)
     {
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
-            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
+            $PRCode = base64_decode($request->id);
+            $RSPR = T_PCHREQHEAD::on($this->dedicatedConnection)->select('TPCHREQ_SUPCD', 'MSUP_CGCON')
+                ->leftJoin('M_SUP', 'TPCHREQ_SUPCD', '=', 'MSUP_SUPCD')
+                ->where('TPCHREQ_PCHCD', $PRCode)
+                ->first();
+
+            # Periksa registrasi CG aktif di CG tujuan pada Customer Master
+            $RSCGActiveAsCustomer = M_CUS::on($RSPR->MSUP_CGCON)->select('MCUS_CUSCD')
+                ->where('MCUS_CGCON', $this->dedicatedConnection)->first();
+
+            if (empty($RSCGActiveAsCustomer)) {
+                return response()->json(['message' => 'please register current company as their customer connection'], 403);
+            }
+
+            # registrasi Item (jika belum ada) di CG tujuan pada Item Master
+            $RSPRDetail = T_PCHREQDETA::on($this->dedicatedConnection)->select('TPCHREQDETA_ITMQT', 'M_ITM.*')
+                ->leftJoin('M_ITM', 'TPCHREQDETA_ITMCD', '=', 'MITM_ITMCD')
+                ->where('TPCHREQDETA_PCHCD', $PRCode)
+                ->whereNull('deleted_at')
+                ->get();
+            foreach ($RSPRDetail as $r) {
+                $totalRow = M_ITM::on($RSPR->MSUP_CGCON)->where('MITM_ITMCD', $r->MITM_ITMCD)->count();
+                if ($totalRow === 0) {
+                    M_ITM::on($RSPR->MSUP_CGCON)->create([
+                        'MITM_ITMCD' => $r->MITM_ITMCD,
+                        'MITM_ITMNM' => $r->MITM_ITMNM,
+                        'MITM_STKUOM' => $r->MITM_STKUOM,
+                        'MITM_ITMTYPE' => $r->MITM_ITMTYPE,
+                        'MITM_BRAND' => $r->MITM_BRAND,
+                        'MITM_MODEL' => $r->MITM_MODEL,
+                        'MITM_SPEC' => $r->MITM_SPEC,
+                        'MITM_ITMCAT' => $r->MITM_ITMCAT,
+                        'MITM_COACD' => $r->MITM_COACD,
+                    ]);
+                }
+            }
+
+            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', $PRCode)
                 ->update([
                     'TPCHREQ_APPRVBY' => Auth::user()->nick_name, 'TPCHREQ_APPRVDT' => date('Y-m-d H:i:s')
                 ]);
-            $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+            if ($affectedRow) {
+
+                # Generate Nomor PO
+                $RSAlias = CompanyGroup::select('alias_code')
+                    ->where('connection', $this->dedicatedConnection)
+                    ->first();
+
+                $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHORDHEAD')
+                    ->whereMonth('created_at', '=', date('m'))
+                    ->whereYear('created_at', '=', date('Y'))
+                    ->max('TPCHORD_LINE');
+
+                $newPOCode = '';
+                if (!$LastLine) {
+                    $LastLine = 1;
+                    $newPOCode = '001/' . $RSAlias->alias_code . '-PO/' . $this->monthOfRoma[date('n') - 1] . '/' . date('y');
+                } else {
+                    $LastLine++;
+                    $newPOCode = substr('00' . $LastLine, -3) . '/' . $RSAlias->alias_code . '-PO/' . $this->monthOfRoma[date('n') - 1] . '/' . date('y');
+                }
+
+                $headerTable = [
+                    'TPCHORD_PCHCD' => $newPOCode,
+                    'TPCHORD_ATTN' => '-',
+                    'TPCHORD_SUPCD' => $RSPR->TPCHREQ_SUPCD,
+                    'TPCHORD_LINE' => $LastLine,
+                    'TPCHORD_ISSUDT' => date('Y-m-d'),
+                    'TPCHORD_APPRVBY' => Auth::user()->nick_name,
+                    'TPCHORD_APPRVDT' => date('Y-m-d H:i:s'),
+                    'TPCHORD_REQCD' => $PRCode,
+                    'created_by' => Auth::user()->nick_name,
+                ];
+
+                $detailTable = [];
+                foreach ($RSPRDetail as $r) {
+                    $detailTable[] = [
+                        'TPCHORDDETA_PCHCD' => $newPOCode,
+                        'TPCHORDDETA_ITMCD' => $r->MITM_ITMCD,
+                        'TPCHORDDETA_ITMQT' => $r->TPCHREQDETA_ITMQT,
+                        'TPCHORDDETA_ITMPRC_PER' => 0,
+                        'created_by' => Auth::user()->nick_name,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ];
+                }
+
+                # Simpan data ke Tabel PO Header
+                T_PCHORDHEAD::on($this->dedicatedConnection)->create($headerTable);
+
+                # Simpan data ke Tabel PO Detail
+                T_PCHORDDETA::on($this->dedicatedConnection)->insert($detailTable);
+
+                # Generate Sales Order Draft di CG tujuan
+                $LastLine = DB::connection($RSPR->MSUP_CGCON)->table('T_SLO_DRAFT_HEAD')
+                    ->whereMonth('created_at', '=', date('m'))
+                    ->whereYear('created_at', '=', date('Y'))
+                    ->max('TSLODRAFT_LINE');
+
+                $newDocumentCode = '';
+                if (!$LastLine) {
+                    $LastLine = 1;
+                    $newDocumentCode = '001/SOD/' . $this->monthOfRoma[date('n') - 1] . '/' . date('Y');
+                } else {
+                    $LastLine++;
+                    $newDocumentCode = substr('00' . $LastLine, -3) . '/SOD/' . $this->monthOfRoma[date('n') - 1] . '/' . date('Y');
+                }
+                $headerTable = [
+                    'TSLODRAFT_SLOCD' => $newDocumentCode,
+                    'TSLODRAFT_CUSCD' => $RSCGActiveAsCustomer->MCUS_CUSCD,
+                    'TSLODRAFT_LINE' => $LastLine,
+                    'TSLODRAFT_ATTN' => '-',
+                    'TSLODRAFT_POCD' => $newPOCode,
+                    'TSLODRAFT_ISSUDT' => date('Y-m-d'),
+                    'created_by' => Auth::user()->nick_name,
+                ];
+
+                # Simpan data ke Tabel RO Header di CG tujuan
+                T_SLO_DRAFT_HEAD::on($RSPR->MSUP_CGCON)->create($headerTable);
+
+                # Simpan data ke Tabel RO Detail di CG tujuan
+                $detailTable = [];
+                foreach ($RSPRDetail as $r) {
+                    $detailTable[] = [
+                        'TSLODRAFTDETA_SLOCD' => $newDocumentCode,
+                        'TSLODRAFTDETA_ITMCD' => $r->MITM_ITMCD,
+                        'TSLODRAFTDETA_ITMQT' => $r->TPCHREQDETA_ITMQT,
+                        'TSLODRAFTDETA_ITMPRC_PER' => 0,
+                        'created_by' => Auth::user()->nick_name,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ];
+                }
+                T_SLO_DRAFT_DETAIL::on($RSPR->MSUP_CGCON)->insert($detailTable);
+
+                $message = 'Approved';
+            } else {
+                $message =  'Something wrong please contact admin';
+            }
+
             return ['message' => $message];
         } else {
             return response()->json(['message' => 'forbidden'], 403);

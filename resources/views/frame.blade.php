@@ -154,6 +154,9 @@
                     </li>
                     <li><a class="dropdown-item" href="#" onclick="liApprovalPurchaseRequestOnclick(event)">Purchase Request Approval <span class="badge text-bg-info" id="labelNotifApprovalPurchaseRequest"></span></a></li>
                     <li><a class="dropdown-item" href="#" onclick="liApprovedPurchaseRequestOnclick(event)">Purchase Request Recent Updates <span class="badge text-bg-info" id="labelNotifApprovedPurchaseRequest"></span></a></li>
+                    <li>
+                        <h6 class="dropdown-header">Purchase Order</h6>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -307,19 +310,19 @@
                     // Quotations
                     const totalNotifQT = response.data.length
                     const totalNotifApprovedQT = response.dataApproved.length
-                    
+
                     // Purchase Request
                     const totalNotifQTPurchaseRequest = response.dataPurchaseRequest.length
                     const totalNotifApprovedQTPurchaseRequest = response.dataPurchaseRequestApproved.length
-                    
+
                     const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
-                    
+
                     labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
                     labelNotifApprovedQuotation.innerHTML = totalNotifApprovedQT === 0 ? '' : totalNotifApprovedQT
 
                     labelNotifApprovalPurchaseRequest.innerHTML = totalNotifQTPurchaseRequest === 0 ? '' : totalNotifQTPurchaseRequest
-                    labelNotifApprovedPurchaseRequest.innerText = totalNotifApprovedQTPurchaseRequest === 0 ? '' : totalNotifApprovedQTPurchaseRequest                  
+                    labelNotifApprovedPurchaseRequest.innerText = totalNotifApprovedQTPurchaseRequest === 0 ? '' : totalNotifApprovedQTPurchaseRequest
                 }
             });
         }
@@ -462,7 +465,7 @@
             location.href = '/home'
         }
 
-        function liApprovalPurchaseRequestOnclick(e){
+        function liApprovalPurchaseRequestOnclick(e) {
             e.preventDefault()
             if (labelNotifApprovalPurchaseRequest.innerText.length > 0) {
                 ContentContainer.innerHTML = 'Please wait'
@@ -476,7 +479,7 @@
             }
         }
 
-        function liApprovedPurchaseRequestOnclick(e){
+        function liApprovedPurchaseRequestOnclick(e) {
             e.preventDefault()
             if (labelNotifApprovedPurchaseRequest.innerText.length > 0) {
                 ContentContainer.innerHTML = 'Please wait'

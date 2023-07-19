@@ -105,7 +105,6 @@
         <div class="row">
             <div class="col-md-12 mb-1 text-center">
                 <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-outline-secondary" id="btnSaveLine" onclick="btnSaveLineOnclick(this)">Save line</button>
                     <button type="button" class="btn btn-outline-secondary" id="btnUpdateLine" onclick="btnUpdateLineOnclick(this)">Update line</button>
                     <button type="button" class="btn btn-outline-secondary" id="btnRemoveLine" onclick="btnRemoveLineOnclick(this)">Remove line</button>
                 </div>
@@ -452,58 +451,6 @@
                 }
             });
         }
-    }
-
-    function btnSaveLineOnclick() {
-        if (orderItemCode.value.length === 0) {
-            orderItemCode.focus()
-            alertify.warning(`Item Code is required`)
-            return
-        }
-        const orderTableBody = orderTable.getElementsByTagName('tbody')[0]
-        newrow = orderTableBody.insertRow(-1)
-        newrow.title = 'not selected'
-        newrow.onclick = (event) => {
-            const selrow = orderTable.rows[event.target.parentElement.rowIndex]
-            if (selrow.title === 'selected') {
-                selrow.title = 'not selected'
-                selrow.classList.remove('table-info')
-            } else {
-                const ttlrows = orderTable.rows.length
-                for (let i = 1; i < ttlrows; i++) {
-                    orderTable.rows[i].classList.remove('table-info')
-                    orderTable.rows[i].title = 'not selected'
-                }
-                selrow.title = 'selected'
-                selrow.classList.add('table-info')
-            }
-        }
-        newcell = newrow.insertCell(0)
-        newcell.classList.add('d-none')
-
-        newcell = newrow.insertCell(1)
-        newcell.innerHTML = orderItemCode.value
-
-        newcell = newrow.insertCell(2)
-        newcell.innerHTML = orderItemName.value
-
-        newcell = newrow.insertCell(3)
-        newcell.innerHTML = orderUsage.value
-        newcell.classList.add('text-center')
-
-        newcell = newrow.insertCell(4)
-        newcell.innerHTML = numeral(orderPrice.value).format(',')
-        newcell.classList.add('text-end')
-
-        newcell = newrow.insertCell(5)
-        newcell.innerHTML = numeral(orderOperator.value).format(',')
-        newcell.classList.add('text-end')
-
-        newcell = newrow.insertCell(6)
-        newcell.innerHTML = numeral(orderMOBDEMOB.value).format(',')
-        newcell.classList.add('text-end')
-
-        tribinClearTextBoxByClassName('orderInputItem')
     }
 
     function btnNewOnclick() {

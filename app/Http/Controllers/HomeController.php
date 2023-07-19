@@ -92,7 +92,7 @@ class HomeController extends Controller
                 ->whereNull("TQUO_REJCTDT")
                 ->groupBy('TQUO_QUOCD')->get();
 
-            # Query untuk data Purchase Request
+            # Query untuk data Purchase Request dengan tipe "Auto PO" 
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
                 ->groupBy("TPCHREQDETA_PCHCD")
@@ -103,6 +103,7 @@ class HomeController extends Controller
                 })
                 ->whereNull("TPCHREQ_APPRVDT")
                 ->whereNull("TPCHREQ_REJCTDT")
+                ->where("TPCHREQ_TYPE", '2')
                 ->groupBy('TPCHREQ_PCHCD')->get();
         }
         if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
@@ -128,7 +129,9 @@ class HomeController extends Controller
             $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
-                })                
+                })
+                ->leftJoin('T_PCHORDHEAD', 'TPCHREQ_PCHCD', '=', 'TPCHORD_REQCD')
+                ->whereNull('TPCHORD_REQCD')
                 ->groupBy('TPCHREQ_PCHCD')->get();
         }
 

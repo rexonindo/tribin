@@ -31,7 +31,7 @@
                     const elCard = document.createElement('div')
                     elCard.classList.add(...['card', 'shadow-sm'])
                     elCard.innerHTML = `<svg class="bd-placeholder-img card-img-top" width="100%" height="125" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
-                    <title>Customer</title>
+                    <title>Request type</title>
                     <rect width="100%" height="100%" fill="#188273" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">${arrayItem['MPCHREQTYPE_NAME']}</text>
                     </svg>`
                     const elCardBody = document.createElement('div')
@@ -67,7 +67,7 @@
                     const elButtonGrup = document.createElement('div')
                     elButtonGrup.classList.add(...['btn-group', 'btn-group-sm'])
 
-                    if (quotationStatus === 1) {
+                    if (quotationStatus === 1 && arrayItem['TPCHREQ_TYPE'] == '1') {
                         const elButton2 = document.createElement('button')
                         elButton2.classList.add(...['btn', 'btn-outline-primary'])
                         elButton2.innerHTML = 'Create Purchase Order'
