@@ -17,7 +17,11 @@ class HomeController extends Controller
 
     public function __construct()
     {
-        $this->dedicatedConnection = isset($_COOKIE['CGID']) === '-' ? '-' : Crypt::decryptString($_COOKIE['CGID']);
+        if (isset($_COOKIE['CGID'])) {
+            $this->dedicatedConnection = $_COOKIE['CGID'] === '-' ? '-' : Crypt::decryptString($_COOKIE['CGID']);
+        } else {
+            $this->dedicatedConnection = '-';
+        }
     }
     function index()
     {
