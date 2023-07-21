@@ -156,7 +156,11 @@
                     <li><a class="dropdown-item" href="#" onclick="liApprovedPurchaseRequestOnclick(event)">Purchase Request Recent Updates <span class="badge text-bg-info" id="labelNotifApprovedPurchaseRequest"></span></a></li>
                     <li>
                         <h6 class="dropdown-header">Purchase Order</h6>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovalPurchaseOrderOnclick(event)">Purchase Order Approval <span class="badge text-bg-info" id="labelNotifApprovalPurchaseOrder"></span></a></li>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovalPurchaseOrderOnclick(event)">Purchase Order Approval <span class="badge text-bg-info" id="labelNotifApprovalPurchaseOrder"></span></a></li>                    
+                    </li>
+                    <li>
+                        <h6 class="dropdown-header">Sales Order Draft</h6>
+                    <li><a class="dropdown-item" href="#" onclick="liApprovalSalesOrderDraftOnclick(event)">Sales Order Draft Status <span class="badge text-bg-info" id="labelNotifApprovalSalesOrderDraft"></span></a></li>
                     </li>
                 </ul>
             </div>
@@ -321,7 +325,10 @@
                     const totalNotifQTPurchaseRequest = response.dataPurchaseRequest.length
                     const totalNotifApprovedQTPurchaseRequest = response.dataPurchaseRequestApproved.length
 
-                    const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest
+                    // Sales Order Draft
+                    const totalNotifQTSalesOrderDraft = response.dataSalesOrderDraft.length
+
+                    const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest + totalNotifQTSalesOrderDraft
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
 
                     labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
@@ -329,6 +336,8 @@
 
                     labelNotifApprovalPurchaseRequest.innerHTML = totalNotifQTPurchaseRequest === 0 ? '' : totalNotifQTPurchaseRequest
                     labelNotifApprovedPurchaseRequest.innerText = totalNotifApprovedQTPurchaseRequest === 0 ? '' : totalNotifApprovedQTPurchaseRequest
+
+                    labelNotifApprovalSalesOrderDraft.innerText = totalNotifQTSalesOrderDraft === 0 ? '' : totalNotifQTSalesOrderDraft
                 }
             });
         }
@@ -492,6 +501,20 @@
                 $.ajax({
                     type: "GET",
                     url: "/approved/form/purchase-request",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
+        }
+
+        function liApprovalSalesOrderDraftOnclick(e){
+            e.preventDefault()
+            if (labelNotifApprovalSalesOrderDraft.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/approved/form/sales-order-draft",
                     success: function(response) {
                         setInnerHTML(ContentContainer, response)
                     }

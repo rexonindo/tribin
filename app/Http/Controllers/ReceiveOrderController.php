@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\T_SLO_DRAFT_DETAIL;
+use App\Models\T_SLO_DRAFT_HEAD;
 use App\Models\T_SLODETA;
 use App\Models\T_SLOHEAD;
 use Illuminate\Http\Request;
@@ -32,7 +34,7 @@ class ReceiveOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'TSLO_CUSCD' => 'required',
             'TSLO_ATTN' => 'required',
-            'TSLO_QUOCD' => 'required',            
+            'TSLO_QUOCD' => 'required',
             'TSLO_ISSUDT' => 'required|date',
             'TSLO_PLAN_DLVDT' => 'required',
         ]);
@@ -128,11 +130,7 @@ class ReceiveOrderController extends Controller
         }
 
         return [
-            'msg' => 'OK', 'doc' => $newDocumentCode
-            , '$RSLast' => $LastLine
-            , 'quotationHeader' => $quotationHeader
-            , 'quotationDetail' => $quotationDetail
-            , 'newPOCode' => $newPOCode
+            'msg' => 'OK', 'doc' => $newDocumentCode, '$RSLast' => $LastLine, 'quotationHeader' => $quotationHeader, 'quotationDetail' => $quotationDetail, 'newPOCode' => $newPOCode
         ];
     }
 
@@ -151,11 +149,35 @@ class ReceiveOrderController extends Controller
         return ['data' => $RS];
     }
 
+    function searchDraft(Request $request)
+    {
+        $columnMap = [
+            'TSLODRAFT_SLOCD',
+            'MCUS_CUSNM',
+            'TSLODRAFT_POCD',
+        ];
+
+        $RS = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(["TSLODRAFT_SLOCD", "TSLODRAFT_CUSCD", "MCUS_CUSNM", "TSLODRAFT_ISSUDT", "TSLODRAFT_POCD", "TSLODRAFT_ATTN"])
+            ->leftJoin("M_CUS", "TSLODRAFT_CUSCD", "=", "MCUS_CUSCD")
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->get();
+        return ['data' => $RS];
+    }
+
     function loadById(Request $request)
     {
-        $RS = T_SLODETA::on($this->dedicatedConnection)->select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
+        $RS = T_SLODETA::on($this->dedicatedConnection)->select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE", "TSLODETA_ITMQT", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
             ->leftJoin("M_ITM", "TSLODETA_ITMCD", "=", "MITM_ITMCD")
             ->where('TSLODETA_SLOCD', base64_decode($request->id))
+            ->whereNull('deleted_at')->get();
+        return ['dataItem' => $RS];
+    }
+
+    function loadDraftById(Request $request)
+    {
+        $RS = T_SLO_DRAFT_DETAIL::on($this->dedicatedConnection)->select(["id", "TSLODRAFTDETA_ITMCD", "MITM_ITMNM", "TSLODRAFTDETA_ITMQT", "TSLODRAFTDETA_ITMPRC_PER"])
+            ->leftJoin("M_ITM", "TSLODRAFTDETA_ITMCD", "=", "MITM_ITMCD")
+            ->where('TSLODRAFTDETA_SLOCD', base64_decode($request->id))
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS];
     }
@@ -214,5 +236,32 @@ class ReceiveOrderController extends Controller
             header('Cache-Control: max-age=0');
             $writer->save('php://output');
         }
+    }
+
+    function notificationsDraft()
+    {
+        $dataTobeUpproved = [];
+        $dataPurchaseRequestApproved = [];
+        if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
+            # Query untuk data Purchase Order Draft
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_SLO_DRAFT_DETAIL')
+                ->selectRaw("COUNT(*) TTLDETAIL, TSLODRAFTDETA_SLOCD")
+                ->groupBy("TSLODRAFTDETA_SLOCD")
+                ->whereNull('deleted_at');
+            $dataTobeUpproved = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(DB::raw("TSLODRAFT_SLOCD,max(TTLDETAIL) TTLDETAIL, max(T_SLO_DRAFT_HEAD.created_at) CREATED_AT,max(TSLODRAFT_POCD) TSLODRAFT_POCD"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TSLODRAFT_SLOCD", "=", "TSLODRAFTDETA_SLOCD");
+                })
+                ->whereNull("TSLODRAFT_APPRVDT")
+                ->groupBy('TSLODRAFT_SLOCD')->get();
+        }
+        return [
+            'data' => $dataTobeUpproved, 'dataApproved' => $dataPurchaseRequestApproved
+        ];
+    }
+
+    public function formApprovalDraft()
+    {
+        return view('transaction.sales_order_draft_status');
     }
 }

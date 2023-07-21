@@ -26,8 +26,8 @@
                 <input type="text" id="orderIssueDate" class="form-control" maxlength="10" readonly>
             </div>
             <div class="col-md-4 mb-1">
-                <label for="orderPaymentTerm" class="form-label">Payment Term</label>
-                <input type="text" id="orderPaymentTerm" class="form-control" maxlength="10" readonly>
+                <label for="orderDeliveryDate" class="form-label">Delivery Date</label>
+                <input type="text" id="orderDeliveryDate" class="form-control" maxlength="10" readonly>
             </div>
         </div>
         <div class="row">
@@ -63,7 +63,7 @@
                                 <th class="d-none">idLine</th>
                                 <th>Item Code</th>
                                 <th>Item Name</th>
-                                <th class="text-center">Qty</th>
+                                <th class="text-end">Qty</th>
                                 <th class="text-end">Price</th>
                             </tr>
                         </thead>
@@ -78,7 +78,6 @@
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Item Code</span>
                     <input type="text" id="orderItemCode" class="form-control orderInputItem" placeholder="Item Code" disabled>
-                    <button class="btn btn-primary" type="button" onclick="btnShowItemModal()"><i class="fas fa-search"></i></button>
                 </div>
             </div>
             <div class="col-md-6 mb-1">
@@ -92,13 +91,13 @@
             <div class="col-md-6 mb-1">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Qty</span>
-                    <input type="text" id="orderQty" class="form-control orderInputItem" title="price per hour">
+                    <input type="text" id="orderQty" class="form-control orderInputItem" disabled>
                 </div>
             </div>
             <div class="col-md-6 mb-1">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Price</span>
-                    <input type="text" id="orderPrice" class="form-control orderInputItem" title="price per hour">
+                    <input type="text" id="orderPrice" class="form-control orderInputItem">
                 </div>
             </div>
         </div>
@@ -110,13 +109,8 @@
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col mt-1 mb-1">
-
-            </div>
-        </div>
         <input type="hidden" id="orderInputMode" value="0">
+        <input type="hidden" id="selectedRowAtOrderTable">
     </div>
 
 </form>
@@ -136,8 +130,7 @@
                                 <span class="input-group-text">Search by</span>
                                 <select id="orderSearchBy" class="form-select" onchange="orderSearch.focus()">
                                     <option value="0">Order Code</option>
-                                    <option value="1">Customer</option>
-                                    <option value="2">PO Number</option>
+                                    <option value="1">Supplier</option>
                                 </select>
                                 <input type="text" id="orderSearch" class="form-control" maxlength="50" onkeypress="orderSearchOnKeypress(event)">
                             </div>
@@ -150,10 +143,8 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Code</th>
-                                            <th>Customer</th>
+                                            <th>Supplier</th>
                                             <th>Issue Date</th>
-                                            <th>Quotation</th>
-                                            <th>PO Number</th>
                                             <th>Delivery Plan Date</th>
                                         </tr>
                                     </thead>
@@ -216,62 +207,13 @@
         </div>
     </div>
 </div>
-<!-- Item Modal -->
-<div class="modal fade" id="itemModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Item List</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col mb-1">
-                            <div class="input-group input-group-sm mb-1">
-                                <span class="input-group-text">Search by</span>
-                                <select id="itemSearchBy" class="form-select" onchange="itemSearch.focus()">
-                                    <option value="0">Item Code</option>
-                                    <option value="1">Item Name</option>
-                                    <option value="2">Specification</option>
-                                </select>
-                                <input type="text" id="itemSearch" class="form-control" placeholder="Item Search" aria-label="Item Search" maxlength="50" onkeypress="itemSearchOnKeypress(event)">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="table-responsive" id="itemTabelContainer">
-                                <table id="itemTabel" class="table table-sm table-striped table-bordered table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Item Code</th>
-                                            <th>Item Name</th>
-                                            <th>Item Type</th>
-                                            <th>UM</th>
-                                            <th>Brand</th>
-                                            <th>Model</th>
-                                            <th>Specification</th>
-                                            <th>Category</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 <!-- Modal -->
 <div class="modal fade" id="quotationModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Approved Quotation List</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Purchase Request List</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -281,8 +223,8 @@
                             <div class="input-group input-group-sm mb-1">
                                 <span class="input-group-text">Search by</span>
                                 <select id="quotationSearchBy" class="form-select" onchange="quotationSearch.focus()">
-                                    <option value="0">Quotation Code</option>
-                                    <option value="1">Customer</option>
+                                    <option value="0">Purchase Request Code</option>
+                                    <option value="1">Supplier</option>
                                 </select>
                                 <input type="text" id="quotationSearch" class="form-control" maxlength="50" onkeypress="quotationSearchOnKeypress(event)">
                             </div>
@@ -295,7 +237,7 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Code</th>
-                                            <th>Customer</th>
+                                            <th>Supplier</th>
                                             <th>Issue Date</th>
                                             <th>Subject</th>
                                         </tr>
@@ -317,7 +259,7 @@
         autoclose: true,
         uiLibrary: 'bootstrap5'
     })
-    $("#orderPlanDeliveryDate").datepicker({
+    $("#orderDeliveryDate").datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
         uiLibrary: 'bootstrap5'
@@ -341,7 +283,7 @@
             customerTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please wait</td></tr>`
             $.ajax({
                 type: "GET",
-                url: "customer",
+                url: "supplier",
                 data: data,
                 dataType: "json",
                 success: function(response) {
@@ -356,24 +298,24 @@
                     response.data.forEach((arrayItem) => {
                         newrow = myTableBody.insertRow(-1)
                         newcell = newrow.insertCell(0)
-                        newcell.innerHTML = arrayItem['MCUS_CUSCD']
+                        newcell.innerHTML = arrayItem['MSUP_SUPCD']
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
                             $('#supplierModal').modal('hide')
-                            orderCustomerCode.value = arrayItem['MCUS_CUSCD']
-                            orderCustomer.value = arrayItem['MCUS_CUSNM']
+                            orderCustomerCode.value = arrayItem['MSUP_SUPCD']
+                            orderCustomer.value = arrayItem['MSUP_SUPNM']
                             orderAttn.focus()
                         }
                         newcell = newrow.insertCell(1)
-                        newcell.innerHTML = arrayItem['MCUS_CUSNM']
+                        newcell.innerHTML = arrayItem['MSUP_SUPNM']
                         newcell = newrow.insertCell(2)
-                        newcell.innerHTML = arrayItem['MCUS_CURCD']
+                        newcell.innerHTML = arrayItem['MSUP_CURCD']
                         newcell = newrow.insertCell(3)
-                        newcell.innerHTML = arrayItem['MCUS_TAXREG']
+                        newcell.innerHTML = arrayItem['MSUP_TAXREG']
                         newcell = newrow.insertCell(4)
-                        newcell.innerHTML = arrayItem['MCUS_ADDR1']
+                        newcell.innerHTML = arrayItem['MSUP_ADDR1']
                         newcell = newrow.insertCell(5)
-                        newcell.innerHTML = arrayItem['MCUS_TELNO']
+                        newcell.innerHTML = arrayItem['MSUP_TELNO']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -382,72 +324,6 @@
                     alertify.warning(xthrow);
                     e.target.disabled = false
                     customerTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please try again</td></tr>`
-                }
-            });
-        }
-    }
-
-    function btnShowItemModal() {
-        const myModal = new bootstrap.Modal(document.getElementById('itemModal'), {})
-        itemModal.addEventListener('shown.bs.modal', () => {
-            itemSearch.focus()
-        })
-        myModal.show()
-    }
-
-    function itemSearchOnKeypress(e) {
-        if (e.key === 'Enter') {
-            e.target.disabled = true
-            const data = {
-                searchBy: itemSearchBy.value,
-                searchValue: e.target.value,
-            }
-            itemTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="8">Please wait</td></tr>`
-            $.ajax({
-                type: "GET",
-                url: "item",
-                data: data,
-                dataType: "json",
-                success: function(response) {
-                    e.target.disabled = false
-                    let myContainer = document.getElementById("itemTabelContainer");
-                    let myfrag = document.createDocumentFragment();
-                    let cln = itemTabel.cloneNode(true);
-                    myfrag.appendChild(cln);
-                    let myTable = myfrag.getElementById("itemTabel");
-                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
-                    myTableBody.innerHTML = ''
-                    response.data.forEach((arrayItem) => {
-                        newrow = myTableBody.insertRow(-1)
-                        newcell = newrow.insertCell(0)
-                        newcell.innerHTML = arrayItem['MITM_ITMCD']
-                        newcell.style.cssText = 'cursor:pointer'
-                        newcell.onclick = () => {
-                            $('#itemModal').modal('hide')
-                            orderItemCode.value = arrayItem['MITM_ITMCD']
-                            orderItemName.value = arrayItem['MITM_ITMNM']
-                        }
-                        newcell = newrow.insertCell(1)
-                        newcell.innerHTML = arrayItem['MITM_ITMNM']
-                        newcell = newrow.insertCell(2)
-                        newcell.innerHTML = arrayItem['MITM_ITMTYPE']
-                        newcell = newrow.insertCell(3)
-                        newcell.innerHTML = arrayItem['MITM_STKUOM']
-                        newcell = newrow.insertCell(4)
-                        newcell.innerHTML = arrayItem['MITM_BRAND']
-                        newcell = newrow.insertCell(5)
-                        newcell.innerHTML = arrayItem['MITM_MODEL']
-                        newcell = newrow.insertCell(6)
-                        newcell.innerHTML = arrayItem['MITM_SPEC']
-                        newcell = newrow.insertCell(7)
-                        newcell.innerHTML = arrayItem['MITM_ITMCAT']
-                    })
-                    myContainer.innerHTML = ''
-                    myContainer.appendChild(myfrag)
-                },
-                error: function(xhr, xopt, xthrow) {
-                    alertify.warning(xthrow);
-                    e.target.disabled = false
                 }
             });
         }
@@ -506,18 +382,13 @@
     function btnSaveOnclick(pthis) {
         let itemCode = []
         let itemQty = []
-        let itemUsage = []
         let itemPrice = []
-        let itemOperatorPrice = []
-        let itemMobDemob = []
+
         const ttlrows = orderTable.rows.length
         for (let i = 1; i < ttlrows; i++) {
             itemCode.push(orderTable.rows[i].cells[1].innerText.trim())
-            itemUsage.push(orderTable.rows[i].cells[3].innerText.trim())
-            itemQty.push(1)
+            itemQty.push(orderTable.rows[i].cells[3].innerText.trim())
             itemPrice.push(numeral(orderTable.rows[i].cells[4].innerText.trim()).value())
-            itemOperatorPrice.push(numeral(orderTable.rows[i].cells[5].innerText.trim()).value())
-            itemMobDemob.push(numeral(orderTable.rows[i].cells[6].innerText.trim()).value())
         }
         if (ttlrows === 1) {
             alertify.message('nothing to be saved')
@@ -529,24 +400,16 @@
             return
         }
 
-        if (orderPlanDeliveryDate.value.trim().length <= 1) {
-            alertify.message('Plan Delivery date is required')
-            orderPlanDeliveryDate.focus()
-            return
-        }
         if (orderCode.value.length === 0) {
             const data = {
-                TSLO_CUSCD: orderCustomerCode.value.trim(),
-                TSLO_ATTN: orderAttn.value.trim(),
-                TSLO_QUOCD: orderQuotation.value.trim(),
-                TSLO_ISSUDT: orderIssueDate.value.trim(),
-                TSLO_PLAN_DLVDT: orderPlanDeliveryDate.value.trim(),
-                TSLODETA_ITMCD: itemCode,
-                TSLODETA_ITMQT: itemQty,
-                TSLODETA_USAGE: itemUsage,
-                TSLODETA_PRC: itemPrice,
-                TSLODETA_OPRPRC: itemOperatorPrice,
-                TSLODETA_MOBDEMOB: itemMobDemob,
+                TPCHORD_SUPCD: orderCustomerCode.value.trim(),
+                TPCHORD_ATTN: orderAttn.value.trim(),
+                TPCHORD_REQCD: orderQuotation.value.trim(),
+                TPCHORD_ISSUDT: orderIssueDate.value.trim(),
+                TPCHORD_DLVDT: orderDeliveryDate.value.trim(),
+                TPCHORDDETA_ITMCD: itemCode,
+                TPCHORDDETA_ITMQT: itemQty,
+                TPCHORDDETA_ITMPRC_PER: itemPrice,
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to save ?`)) {
@@ -554,7 +417,7 @@
                 pthis.disabled = true
                 $.ajax({
                     type: "POST",
-                    url: "receive-order",
+                    url: "purchase-order",
                     data: data,
                     dataType: "json",
                     success: function(response) {
@@ -586,10 +449,10 @@
             }
         } else {
             const data = {
-                TSLO_CUSCD: orderCustomerCode.value.trim(),
-                TSLO_ATTN: orderAttn.value.trim(),
-                TSLO_ISSUDT: orderIssueDate.value.trim(),
-                TSLO_PLAN_DLVDT: orderPlanDeliveryDate.value.trim(),
+                TPCHORD_SUPCD: orderCustomerCode.value.trim(),
+                TPCHORD_ATTN: orderAttn.value.trim(),
+                TPCHORD_ISSUDT: orderIssueDate.value.trim(),
+                TPCHORD_DLVDT: orderDeliveryDate.value.trim(),
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -597,7 +460,7 @@
                 pthis.disabled = true
                 $.ajax({
                     type: "PUT",
-                    url: `receive-order/${btoa(orderCode.value)}`,
+                    url: `purchase-order/${btoa(orderCode.value)}`,
                     data: data,
                     dataType: "json",
                     success: function(response) {
@@ -644,7 +507,7 @@
             orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please wait</td></tr>`
             $.ajax({
                 type: "GET",
-                url: "receive-order",
+                url: "purchase-order",
                 data: data,
                 dataType: "json",
                 success: function(response) {
@@ -659,31 +522,26 @@
                     response.data.forEach((arrayItem) => {
                         newrow = myTableBody.insertRow(-1)
                         newcell = newrow.insertCell(0)
-                        newcell.innerHTML = arrayItem['TSLO_SLOCD']
+                        newcell.innerHTML = arrayItem['TPCHORD_PCHCD']
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
                             $('#orderModal').modal('hide')
-                            orderCode.value = arrayItem['TSLO_SLOCD']
-                            orderIssueDate.value = arrayItem['TSLO_ISSUDT']
-                            orderQuotation.value = arrayItem['TSLO_QUOCD']
-                            orderCustomer.value = arrayItem['MCUS_CUSNM']
-                            orderCustomerCode.value = arrayItem['TSLO_CUSCD']
-                            orderAttn.value = arrayItem['TSLO_ATTN']
-                            orderPlanDeliveryDate.value = arrayItem['TSLO_PLAN_DLVDT']
+                            orderCode.value = arrayItem['TPCHORD_PCHCD']
+                            orderIssueDate.value = arrayItem['TPCHORD_ISSUDT']
+                            orderQuotation.value = arrayItem['TPCHORD_REQCD']
+                            orderCustomer.value = arrayItem['MSUP_SUPNM']
+                            orderCustomerCode.value = arrayItem['TPCHORD_SUPCD']
+                            orderDeliveryDate.value = arrayItem['TPCHORD_DLVDT']
                             loadReceiveDetail({
-                                doc: arrayItem['TSLO_SLOCD']
+                                doc: arrayItem['TPCHORD_PCHCD']
                             })
                         }
                         newcell = newrow.insertCell(1)
-                        newcell.innerHTML = arrayItem['MCUS_CUSNM']
+                        newcell.innerHTML = arrayItem['MSUP_SUPNM']
                         newcell = newrow.insertCell(2)
-                        newcell.innerHTML = arrayItem['TSLO_ISSUDT']
+                        newcell.innerHTML = arrayItem['TPCHORD_ISSUDT']
                         newcell = newrow.insertCell(3)
-                        newcell.innerHTML = arrayItem['TSLO_QUOCD']
-                        newcell = newrow.insertCell(4)
-                        newcell.innerHTML = arrayItem['TSLO_POCD']
-                        newcell = newrow.insertCell(5)
-                        newcell.innerHTML = arrayItem['TSLO_PLAN_DLVDT']
+                        newcell.innerHTML = arrayItem['TPCHORD_DLVDT']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -700,7 +558,7 @@
     function loadReceiveDetail(data) {
         $.ajax({
             type: "GET",
-            url: `receive-order/${btoa(data.doc)}`,
+            url: `purchase-order/document/${btoa(data.doc)}`,
             dataType: "json",
             success: function(response) {
                 let myContainer = document.getElementById("orderTableContainer");
@@ -717,6 +575,11 @@
                         if (selrow.title === 'selected') {
                             selrow.title = 'not selected'
                             selrow.classList.remove('table-info')
+                            selectedRowAtOrderTable.value = -1
+                            orderItemCode.value = ''
+                            orderItemName.value = ''
+                            orderQty.value = ''
+                            orderPrice.value = ''
                         } else {
                             const ttlrows = orderTable.rows.length
                             for (let i = 1; i < ttlrows; i++) {
@@ -725,27 +588,26 @@
                             }
                             selrow.title = 'selected'
                             selrow.classList.add('table-info')
+                            selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                            orderItemCode.value = selrow.cells[1].innerText
+                            orderItemName.value = selrow.cells[2].innerText
+                            orderQty.value = selrow.cells[3].innerText
+                            orderPrice.value = selrow.cells[4].innerText
                         }
                     }
                     newcell = newrow.insertCell(0)
                     newcell.classList.add('d-none')
                     newcell.innerHTML = arrayItem['id']
                     newcell = newrow.insertCell(1)
-                    newcell.innerHTML = arrayItem['TSLODETA_ITMCD']
+                    newcell.innerHTML = arrayItem['TPCHORDDETA_ITMCD']
                     newcell = newrow.insertCell(2)
                     newcell.innerHTML = arrayItem['MITM_ITMNM']
                     newcell = newrow.insertCell(3)
-                    newcell.classList.add('text-center')
-                    newcell.innerHTML = arrayItem['TSLODETA_USAGE']
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['TPCHORDDETA_ITMQT']
                     newcell = newrow.insertCell(4)
                     newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TSLODETA_PRC']).format(',')
-                    newcell = newrow.insertCell(5)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TSLODETA_OPRPRC']).format(',')
-                    newcell = newrow.insertCell(6)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TSLODETA_MOBDEMOB']).format(',')
+                    newcell.innerHTML = numeral(arrayItem['TPCHORDDETA_ITMPRC_PER']).format(',')
                 })
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
@@ -775,7 +637,7 @@
             quotationSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4">Please wait</td></tr>`
             $.ajax({
                 type: "GET",
-                url: "quotation",
+                url: "purchase-request",
                 data: data,
                 dataType: "json",
                 success: function(response) {
@@ -790,24 +652,23 @@
                     response.data.forEach((arrayItem) => {
                         newrow = myTableBody.insertRow(-1)
                         newcell = newrow.insertCell(0)
-                        newcell.innerHTML = arrayItem['TQUO_QUOCD']
+                        newcell.innerHTML = arrayItem['TPCHREQ_PCHCD']
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
                             $('#quotationModal').modal('hide')
-                            orderQuotation.value = arrayItem['TQUO_QUOCD']
-                            orderCustomer.value = arrayItem['MCUS_CUSNM']
-                            orderCustomerCode.value = arrayItem['TQUO_CUSCD']
-                            orderAttn.value = arrayItem['TQUO_ATTN']
+                            orderQuotation.value = arrayItem['TPCHREQ_PCHCD']
+                            orderCustomer.value = arrayItem['MSUP_SUPNM']
+                            orderCustomerCode.value = arrayItem['TPCHREQ_SUPCD']
                             loadQuotationDetail({
-                                doc: arrayItem['TQUO_QUOCD']
+                                doc: arrayItem['TPCHREQ_PCHCD']
                             })
                         }
                         newcell = newrow.insertCell(1)
-                        newcell.innerHTML = arrayItem['MCUS_CUSNM']
+                        newcell.innerHTML = arrayItem['MSUP_SUPNM']
                         newcell = newrow.insertCell(2)
-                        newcell.innerHTML = arrayItem['TQUO_ISSUDT']
+                        newcell.innerHTML = arrayItem['TPCHREQ_ISSUDT']
                         newcell = newrow.insertCell(3)
-                        newcell.innerHTML = arrayItem['TQUO_SBJCT']
+                        newcell.innerHTML = arrayItem['TPCHREQ_PURPOSE']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -824,7 +685,7 @@
     function loadQuotationDetail(data) {
         $.ajax({
             type: "GET",
-            url: `quotation/${btoa(data.doc)}`,
+            url: `purchase-request/${btoa(data.doc)}`,
             dataType: "json",
             success: function(response) {
                 let myContainer = document.getElementById("orderTableContainer");
@@ -841,6 +702,11 @@
                         if (selrow.title === 'selected') {
                             selrow.title = 'not selected'
                             selrow.classList.remove('table-info')
+                            selectedRowAtOrderTable.value = -1
+                            orderItemCode.value = ''
+                            orderItemName.value = ''
+                            orderQty.value = ''
+                            orderPrice.value = ''
                         } else {
                             const ttlrows = orderTable.rows.length
                             for (let i = 1; i < ttlrows; i++) {
@@ -849,27 +715,26 @@
                             }
                             selrow.title = 'selected'
                             selrow.classList.add('table-info')
+                            selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                            orderItemCode.value = selrow.cells[1].innerText
+                            orderItemName.value = selrow.cells[2].innerText
+                            orderQty.value = selrow.cells[3].innerText
+                            orderPrice.value = selrow.cells[4].innerText
                         }
                     }
                     newcell = newrow.insertCell(0)
                     newcell.classList.add('d-none')
                     newcell.innerHTML = arrayItem['id']
                     newcell = newrow.insertCell(1)
-                    newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
+                    newcell.innerHTML = arrayItem['TPCHREQDETA_ITMCD']
                     newcell = newrow.insertCell(2)
                     newcell.innerHTML = arrayItem['MITM_ITMNM']
                     newcell = newrow.insertCell(3)
-                    newcell.classList.add('text-center')
-                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['TPCHREQDETA_ITMQT']).value()
                     newcell = newrow.insertCell(4)
                     newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
-                    newcell = newrow.insertCell(5)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
-                    newcell = newrow.insertCell(6)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
+                    newcell.innerHTML = 0
                 })
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
@@ -878,5 +743,57 @@
                 alertify.warning(xthrow);
             }
         });
+    }
+
+    function btnUpdateLineOnclick(pthis) {
+        if (orderCode.value.trim().length > 0) {
+            const data = {
+                TPCHORDDETA_ITMPRC_PER: orderPrice.value,
+                _token: '{{ csrf_token() }}'
+            }
+            const idRow = orderTable.rows[selectedRowAtOrderTable.value].cells[0].innerText
+            if (confirm('Are you sure ?')) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "PUT",
+                    url: `purchase-order/items/${idRow}`,
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                        updateSelectedTable(selectedRowAtOrderTable.value)
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${msg}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
+        } else {
+            updateSelectedTable(selectedRowAtOrderTable.value)
+        }
+    }
+
+    function updateSelectedTable(pindex) {
+        orderTable.rows[pindex].cells[1].innerText = orderItemCode.value
+        orderTable.rows[pindex].cells[2].innerText = orderItemName.value
+        orderTable.rows[pindex].cells[3].innerText = orderQty.value
+        orderTable.rows[pindex].cells[4].innerText = orderPrice.value
+        tribinClearTextBoxByClassName('orderInputItem')
     }
 </script>

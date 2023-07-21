@@ -98,13 +98,16 @@ Route::get('condition', [QuotationController::class, 'getAllCondition'])->middle
 Route::get('approval/notifications', [HomeController::class, 'notifications'])->middleware('auth');
 Route::get('approval/quotation', [QuotationController::class, 'notifications'])->middleware('auth');
 Route::get('approval/purchase-request', [PurchaseController::class, 'notifications'])->middleware('auth');
+Route::get('approval/sales-order-draft', [ReceiveOrderController::class, 'notificationsDraft'])->middleware('auth');
 Route::get('approval/form/quotation', [QuotationController::class, 'formApproval'])->middleware('auth');
 Route::get('approval/form/purchase-request', [PurchaseController::class, 'formApproval'])->middleware('auth');
 
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
 Route::put('approve/purchase-request/{id}', [PurchaseController::class, 'approve'])->middleware('auth');
+Route::put('approve/sales-order-draft/{id}', [ReceiveOrderController::class, 'approve'])->middleware('auth');
 Route::get('approved/form/quotation', [QuotationController::class, 'formApproved'])->middleware('auth');
 Route::get('approved/form/purchase-request', [PurchaseController::class, 'formStatus'])->middleware('auth');
+Route::get('approved/form/sales-order-draft', [ReceiveOrderController::class, 'formApprovalDraft'])->middleware('auth');
 
 #Terkait Rejection
 Route::put('reject/quotations/{id}', [QuotationController::class, 'reject'])->middleware('auth');
@@ -166,6 +169,15 @@ Route::delete('purchase-request/items/{id}', [PurchaseController::class, 'delete
 
 # Terkait Purchase Order Transaction
 Route::get('purchase-order/form', [PurchaseController::class, 'formOrder'])->middleware('auth');
+Route::post('purchase-order', [PurchaseController::class, 'savePO'])->middleware('auth');
+Route::get('purchase-order', [PurchaseController::class, 'searchPO'])->middleware('auth');
+Route::get('purchase-order/document/{id}', [PurchaseController::class, 'loadPOById'])->middleware('auth');
+Route::put('purchase-order/items/{id}', [PurchaseController::class, 'updatePODetail'])->middleware('auth');
+Route::delete('purchase-order/items/{id}', [PurchaseController::class, 'updatePODetail'])->middleware('auth');
+
+# Terkait Sales Order Draft Transaction
+Route::get('sales-order-draft/document/{id}', [ReceiveOrderController::class, 'loadDraftById'])->middleware('auth');
+Route::get('sales-order-draft', [ReceiveOrderController::class, 'searchDraft'])->middleware('auth');
 
 # Terkait Receive
 Route::get('receive/form', [ReceiveController::class, 'index'])->middleware('auth');

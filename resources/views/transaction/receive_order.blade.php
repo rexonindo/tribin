@@ -40,9 +40,9 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="orderQuotation" class="form-label">Quotation Code</label>
+                                    <label for="orderQuotation" class="form-label">Quotation/RO Draft</label>
                                     <div class="input-group mb-1">
-                                        <input type="text" id="orderQuotation" class="form-control" placeholder="PNW..." disabled>
+                                        <input type="text" id="orderQuotation" class="form-control" placeholder="PNW/SOD" disabled>
                                         <button class="btn btn-primary" type="button" onclick="btnShowQuotationModal()"><i class="fas fa-search"></i></button>
                                     </div>
                                 </div>
@@ -63,6 +63,7 @@
                                                     <th class="d-none">idLine</th>
                                                     <th>Item Code</th>
                                                     <th>Item Name</th>
+                                                    <th class="text-center">Qty</th>
                                                     <th class="text-center">Usage</th>
                                                     <th class="text-end">Price</th>
                                                     <th class="text-end">Operator</th>
@@ -76,17 +77,23 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 mb-1">
+                                <div class="col-md-4 mb-1">
                                     <div class="input-group input-group-sm mb-1">
                                         <span class="input-group-text">Item Code</span>
                                         <input type="text" id="orderItemCode" class="form-control orderInputItem" placeholder="Item Code" disabled>
                                         <button class="btn btn-primary" type="button" onclick="btnShowItemModal()"><i class="fas fa-search"></i></button>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-1">
+                                <div class="col-md-4 mb-1">
                                     <div class="input-group input-group-sm mb-1">
                                         <span class="input-group-text">Item Name</span>
                                         <input type="text" id="orderItemName" class="form-control orderInputItem" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-1">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <span class="input-group-text">Qty</span>
+                                        <input type="text" id="orderItemQty" class="form-control orderInputItem">
                                     </div>
                                 </div>
                             </div>
@@ -123,6 +130,7 @@
                                 <div class="col-md-12 mb-1 text-center">
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-secondary" id="btnSaveLine" onclick="btnSaveLineOnclick(this)">Save line</button>
+                                        <button type="button" class="btn btn-outline-secondary" id="btnUpdateLine" onclick="btnUpdateLineOnclick(this)">Update line</button>
                                         <button type="button" class="btn btn-outline-secondary" id="btnRemoveLine" onclick="btnRemoveLineOnclick(this)">Remove line</button>
                                     </div>
                                 </div>
@@ -160,6 +168,7 @@
             </div>
         </div>
         <input type="hidden" id="orderInputMode" value="0">
+        <input type="hidden" id="selectedRowAtOrderTable" value="-1">
     </div>
 
 </form>
@@ -314,11 +323,22 @@
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Approved Quotation List</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Approved Quotation / RO Draft List</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
+                    <div class="row">
+                        <div class="col mb-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <span class="input-group-text">Source</span>
+                                <select id="orderSourceBy" class="form-select" onchange="orderSourceByOnlClick(this)">
+                                    <option value="1">Quotation</option>
+                                    <option value="2">Sales Order Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col mb-1">
                             <div class="input-group input-group-sm mb-1">
@@ -341,6 +361,7 @@
                                             <th>Customer</th>
                                             <th>Issue Date</th>
                                             <th>Subject</th>
+                                            <th>Customer PO</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -510,6 +531,14 @@
             if (selrow.title === 'selected') {
                 selrow.title = 'not selected'
                 selrow.classList.remove('table-info')
+                selectedRowAtOrderTable.value = -1
+                orderItemCode.value = ''
+                orderItemName.value = ''
+                orderItemQty.value = ''
+                orderUsage.value = ''
+                orderPrice.value = ''
+                orderOperator.value = ''
+                orderMOBDEMOB.value = ''
             } else {
                 const ttlrows = orderTable.rows.length
                 for (let i = 1; i < ttlrows; i++) {
@@ -518,6 +547,14 @@
                 }
                 selrow.title = 'selected'
                 selrow.classList.add('table-info')
+                selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                orderItemCode.value = selrow.cells[1].innerText
+                orderItemName.value = selrow.cells[2].innerText
+                orderItemQty.value = selrow.cells[3].innerText
+                orderUsage.value = selrow.cells[4].innerText
+                orderPrice.value = selrow.cells[5].innerText
+                orderOperator.value = selrow.cells[6].innerText
+                orderMOBDEMOB.value = selrow.cells[7].innerText
             }
         }
         newcell = newrow.insertCell(0)
@@ -530,18 +567,22 @@
         newcell.innerHTML = orderItemName.value
 
         newcell = newrow.insertCell(3)
-        newcell.innerHTML = orderUsage.value
+        newcell.innerHTML = orderItemQty.value
         newcell.classList.add('text-center')
 
         newcell = newrow.insertCell(4)
+        newcell.innerHTML = orderUsage.value
+        newcell.classList.add('text-center')
+
+        newcell = newrow.insertCell(5)
         newcell.innerHTML = numeral(orderPrice.value).format(',')
         newcell.classList.add('text-end')
 
-        newcell = newrow.insertCell(5)
+        newcell = newrow.insertCell(6)
         newcell.innerHTML = numeral(orderOperator.value).format(',')
         newcell.classList.add('text-end')
 
-        newcell = newrow.insertCell(6)
+        newcell = newrow.insertCell(7)
         newcell.innerHTML = numeral(orderMOBDEMOB.value).format(',')
         newcell.classList.add('text-end')
 
@@ -607,12 +648,22 @@
         let itemMobDemob = []
         const ttlrows = orderTable.rows.length
         for (let i = 1; i < ttlrows; i++) {
+            let price = numeral(orderTable.rows[i].cells[5].innerText.trim()).value()
+            let qty = numeral(orderTable.rows[i].cells[3].innerText.trim()).value()
+            if (price <= 0) {
+                alertify.warning('Price should not be zero')
+                return
+            }
+            if (qty <= 0) {
+                alertify.warning('Qty should not be zero')
+                return
+            }
             itemCode.push(orderTable.rows[i].cells[1].innerText.trim())
-            itemUsage.push(orderTable.rows[i].cells[3].innerText.trim())
-            itemQty.push(1)
-            itemPrice.push(numeral(orderTable.rows[i].cells[4].innerText.trim()).value())
-            itemOperatorPrice.push(numeral(orderTable.rows[i].cells[5].innerText.trim()).value())
-            itemMobDemob.push(numeral(orderTable.rows[i].cells[6].innerText.trim()).value())
+            itemQty.push(orderTable.rows[i].cells[3].innerText.trim())
+            itemUsage.push(orderTable.rows[i].cells[4].innerText.trim())
+            itemPrice.push(price)
+            itemOperatorPrice.push(numeral(orderTable.rows[i].cells[6].innerText.trim()).value())
+            itemMobDemob.push(numeral(orderTable.rows[i].cells[7].innerText.trim()).value())
         }
         if (ttlrows === 1) {
             alertify.message('nothing to be saved')
@@ -630,8 +681,8 @@
             return
         }
         if (orderCode.value.length === 0) {
-            if (orderPONumber.value.trim().length <= 1) {                
-                if(!confirm('Leave PO from Customer blank ?')){
+            if (orderPONumber.value.trim().length <= 1) {
+                if (!confirm('Leave PO from Customer blank ?')) {
                     orderPONumber.focus()
                     return
                 }
@@ -822,6 +873,14 @@
                         if (selrow.title === 'selected') {
                             selrow.title = 'not selected'
                             selrow.classList.remove('table-info')
+                            selectedRowAtOrderTable.value = -1
+                            orderItemCode.value = ''
+                            orderItemName.value = ''
+                            orderItemQty.value = ''
+                            orderUsage.value = ''
+                            orderPrice.value = ''
+                            orderOperator.value = ''
+                            orderMOBDEMOB.value = ''
                         } else {
                             const ttlrows = orderTable.rows.length
                             for (let i = 1; i < ttlrows; i++) {
@@ -830,6 +889,14 @@
                             }
                             selrow.title = 'selected'
                             selrow.classList.add('table-info')
+                            selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                            orderItemCode.value = selrow.cells[1].innerText
+                            orderItemName.value = selrow.cells[2].innerText
+                            orderItemQty.value = selrow.cells[3].innerText
+                            orderUsage.value = selrow.cells[4].innerText
+                            orderPrice.value = selrow.cells[5].innerText
+                            orderOperator.value = selrow.cells[6].innerText
+                            orderMOBDEMOB.value = selrow.cells[7].innerText
                         }
                     }
                     newcell = newrow.insertCell(0)
@@ -839,16 +906,21 @@
                     newcell.innerHTML = arrayItem['TSLODETA_ITMCD']
                     newcell = newrow.insertCell(2)
                     newcell.innerHTML = arrayItem['MITM_ITMNM']
+
                     newcell = newrow.insertCell(3)
                     newcell.classList.add('text-center')
-                    newcell.innerHTML = arrayItem['TSLODETA_USAGE']
+                    newcell.innerHTML = arrayItem['TSLODETA_ITMQT']
                     newcell = newrow.insertCell(4)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TSLODETA_PRC']).format(',')
+                    newcell.classList.add('text-center')
+                    newcell.innerHTML = arrayItem['TSLODETA_USAGE']
+
                     newcell = newrow.insertCell(5)
                     newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TSLODETA_OPRPRC']).format(',')
+                    newcell.innerHTML = numeral(arrayItem['TSLODETA_PRC']).format(',')
                     newcell = newrow.insertCell(6)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['TSLODETA_OPRPRC']).format(',')
+                    newcell = newrow.insertCell(7)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['TSLODETA_MOBDEMOB']).format(',')
                 })
@@ -865,6 +937,7 @@
         const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
         quotationModal.addEventListener('shown.bs.modal', () => {
             quotationSearch.focus()
+            quotationSavedTabel.getElementsByTagName('tbody').innerHTML = ''
         })
         myModal.show()
     }
@@ -877,53 +950,90 @@
                 searchValue: e.target.value,
                 approval: '1',
             }
-            quotationSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4">Please wait</td></tr>`
+            quotationSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="5">Please wait</td></tr>`
             $.ajax({
                 type: "GET",
-                url: "quotation",
+                url: orderSourceBy.value == '2' ? "sales-order-draft" : "quotation",
                 data: data,
                 dataType: "json",
                 success: function(response) {
                     e.target.disabled = false
-                    let myContainer = document.getElementById("quotationSavedTabelContainer");
-                    let myfrag = document.createDocumentFragment();
-                    let cln = quotationSavedTabel.cloneNode(true);
-                    myfrag.appendChild(cln);
-                    let myTable = myfrag.getElementById("quotationSavedTabel");
-                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
-                    myTableBody.innerHTML = ''
-                    response.data.forEach((arrayItem) => {
-                        newrow = myTableBody.insertRow(-1)
-                        newcell = newrow.insertCell(0)
-                        newcell.innerHTML = arrayItem['TQUO_QUOCD']
-                        newcell.style.cssText = 'cursor:pointer'
-                        newcell.onclick = () => {
-                            $('#quotationModal').modal('hide')
-                            orderQuotation.value = arrayItem['TQUO_QUOCD']
-                            orderCustomer.value = arrayItem['MCUS_CUSNM']
-                            orderCustomerCode.value = arrayItem['TQUO_CUSCD']
-                            orderAttn.value = arrayItem['TQUO_ATTN']
-                            loadQuotationDetail({
-                                doc: arrayItem['TQUO_QUOCD']
-                            })
-                        }
-                        newcell = newrow.insertCell(1)
-                        newcell.innerHTML = arrayItem['MCUS_CUSNM']
-                        newcell = newrow.insertCell(2)
-                        newcell.innerHTML = arrayItem['TQUO_ISSUDT']
-                        newcell = newrow.insertCell(3)
-                        newcell.innerHTML = arrayItem['TQUO_SBJCT']
+                    dataToQuotationTable({
+                        type: orderSourceBy.value == '2' ? 'sod' : 'quo',
+                        data: response.data
                     })
-                    myContainer.innerHTML = ''
-                    myContainer.appendChild(myfrag)
                 },
                 error: function(xhr, xopt, xthrow) {
                     alertify.warning(xthrow);
                     e.target.disabled = false
-                    quotationSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4"></td></tr>`
+                    quotationSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="5"></td></tr>`
                 }
             });
         }
+    }
+
+    function dataToQuotationTable(param) {
+        let myContainer = document.getElementById("quotationSavedTabelContainer");
+        let myfrag = document.createDocumentFragment();
+        let cln = quotationSavedTabel.cloneNode(true);
+        myfrag.appendChild(cln);
+        let myTable = myfrag.getElementById("quotationSavedTabel");
+        let myTableBody = myTable.getElementsByTagName("tbody")[0];
+        myTableBody.innerHTML = ''
+        if (param.type == 'sod') {
+            param.data.forEach((arrayItem) => {
+                newrow = myTableBody.insertRow(-1)
+                newcell = newrow.insertCell(0)
+                newcell.innerHTML = arrayItem['TSLODRAFT_SLOCD']
+                newcell.style.cssText = 'cursor:pointer'
+                newcell.onclick = () => {
+                    $('#quotationModal').modal('hide')
+                    orderQuotation.value = arrayItem['TSLODRAFT_SLOCD']
+                    orderCustomer.value = arrayItem['MCUS_CUSNM']
+                    orderCustomerCode.value = arrayItem['TSLODRAFT_CUSCD']
+                    orderAttn.value = arrayItem['TSLODRAFT_ATTN']
+                    orderPONumber.value = arrayItem['TSLODRAFT_POCD']
+                    loadSalesDraftDetail({
+                        doc: arrayItem['TSLODRAFT_SLOCD']
+                    })
+                }
+                newcell = newrow.insertCell(1)
+                newcell.innerHTML = arrayItem['MCUS_CUSNM']
+                newcell = newrow.insertCell(2)
+                newcell.innerHTML = arrayItem['TSLODRAFT_ISSUDT']
+                newcell = newrow.insertCell(3)
+                newcell.innerHTML = ''
+                newcell = newrow.insertCell(4)
+                newcell.innerHTML = arrayItem['TSLODRAFT_POCD']
+            })
+        } else {
+            param.data.forEach((arrayItem) => {
+                newrow = myTableBody.insertRow(-1)
+                newcell = newrow.insertCell(0)
+                newcell.innerHTML = arrayItem['TQUO_QUOCD']
+                newcell.style.cssText = 'cursor:pointer'
+                newcell.onclick = () => {
+                    $('#quotationModal').modal('hide')
+                    orderQuotation.value = arrayItem['TQUO_QUOCD']
+                    orderCustomer.value = arrayItem['MCUS_CUSNM']
+                    orderCustomerCode.value = arrayItem['TQUO_CUSCD']
+                    orderAttn.value = arrayItem['TQUO_ATTN']
+                    loadQuotationDetail({
+                        doc: arrayItem['TQUO_QUOCD']
+                    })
+                }
+                newcell = newrow.insertCell(1)
+                newcell.innerHTML = arrayItem['MCUS_CUSNM']
+                newcell = newrow.insertCell(2)
+                newcell.innerHTML = arrayItem['TQUO_ISSUDT']
+                newcell = newrow.insertCell(3)
+                newcell.innerHTML = arrayItem['TQUO_SBJCT']
+                newcell = newrow.insertCell(4)
+                newcell.innerHTML = ''
+            })
+        }
+        myContainer.innerHTML = ''
+        myContainer.appendChild(myfrag)
     }
 
     function loadQuotationDetail(data) {
@@ -946,6 +1056,14 @@
                         if (selrow.title === 'selected') {
                             selrow.title = 'not selected'
                             selrow.classList.remove('table-info')
+                            selectedRowAtOrderTable.value = -1
+                            orderItemCode.value = ''
+                            orderItemName.value = ''
+                            orderItemQty.value = ''
+                            orderUsage.value = ''
+                            orderPrice.value = ''
+                            orderOperator.value = ''
+                            orderMOBDEMOB.value = ''
                         } else {
                             const ttlrows = orderTable.rows.length
                             for (let i = 1; i < ttlrows; i++) {
@@ -954,6 +1072,14 @@
                             }
                             selrow.title = 'selected'
                             selrow.classList.add('table-info')
+                            selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                            orderItemCode.value = selrow.cells[1].innerText
+                            orderItemName.value = selrow.cells[2].innerText
+                            orderItemQty.value = selrow.cells[3].innerText
+                            orderUsage.value = selrow.cells[4].innerText
+                            orderPrice.value = selrow.cells[5].innerText
+                            orderOperator.value = selrow.cells[6].innerText
+                            orderMOBDEMOB.value = selrow.cells[7].innerText
                         }
                     }
                     newcell = newrow.insertCell(0)
@@ -965,14 +1091,17 @@
                     newcell.innerHTML = arrayItem['MITM_ITMNM']
                     newcell = newrow.insertCell(3)
                     newcell.classList.add('text-center')
-                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                    newcell.innerHTML = 1
                     newcell = newrow.insertCell(4)
+                    newcell.classList.add('text-center')
+                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                    newcell = newrow.insertCell(5)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
                     newcell = newrow.insertCell(5)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
-                    newcell = newrow.insertCell(6)
+                    newcell = newrow.insertCell(7)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
                 })
@@ -983,5 +1112,146 @@
                 alertify.warning(xthrow);
             }
         });
+    }
+
+    function loadSalesDraftDetail(data) {
+        $.ajax({
+            type: "GET",
+            url: `sales-order-draft/document/${btoa(data.doc)}`,
+            dataType: "json",
+            success: function(response) {
+                let myContainer = document.getElementById("orderTableContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = orderTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("orderTable");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                response.dataItem.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newrow.onclick = (event) => {
+                        const selrow = orderTable.rows[event.target.parentElement.rowIndex]
+                        if (selrow.title === 'selected') {
+                            selrow.title = 'not selected'
+                            selrow.classList.remove('table-info')
+                            selectedRowAtOrderTable.value = -1
+                            orderItemCode.value = ''
+                            orderItemName.value = ''
+                            orderItemQty.value = ''
+                            orderUsage.value = ''
+                            orderPrice.value = ''
+                            orderOperator.value = ''
+                            orderMOBDEMOB.value = ''
+                        } else {
+                            const ttlrows = orderTable.rows.length
+                            for (let i = 1; i < ttlrows; i++) {
+                                orderTable.rows[i].classList.remove('table-info')
+                                orderTable.rows[i].title = 'not selected'
+                            }
+                            selrow.title = 'selected'
+                            selrow.classList.add('table-info')
+                            selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                            orderItemCode.value = selrow.cells[1].innerText
+                            orderItemName.value = selrow.cells[2].innerText
+                            orderItemQty.value = selrow.cells[3].innerText
+                            orderUsage.value = selrow.cells[4].innerText
+                            orderPrice.value = selrow.cells[5].innerText
+                            orderOperator.value = selrow.cells[6].innerText
+                            orderMOBDEMOB.value = selrow.cells[7].innerText
+                        }
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.classList.add('d-none')
+                    newcell.innerHTML = arrayItem['id']
+                    newcell = newrow.insertCell(1)
+                    newcell.innerHTML = arrayItem['TSLODRAFTDETA_ITMCD']
+                    newcell = newrow.insertCell(2)
+                    newcell.innerHTML = arrayItem['MITM_ITMNM']
+                    newcell = newrow.insertCell(3)
+                    newcell.classList.add('text-center')
+                    newcell.innerHTML = arrayItem['TSLODRAFTDETA_ITMQT']
+                    newcell = newrow.insertCell(4)
+                    newcell.classList.add('text-center')
+                    newcell.innerHTML = 0
+                    newcell = newrow.insertCell(5)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['TSLODRAFTDETA_ITMPRC_PER']).format(',')
+                    newcell = newrow.insertCell(5)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = 0
+                    newcell = newrow.insertCell(7)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = 0
+                })
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+            }
+        });
+    }
+
+    function btnUpdateLineOnclick() {
+        if (orderCode.value.trim().length > 0) {
+            const data = {
+                TPCHORDDETA_ITMPRC_PER: orderPrice.value,
+                _token: '{{ csrf_token() }}'
+            }
+            const idRow = orderTable.rows[selectedRowAtOrderTable.value].cells[0].innerText
+            if (confirm('Are you sure ?')) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "PUT",
+                    url: `receive-order/items/${idRow}`,
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                        updateSelectedTable(selectedRowAtOrderTable.value)
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${msg}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
+        } else {
+            updateSelectedTable(selectedRowAtOrderTable.value)
+        }
+    }
+
+    function updateSelectedTable(pindex) {
+        orderTable.rows[pindex].cells[1].innerText = orderItemCode.value
+        orderTable.rows[pindex].cells[2].innerText = orderItemName.value
+        orderTable.rows[pindex].cells[3].innerText = orderItemQty.value
+        orderTable.rows[pindex].cells[4].innerText = orderUsage.value
+        orderTable.rows[pindex].cells[5].innerText = orderPrice.value
+        orderTable.rows[pindex].cells[6].innerText = orderOperator.value
+        orderTable.rows[pindex].cells[7].innerText = orderMOBDEMOB.value
+        tribinClearTextBoxByClassName('orderInputItem')
+    }
+
+    function orderSourceByOnlClick(pthis) {
+        quotationSearchBy.innerHTML = pthis.value === '1' ? ` <option value="0">Quotation Code</option>
+                                    <option value="1">Customer</option>` : `<option value="0">Order Draft Code</option>
+                                    <option value="1">Customer Name</option>
+                                    <option value="2">Customer PO</option>`
+        quotationSearch.focus()
     }
 </script>

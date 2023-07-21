@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\T_PCHREQHEAD;
 use App\Models\T_QUOHEAD;
+use App\Models\T_SLO_DRAFT_DETAIL;
+use App\Models\T_SLO_DRAFT_HEAD;
 use App\Models\T_SLOHEAD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,6 +83,7 @@ class HomeController extends Controller
     {
         $dataTobeApproved = $dataPurchaseRequestTobeUpproved = [];
         $dataApproved = $dataPurchaseRequestApproved = [];
+        $dataSalesOrderDraftTobeProcessed = [];
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
@@ -123,6 +126,18 @@ class HomeController extends Controller
                 ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
                 ->whereNull("TSLO_QUOCD")
                 ->groupBy('TQUO_QUOCD')->get();
+
+            # Query untuk data Purchase Order Draft
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_SLO_DRAFT_DETAIL')
+                ->selectRaw("COUNT(*) TTLDETAIL, TSLODRAFTDETA_SLOCD")
+                ->groupBy("TSLODRAFTDETA_SLOCD")
+                ->whereNull('deleted_at');
+            $dataSalesOrderDraftTobeProcessed = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(DB::raw("TSLODRAFT_SLOCD,max(TTLDETAIL) TTLDETAIL, max(T_SLO_DRAFT_HEAD.created_at) CREATED_AT,max(TSLODRAFT_POCD) TSLODRAFT_POCD"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TSLODRAFT_SLOCD", "=", "TSLODRAFTDETA_SLOCD");
+                })
+                ->whereNull("TSLODRAFT_APPRVDT")
+                ->groupBy('TSLODRAFT_SLOCD')->get();
         }
 
         if (in_array(Auth::user()->role, ['purchasing'])) {
@@ -141,7 +156,8 @@ class HomeController extends Controller
 
         return [
             'data' => $dataTobeApproved, 'dataApproved' => $dataApproved,
-            'dataPurchaseRequest' => $dataPurchaseRequestTobeUpproved, 'dataPurchaseRequestApproved' => $dataPurchaseRequestApproved
+            'dataPurchaseRequest' => $dataPurchaseRequestTobeUpproved, 'dataPurchaseRequestApproved' => $dataPurchaseRequestApproved,
+            'dataSalesOrderDraft' => $dataSalesOrderDraftTobeProcessed
         ];
     }
 }

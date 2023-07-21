@@ -133,12 +133,106 @@ class PurchaseController extends Controller
         }
     }
 
+    public function savePO(Request $request)
+    {
+        # data header
+        $validator = Validator::make($request->all(), [
+            'TPCHORD_SUPCD' => 'required',
+            'TPCHORD_ATTN' => 'required',
+            'TPCHORD_REQCD' => 'required',
+            'TPCHORD_ISSUDT' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHREQHEAD')
+            ->whereMonth('created_at', '=', date('m'))
+            ->whereYear('created_at', '=', date('Y'))
+            ->max('TPCHREQ_LINE');
+
+        # Generate Nomor PO
+        $RSAlias = CompanyGroup::select('alias_code')
+            ->where('connection', $this->dedicatedConnection)
+            ->first();
+
+        $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHORDHEAD')
+            ->whereMonth('created_at', '=', date('m'))
+            ->whereYear('created_at', '=', date('Y'))
+            ->max('TPCHORD_LINE');
+
+        $newPOCode = '';
+        if (!$LastLine) {
+            $LastLine = 1;
+            $newPOCode = '001/' . $RSAlias->alias_code . '-PO/' . $this->monthOfRoma[date('n') - 1] . '/' . date('y');
+        } else {
+            $LastLine++;
+            $newPOCode = substr('00' . $LastLine, -3) . '/' . $RSAlias->alias_code . '-PO/' . $this->monthOfRoma[date('n') - 1] . '/' . date('y');
+        }
+
+        $headerTable = [
+            'TPCHORD_PCHCD' => $newPOCode,
+            'TPCHORD_ATTN' => $request->TPCHORD_ATTN,
+            'TPCHORD_SUPCD' => $request->TPCHORD_SUPCD,
+            'TPCHORD_LINE' => $LastLine,
+            'TPCHORD_ISSUDT' => $request->TPCHORD_ISSUDT,
+            'TPCHORD_REQCD' => $request->TPCHORD_REQCD,
+            'created_by' => Auth::user()->nick_name,
+        ];
+
+        T_PCHORDHEAD::on($this->dedicatedConnection)->create($headerTable);
+
+        # data detail item
+        $validator = Validator::make($request->all(), [
+            'TPCHORDDETA_ITMCD' => 'required|array',
+            'TPCHORDDETA_ITMQT' => 'required|array',
+            'TPCHORDDETA_ITMQT.*' => 'required|numeric',
+            'TPCHORDDETA_ITMPRC_PER' => 'required|array',
+            'TPCHORDDETA_ITMPRC_PER.*' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        $countDetail = count($request->TPCHORDDETA_ITMCD);
+        $itemDetail = [];
+        for ($i = 0; $i < $countDetail; $i++) {
+            $itemDetail[] = [
+                'TPCHORDDETA_PCHCD' => $newPOCode,
+                'TPCHORDDETA_ITMCD' => $request->TPCHORDDETA_ITMCD[$i],
+                'TPCHORDDETA_ITMQT' => $request->TPCHORDDETA_ITMQT[$i],
+                'TPCHORDDETA_ITMPRC_PER' => $request->TPCHORDDETA_ITMPRC_PER[$i],
+                'created_by' => Auth::user()->nick_name,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+        if (!empty($itemDetail)) {
+            T_PCHORDDETA::on($this->dedicatedConnection)->insert($itemDetail);
+        }
+
+        return [
+            'msg' => 'OK', 'doc' => $newPOCode
+        ];
+    }
+
     public function update(Request $request)
     {
         # ubah data header
         $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
             ->update([
                 'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE, 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT, 'TPCHREQ_TYPE' => $request->TPCHREQ_TYPE, 'TPCHREQ_SUPCD' => $request->TPCHREQ_SUPCD
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
+
+    public function updatePODetail(Request $request)
+    {
+        # ubah data header
+        $affectedRow = T_PCHORDDETA::on($this->dedicatedConnection)->where('id', $request->id)
+            ->update([
+                'TPCHORDDETA_ITMPRC_PER' => $request->TPCHORDDETA_ITMPRC_PER
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
@@ -150,11 +244,39 @@ class PurchaseController extends Controller
             'TPCHREQ_PURPOSE',
         ];
 
-        $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME", "TPCHREQ_SUPCD", "MSUP_SUPNM"])
-            ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
-            ->leftJoin("M_SUP", "TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
+        if ($request->approval == '1') {
+            $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME", "TPCHREQ_SUPCD", "MSUP_SUPNM"])
+                ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
+                ->leftJoin("M_SUP", "TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
+                ->leftJoin("T_PCHORDHEAD", "TPCHREQ_PCHCD", "=", "TPCHORD_REQCD")
+                ->where('TPCHREQ_TYPE', '1')
+                ->whereNull("TPCHORD_REQCD")
+                ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+                ->get();
+        } else {
+            $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME", "TPCHREQ_SUPCD", "MSUP_SUPNM"])
+                ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
+                ->leftJoin("M_SUP", "TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
+                ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+                ->get();
+        }
+
+
+        return ['data' => $RS];
+    }
+
+    function searchPO(Request $request)
+    {
+        $columnMap = [
+            'TPCHORD_PCHCD',
+            'MSUP_SUPNM',
+        ];
+
+        $RS = T_PCHORDHEAD::on($this->dedicatedConnection)->select(["TPCHORD_PCHCD", "TPCHORD_SUPCD", "MSUP_SUPNM", "TPCHORD_ISSUDT", "TPCHORD_DLVDT","TPCHORD_REQCD"])
+            ->leftJoin("M_SUP", "TPCHORD_SUPCD", "=", "MSUP_SUPCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
+
         return ['data' => $RS];
     }
 
@@ -163,6 +285,15 @@ class PurchaseController extends Controller
         $RS = T_PCHREQDETA::on($this->dedicatedConnection)->select(["id", "TPCHREQDETA_ITMCD", "MITM_ITMNM", "TPCHREQDETA_ITMQT", "TPCHREQDETA_REQDT", "TPCHREQDETA_REMARK"])
             ->leftJoin("M_ITM", "TPCHREQDETA_ITMCD", "=", "MITM_ITMCD")
             ->where('TPCHREQDETA_PCHCD', base64_decode($request->id))
+            ->whereNull('deleted_at')->get();
+        return ['dataItem' => $RS];
+    }
+
+    function loadPOById(Request $request)
+    {
+        $RS = T_PCHORDDETA::on($this->dedicatedConnection)->select(["id", "TPCHORDDETA_ITMCD", "MITM_ITMNM", "TPCHORDDETA_ITMQT", "TPCHORDDETA_ITMPRC_PER"])
+            ->leftJoin("M_ITM", "TPCHORDDETA_ITMCD", "=", "MITM_ITMCD")
+            ->where('TPCHORDDETA_PCHCD', base64_decode($request->id))
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS];
     }
