@@ -184,8 +184,8 @@
                 <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown" title="Company">
                     <span class="align-text-bottom fas fa-user"></span> {{ substr(Auth::user()->name, 0 ,11)}}
                 </a>
-                <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
-                    <li><a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6 text-danger" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
+                <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end dropdown-menu-sm-end">
+                    <li><a class="dropdown-item text-danger" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
                             <span data-feather="log-out" class="align-text-bottom"></span> Sign out
                         </a></li>
                 </ul>
