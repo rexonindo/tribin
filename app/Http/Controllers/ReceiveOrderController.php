@@ -159,6 +159,8 @@ class ReceiveOrderController extends Controller
 
         $RS = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(["TSLODRAFT_SLOCD", "TSLODRAFT_CUSCD", "MCUS_CUSNM", "TSLODRAFT_ISSUDT", "TSLODRAFT_POCD", "TSLODRAFT_ATTN"])
             ->leftJoin("M_CUS", "TSLODRAFT_CUSCD", "=", "MCUS_CUSCD")
+            ->leftJoin("T_SLOHEAD", "TSLODRAFT_SLOCD", "=", "TSLO_QUOCD")
+            ->whereNull("TSLO_QUOCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
         return ['data' => $RS];

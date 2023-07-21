@@ -136,7 +136,9 @@ class HomeController extends Controller
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TSLODRAFT_SLOCD", "=", "TSLODRAFTDETA_SLOCD");
                 })
+                ->leftJoin("T_SLOHEAD", "TSLODRAFT_SLOCD", "=", "TSLO_QUOCD")
                 ->whereNull("TSLODRAFT_APPRVDT")
+                ->whereNull("TSLO_QUOCD")
                 ->groupBy('TSLODRAFT_SLOCD')->get();
         }
 
