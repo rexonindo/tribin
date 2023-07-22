@@ -136,6 +136,7 @@ Route::get('report-form/maintenance-schedule', [MaintenanceController::class, 'f
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');
 Route::get('PDF/purchase-request/{id}', [PurchaseController::class, 'toPDF'])->middleware('auth');
+Route::get('PDF/purchase-order/{id}', [PurchaseController::class, 'POtoPDF'])->middleware('auth');
 
 # Terkait Company Group
 Route::get('company/form', [CompanyGroupController::class, 'index'])->middleware('auth');

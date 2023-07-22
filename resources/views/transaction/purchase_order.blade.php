@@ -4,6 +4,7 @@
         <div class="btn-group">
             <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)" title="New"><i class="fas fa-file"></i></button>
             <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)" title="Save"><i class="fas fa-save"></i></button>
+            <button type="button" class="btn btn-outline-primary" id="btnPrint" onclick="btnPrintOnclick(this)" title="Print"><i class="fas fa-print"></i></button>
         </div>
     </div>
 </div>
@@ -795,5 +796,14 @@
         orderTable.rows[pindex].cells[3].innerText = orderQty.value
         orderTable.rows[pindex].cells[4].innerText = orderPrice.value
         tribinClearTextBoxByClassName('orderInputItem')
+    }
+
+    function btnPrintOnclick(){
+        if (orderCode.value.trim().length === 0) {
+            alertify.message('Code is required')
+            orderCode.focus()
+            return
+        }
+        window.open(`PDF/purchase-order/${btoa(orderCode.value)}`, '_blank');
     }
 </script>

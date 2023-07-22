@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('MSUP_SUPCD', 10)->primary();
             $table->string('MSUP_CURCD', 3);
             $table->string('MSUP_SUPNM', 50);
-            $table->string('MSUP_TAXREG', 25);
+            $table->string('MSUP_TAXREG', 25)->nullable();
             $table->string('MSUP_ADDR1', 50);
             $table->string('MSUP_TELNO', 20);
             $table->string('created_by', 16);
