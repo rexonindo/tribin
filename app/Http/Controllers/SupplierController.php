@@ -32,8 +32,7 @@ class SupplierController extends Controller
                 Rule::unique($this->dedicatedConnection . '.M_SUP', 'MSUP_SUPCD')
             ],
             'MSUP_SUPNM' => 'required',
-            'MSUP_CURCD' => 'required',
-            'MSUP_TAXREG' => 'required',
+            'MSUP_CURCD' => 'required',            
             'MSUP_ADDR1' => 'required',
             'MSUP_TELNO' => 'required',
         ]);
