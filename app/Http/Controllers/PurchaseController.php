@@ -538,15 +538,15 @@ class PurchaseController extends Controller
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->MultiCell(10, 5, 'Note', 0);
         $y += 5;
-        $this->fpdf->SetXY(3+10, $y);
+        $this->fpdf->SetXY(3 + 10, $y);
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->MultiCell(150, 5, '1. Semua pengiriman barang harus disertakan nota/faktur/kwitansi', 0);
         $y += 5;
-        $this->fpdf->SetXY(3+10, $y);
+        $this->fpdf->SetXY(3 + 10, $y);
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->MultiCell(150, 5, '2. Barang akan kami kembalikan apabila tidak sesuai pesanan', 0);
         $y += 5;
-        $this->fpdf->SetXY(3+10, $y);
+        $this->fpdf->SetXY(3 + 10, $y);
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->MultiCell(150, 5, '3. Nomor Purchase Order (PO) harus dicantumkan dalam nota/faktur/kwitansi', 0);
 
@@ -554,33 +554,33 @@ class PurchaseController extends Controller
         $this->fpdf->SetXY(90, $y);
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->MultiCell(27, 5, 'Order By', 1, 'C');
-        $this->fpdf->SetXY(90+27, $y);
+        $this->fpdf->SetXY(90 + 27, $y);
         $this->fpdf->MultiCell(27, 5, 'Prepared By', 1, 'C');
-        $this->fpdf->SetXY(90+27+27, $y);
+        $this->fpdf->SetXY(90 + 27 + 27, $y);
         $this->fpdf->MultiCell(27, 5, 'Approved By', 1, 'C');
-        $this->fpdf->SetXY(90+27+27+27, $y);
+        $this->fpdf->SetXY(90 + 27 + 27 + 27, $y);
         $this->fpdf->MultiCell(27, 5, 'Confirmed By', 1, 'C');
 
         $y += 5;
         $this->fpdf->SetXY(90, $y);
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->MultiCell(27, 15, '', 1, 'C');
-        $this->fpdf->SetXY(90+27, $y);
+        $this->fpdf->SetXY(90 + 27, $y);
         $this->fpdf->MultiCell(27, 15, '', 1, 'C');
-        $this->fpdf->SetXY(90+27+27, $y);
+        $this->fpdf->SetXY(90 + 27 + 27, $y);
         $this->fpdf->MultiCell(27, 15, '', 1, 'C');
-        $this->fpdf->SetXY(90+27+27+27, $y);
+        $this->fpdf->SetXY(90 + 27 + 27 + 27, $y);
         $this->fpdf->MultiCell(27, 15, '', 1, 'C');
 
         $y += 15;
         $this->fpdf->SetXY(90, $y);
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->MultiCell(27, 5, '', 1, 'C');
-        $this->fpdf->SetXY(90+27, $y);
+        $this->fpdf->SetXY(90 + 27, $y);
         $this->fpdf->MultiCell(27, 5, $RSUserWhoPrepare->name, 1, 'C');
-        $this->fpdf->SetXY(90+27+27, $y);
+        $this->fpdf->SetXY(90 + 27 + 27, $y);
         $this->fpdf->MultiCell(27, 5, '', 1, 'C');
-        $this->fpdf->SetXY(90+27+27+27, $y);
+        $this->fpdf->SetXY(90 + 27 + 27 + 27, $y);
         $this->fpdf->MultiCell(27, 5, '', 1, 'C');
 
         $this->fpdf->Output('purchase order ' . $doc . '.pdf', 'I');

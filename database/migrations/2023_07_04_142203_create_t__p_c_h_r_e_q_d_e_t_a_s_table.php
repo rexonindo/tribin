@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('TPCHREQDETA_ITMCD', 25);
             $table->float('TPCHREQDETA_ITMQT');
             $table->date('TPCHREQDETA_REQDT');
-            $table->string('TPCHREQDETA_REMARK');
+            $table->string('TPCHREQDETA_REMARK')->nullable();
             $table->string('created_by', 16);
             $table->string('updated_by', 16)->nullable();
             $table->timestamps();
