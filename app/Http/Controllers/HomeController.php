@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\T_PCHORDHEAD;
 use App\Models\T_PCHREQHEAD;
 use App\Models\T_QUOHEAD;
 use App\Models\T_SLO_DRAFT_DETAIL;
@@ -84,6 +85,7 @@ class HomeController extends Controller
         $dataTobeApproved = $dataPurchaseRequestTobeUpproved = [];
         $dataApproved = $dataPurchaseRequestApproved = [];
         $dataSalesOrderDraftTobeProcessed = [];
+        $dataPurchaseOrderTobeUpproved = [];
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
@@ -112,6 +114,19 @@ class HomeController extends Controller
                 ->whereNull("TPCHREQ_REJCTDT")
                 ->where("TPCHREQ_TYPE", '2')
                 ->groupBy('TPCHREQ_PCHCD')->get();
+
+            # Query untuk data Purchase order
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHORDDETA')
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHORDDETA_PCHCD")
+                ->groupBy("TPCHORDDETA_PCHCD")
+                ->whereNull('deleted_at');
+            $dataPurchaseOrderTobeUpproved = T_PCHORDHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHORD_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHORDHEAD.created_at) CREATED_AT"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TPCHORD_PCHCD", "=", "TPCHORDDETA_PCHCD");
+                })
+                ->whereNull("TPCHORD_APPRVDT")
+                ->whereNull("TPCHORD_REJCTBY")
+                ->groupBy('TPCHORD_PCHCD')->get();
         }
         if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
@@ -159,7 +174,8 @@ class HomeController extends Controller
         return [
             'data' => $dataTobeApproved, 'dataApproved' => $dataApproved,
             'dataPurchaseRequest' => $dataPurchaseRequestTobeUpproved, 'dataPurchaseRequestApproved' => $dataPurchaseRequestApproved,
-            'dataSalesOrderDraft' => $dataSalesOrderDraftTobeProcessed
+            'dataSalesOrderDraft' => $dataSalesOrderDraftTobeProcessed,
+            'dataPurchaseOrder' => $dataPurchaseOrderTobeUpproved
         ];
     }
 }

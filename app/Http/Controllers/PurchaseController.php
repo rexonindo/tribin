@@ -593,6 +593,11 @@ class PurchaseController extends Controller
         return view('transaction.purchase_request_approval');
     }
 
+    public function formApprovalPO()
+    {
+        return view('transaction.purchase_order_approval');
+    }
+
     function numberToSentence($nilai)
     {
         $nilai = abs($nilai);
@@ -657,6 +662,29 @@ class PurchaseController extends Controller
         }
         return [
             'data' => $dataPurchaseRequestTobeUpproved, 'dataApproved' => $dataPurchaseRequestApproved
+        ];
+    }
+
+    function notificationsPO()
+    {
+        $data = [];
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            # Query untuk data Purchase Order
+            $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHORDDETA')
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHORDDETA_PCHCD")
+                ->groupBy("TPCHORDDETA_PCHCD")
+                ->whereNull('deleted_at');
+            $data = T_PCHORDHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHORD_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHORDHEAD.created_at) CREATED_AT, MAX(MSUP_SUPNM) MSUP_SUPNM"))
+                ->joinSub($RSDetail, 'dt', function ($join) {
+                    $join->on("TPCHORD_PCHCD", "=", "TPCHORDDETA_PCHCD");
+                })
+                ->leftJoin('M_SUP', 'TPCHORD_SUPCD', '=', 'MSUP_SUPCD')
+                ->whereNull("TPCHORD_APPRVDT")
+                ->whereNull("TPCHORD_REJCTBY")
+                ->groupBy('TPCHORD_PCHCD')->get();
+        }
+        return [
+            'data' => $data
         ];
     }
 
@@ -807,12 +835,40 @@ class PurchaseController extends Controller
         }
     }
 
+    function approvePO(Request $request)
+    {
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)->where('TPCHORD_PCHCD', base64_decode($request->id))
+                ->update([
+                    'TPCHORD_APPRVBY' => Auth::user()->nick_name, 'TPCHORD_APPRVDT' => date('Y-m-d H:i:s')
+                ]);
+            $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+            return ['message' => $message];
+        } else {
+            return response()->json(['message' => 'forbidden'], 403);
+        }
+    }
+
     function reject(Request $request)
     {
         if (in_array(Auth::user()->role, ['accounting', 'director'])) {
             $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
                 ->update([
                     'TPCHREQ_REJCTBY' => Auth::user()->nick_name, 'TPCHREQ_REJCTDT' => date('Y-m-d H:i:s')
+                ]);
+            $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+            return ['message' => $message];
+        } else {
+            return response()->json(['message' => 'forbidden'], 403);
+        }
+    }
+
+    function rejectPO(Request $request)
+    {
+        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+            $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)->where('TPCHORD_PCHCD', base64_decode($request->id))
+                ->update([
+                    'TPCHORD_REJCTBY' => Auth::user()->nick_name, 'TPCHORD_REJCTDT' => date('Y-m-d H:i:s')
                 ]);
             $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
             return ['message' => $message];

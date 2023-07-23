@@ -98,13 +98,16 @@ Route::get('condition', [QuotationController::class, 'getAllCondition'])->middle
 Route::get('approval/notifications', [HomeController::class, 'notifications'])->middleware('auth');
 Route::get('approval/quotation', [QuotationController::class, 'notifications'])->middleware('auth');
 Route::get('approval/purchase-request', [PurchaseController::class, 'notifications'])->middleware('auth');
+Route::get('approval/purchase-order', [PurchaseController::class, 'notificationsPO'])->middleware('auth');
 Route::get('approval/sales-order-draft', [ReceiveOrderController::class, 'notificationsDraft'])->middleware('auth');
 Route::get('approval/form/quotation', [QuotationController::class, 'formApproval'])->middleware('auth');
 Route::get('approval/form/purchase-request', [PurchaseController::class, 'formApproval'])->middleware('auth');
+Route::get('approval/form/purchase-order', [PurchaseController::class, 'formApprovalPO'])->middleware('auth');
 
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
 Route::put('approve/purchase-request/{id}', [PurchaseController::class, 'approve'])->middleware('auth');
 Route::put('approve/sales-order-draft/{id}', [ReceiveOrderController::class, 'approve'])->middleware('auth');
+Route::put('approve/purchase-order/{id}', [PurchaseController::class, 'approvePO'])->middleware('auth');
 Route::get('approved/form/quotation', [QuotationController::class, 'formApproved'])->middleware('auth');
 Route::get('approved/form/purchase-request', [PurchaseController::class, 'formStatus'])->middleware('auth');
 Route::get('approved/form/sales-order-draft', [ReceiveOrderController::class, 'formApprovalDraft'])->middleware('auth');
@@ -112,6 +115,7 @@ Route::get('approved/form/sales-order-draft', [ReceiveOrderController::class, 'f
 #Terkait Rejection
 Route::put('reject/quotations/{id}', [QuotationController::class, 'reject'])->middleware('auth');
 Route::put('reject/purchase-request/{id}', [PurchaseController::class, 'reject'])->middleware('auth');
+Route::put('reject/purchase-order/{id}', [PurchaseController::class, 'rejectPO'])->middleware('auth');
 
 #Terkait Receive Order
 Route::get('receive-order/form', [ReceiveOrderController::class, 'index'])->middleware('auth');
