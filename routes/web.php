@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccessRulesController;
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CoaController;
 use App\Http\Controllers\CompanyGroupController;
 use App\Http\Controllers\CustomerController;
@@ -186,3 +187,8 @@ Route::get('sales-order-draft', [ReceiveOrderController::class, 'searchDraft'])-
 
 # Terkait Receive
 Route::get('receive/form', [ReceiveController::class, 'index'])->middleware('auth');
+
+# Terkait Branch
+Route::get('branch/form', [BranchController::class, 'index'])->middleware('auth');
+Route::post('branch', [BranchController::class, 'save'])->middleware('auth');
+Route::get('branch', [BranchController::class, 'search'])->middleware('auth');
