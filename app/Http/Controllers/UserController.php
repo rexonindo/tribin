@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Validator;
 class UserController extends Controller
 {
     private $RSRoles = [];
+    protected $dedicatedConnection;
 
     public function __construct()
     {
-        $this->RSRoles = Role::select('*')->get();
+        $this->RSRoles = Role::select('*')->where('name', '!=', 'root')->get();
+        $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
     }
 
     public function index()
@@ -45,6 +47,22 @@ class UserController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
+        # sekalian daftarkan ke Company Group
+        $selectedConnection = Crypt::decryptString($_COOKIE['CGID']);
+        $validator = Validator::make([
+            'nick_name' => $request->nick_name,
+            'connection' => $selectedConnection,
+            'role_name' => $request->role,
+        ], [
+            'nick_name' => 'required',
+            'connection' => 'required',
+            'role_name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
         User::create([
             'name' => $request->name,
             'nick_name' => $request->nick_name,
@@ -54,19 +72,7 @@ class UserController extends Controller
             'role' => $request->role,
         ]);
 
-        # sekalian daftarkan ke Company Group
-        $selectedConnection = Crypt::decryptString($_COOKIE['CGID']);
-        $validator = Validator::make([
-            'nick_name' => $request->nick_name,
-            'connection' => $selectedConnection,
-        ], [
-            'nick_name' => 'required',
-            'connection' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 406);
-        }
+        $remarks = [];
 
         if (
             DB::table('COMPANY_GROUP_ACCESSES')
@@ -75,16 +81,17 @@ class UserController extends Controller
             ->whereNull('deleted_at')
             ->count() > 0
         ) {
-            return response()->json(['message' => 'Already registered'], 406);
+            $remarks = ['Already registered'];
+        } else {
+            CompanyGroupAccess::create([
+                'nick_name' => $request->nick_name,
+                'connection' => $selectedConnection,
+                'role_name' => $request->role,
+                'created_by' => Auth::user()->nick_name,
+            ]);
         }
 
-        CompanyGroupAccess::create([
-            'nick_name' => $request->nick_name,
-            'connection' => $selectedConnection,
-            'created_by' => Auth::user()->nick_name,
-        ]);
-
-        return ['msg' => 'OK'];
+        return ['msg' => 'OK', 'remarks' => $remarks];
     }
 
     function search(Request $request)
@@ -100,10 +107,10 @@ class UserController extends Controller
 
     function getPerCompanyGroup()
     {
-        $RS = User::select('users.*', 'description')
-            ->leftJoin('roles', 'role', '=', 'roles.name')
-            ->leftJoin('COMPANY_GROUP_ACCESSES', 'users.nick_name', '=', 'COMPANY_GROUP_ACCESSES.nick_name')
-            ->where('connection', Crypt::decryptString($_COOKIE['CGID']))
+        $RS = User::select('users.id', 'users.name', 'email', 'users.created_at', 'role_name', 'description', 'active', 'description', 'users.nick_name')
+        ->leftJoin('COMPANY_GROUP_ACCESSES', 'users.nick_name', '=', 'COMPANY_GROUP_ACCESSES.nick_name')
+            ->leftJoin('roles', 'role_name', '=', 'roles.name')
+            ->where('connection', $this->dedicatedConnection)
             ->whereNull('deleted_at')
             ->get();
         return ['data' => $RS];
@@ -120,6 +127,10 @@ class UserController extends Controller
             ->update([
                 'name' => $request->name, 'email' => $request->email, 'active' => $request->active, 'role' => $request->role
             ]);
+
+        CompanyGroupAccess::where('connection', $this->dedicatedConnection)
+            ->whereNull('deleted_at')->where('nick_name', $request->nick_name)
+            ->update(['role_name' => $request->role]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 

@@ -10,6 +10,7 @@ class CompanyGroupAccess extends Model
     use HasFactory;
     protected $table = 'COMPANY_GROUP_ACCESSES';
     protected $fillable = [
-        'nick_name', 'connection', 'created_by', 'deleted_at', 'deleted_by', 'updated_by'
+        'nick_name', 'connection', 'created_by', 'deleted_at', 'deleted_by', 'updated_by',
+        'role_name'
     ];
 }

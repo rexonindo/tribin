@@ -180,7 +180,7 @@
             </div>
         </div>
         <div class="navbar-nav">
-            <div class="nav-item dropdown text-nowrap">
+            <!-- <div class="nav-item dropdown text-nowrap">
                 <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown" title="Company">
                     <span class="align-text-bottom fas fa-user"></span> {{ substr(Auth::user()->name, 0 ,21)}}
                 </a>
@@ -189,6 +189,11 @@
                             <span data-feather="log-out" class="align-text-bottom"></span> Sign out
                         </a></li>
                 </ul>
+            </div> -->
+            <div class="nav-item text-nowrap">
+                <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd">
+                    <span class="align-text-bottom fas fa-user"></span> {{ substr(Auth::user()->name, 0 ,21)}}
+                </a>
             </div>
         </div>
     </header>
@@ -247,7 +252,33 @@
             </div>
         </div>
     </div>
-
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasEnd" aria-labelledby="offcanvasEndLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="offcanvasEndLabel">Your info</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col mb-1">
+                        <span class="fas fa-user" title="Your name"></span> {{ substr(Auth::user()->name, 0 ,21)}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col mb-1">
+                        <span class="fas fa-city" title="Branch"></span> ...
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <a class="text-danger" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
+                            <span data-feather="log-out" class="align-text-bottom"></span> Sign out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="{{ url('assets/feathericon/feather.min.js') }} "></script>
     <script src="{{ url('assets/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CompanyGroup;
 use App\Models\CompanyGroupAccess;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -22,7 +23,7 @@ class CompanyGroupController extends Controller
                 $ConnectionList[] = $key;
             }
         }
-        return view('company_group', ['connections' => $ConnectionList, 'companies' => CompanyGroup::all()]);
+        return view('company_group', ['connections' => $ConnectionList, 'companies' => CompanyGroup::all(), 'roles' => Role::all()]);
     }
 
     function search()
@@ -74,9 +75,10 @@ class CompanyGroupController extends Controller
 
     function loadByNickName(Request $request)
     {
-        $RS = CompanyGroupAccess::select(["COMPANY_GROUP_ACCESSES.id", "users.nick_name", "users.email", "COMPANY_GROUPS.name", "COMPANY_GROUP_ACCESSES.connection"])
+        $RS = CompanyGroupAccess::select(["COMPANY_GROUP_ACCESSES.id", "users.nick_name", "users.email", "COMPANY_GROUPS.name", "COMPANY_GROUP_ACCESSES.connection", "roles.description", "role_name"])
             ->leftJoin("users", "COMPANY_GROUP_ACCESSES.nick_name", "=", "users.nick_name")
             ->leftJoin("COMPANY_GROUPS", "COMPANY_GROUP_ACCESSES.connection", "=", "COMPANY_GROUPS.connection")
+            ->leftJoin("roles", "roles.name", "=", "COMPANY_GROUP_ACCESSES.role_name")
             ->where('COMPANY_GROUP_ACCESSES.nick_name', base64_decode($request->id))
             ->whereNull('COMPANY_GROUP_ACCESSES.deleted_at')
             ->get();
@@ -92,6 +94,7 @@ class CompanyGroupController extends Controller
         $validator = Validator::make($request->all(), [
             'nick_name' => 'required',
             'connection' => 'required',
+            'role_name' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -111,6 +114,7 @@ class CompanyGroupController extends Controller
         CompanyGroupAccess::create([
             'nick_name' => $request->nick_name,
             'connection' => $request->connection,
+            'role_name' => $request->role_name,
             'created_by' => Auth::user()->nick_name,
         ]);
         return ['msg' => 'OK'];

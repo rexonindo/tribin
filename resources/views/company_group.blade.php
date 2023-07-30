@@ -13,8 +13,20 @@
         <div class="col">
             <nav>
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <button class="nav-link active" id="nav-registeration-tab" data-bs-toggle="tab" data-bs-target="#nav-registeration" type="button" role="tab">Registration</button>
-                    <button class="nav-link" id="nav-access-tab" data-bs-toggle="tab" data-bs-target="#nav-access" type="button" role="tab">Access</button>
+                    <button class="nav-link active" id="nav-registeration-tab" data-bs-toggle="tab" data-bs-target="#nav-registeration" type="button" role="tab">
+                        <span class="fa-stack" style="vertical-align: top;">
+                            <i class="fa-regular fa-circle fa-stack-2x"></i>
+                            <i class="fa-solid fa-1 fa-stack-1x"></i>
+                        </span>
+                        Registration
+                    </button>
+                    <button class="nav-link" id="nav-access-tab" data-bs-toggle="tab" data-bs-target="#nav-access" type="button" role="tab">
+                        <span class="fa-stack" style="vertical-align: top;">
+                            <i class="fa-regular fa-circle fa-stack-2x"></i>
+                            <i class="fa-solid fa-2 fa-stack-1x"></i>
+                        </span>
+                        Access
+                    </button>
                 </div>
             </nav>
             <div class="tab-content" id="nav-tabContent">
@@ -132,10 +144,22 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-12 mb-1">
+                                <div class="input-group input-group-sm mb-1">
+                                    <span class="input-group-text">Role</span>
+                                    <select class="form-select" id="companyGroupUserRole">
+                                        @foreach ($roles as $r)
+                                        <option value="{{$r->name}}">{{$r->description}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-12 mb-1 text-center">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-outline-primary" id="btnSaveAccess" onclick="btnSaveAccessOnclick(this)" title="Save"><i class="fas fa-save"></i></button>
-                                    <button type="button" class="btn btn-outline-warning" id="btnRemoveAccess" onclick="btnRemoveAccessOnclick(this)" title="Remove"><i class="fas fa-trash"></i></button>
+                                    <button type="button" class="btn btn-outline-warning" id="btnRemoveAccess" onclick="btnRemoveAccessOnclick(this)" title="Revoke">Revoke</button>
                                 </div>
                             </div>
                         </div>
@@ -147,7 +171,9 @@
                                             <tr>
                                                 <th class="d-none">id</th>
                                                 <th>Email</th>
-                                                <th>Company</th>
+                                                <th>Company Name</th>
+                                                <th class="d-none">RoleId</th>
+                                                <th>Role</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -428,7 +454,7 @@
     }
 
     function loadDetail(data) {
-        accessTabel.getElementsByTagName("tbody")[0].innerHTML = `<tr><td colspan="2" class="text-center">Please wait</td></tr>`
+        accessTabel.getElementsByTagName("tbody")[0].innerHTML = `<tr><td colspan="4" class="text-center">Please wait</td></tr>`
         $.ajax({
             type: "GET",
             url: `company/access/${btoa(data.nick_name)}`,
@@ -465,13 +491,18 @@
                     newcell.innerHTML = arrayItem['email']
                     newcell = newrow.insertCell(2)
                     newcell.innerHTML = arrayItem['name']
+                    newcell = newrow.insertCell(3)
+                    newcell.classList.add('d-none')
+                    newcell.innerHTML = arrayItem['role_name']
+                    newcell = newrow.insertCell(4)
+                    newcell.innerHTML = arrayItem['description']
                 })
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
             },
             error: function(xhr, xopt, xthrow) {
                 alertify.warning(xthrow);
-                accessTabel.getElementsByTagName("tbody")[0].innerHTML = `<tr><td colspan="2" class="text-center">${xthrow}</td></tr>`
+                accessTabel.getElementsByTagName("tbody")[0].innerHTML = `<tr><td colspan="4" class="text-center">${xthrow}</td></tr>`
             }
         });
     }
@@ -486,10 +517,11 @@
             alertify.warning('select connection')
             companyGroup.focus()
             return
-        }
+        }        
         const data = {
             'nick_name': userNickName.value,
             'connection': companyGroup.value,
+            'role_name': companyGroupUserRole.value,
             _token: '{{ csrf_token() }}',
         }
         if (confirm(`Are you sure ?`)) {
@@ -549,6 +581,7 @@
             return
         }
         if (confirm(`Are you sure want to remove access ${idItem} in ${idItem2} ?`)) {
+            pthis.innerHTML = `Please wait`
             $.ajax({
                 type: "DELETE",
                 url: `company/access/${id}`,
@@ -557,7 +590,7 @@
                 },
                 dataType: "JSON",
                 success: function(response) {
-                    pthis.innerHTML = `<i class="fas fa-trash"></i>`
+                    pthis.innerHTML = `Revoke`
                     alertify.success(response.msg)
                     pthis.disabled = false
                     document.getElementById('div-alert').innerHTML = ''
@@ -576,7 +609,7 @@
                 ${msg}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>`
-                    pthis.innerHTML = `<i class="fas fa-trash"></i>`
+                    pthis.innerHTML = `Revoke`
                     alertify.warning(xthrow);
                     pthis.disabled = false
                 }

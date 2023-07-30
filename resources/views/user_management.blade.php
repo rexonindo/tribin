@@ -61,8 +61,9 @@
                         <th>Email</th>
                         <th>Registered Date</th>
                         <th>Ugid</th>
-                        <th>Group</th>
+                        <th>Role</th>
                         <th>Status</th>
+                        <th>Nick Name</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,6 +73,7 @@
         </div>
     </div>
     <input type="hidden" id="userId">
+    <input type="hidden" id="userNickName">
 </form>
 <!-- Reset Password Modal -->
 <div class="modal fade" id="resetPasswordModal" tabindex="-1">
@@ -123,7 +125,7 @@
             select: true,
             destroy: true,
             scrollX: true,
-            ajax: 'user/management',
+            ajax: '/user/management',
             columns: [{
                     "data": 'id'
                 },
@@ -137,13 +139,16 @@
                     "data": 'created_at'
                 },
                 {
-                    "data": 'role'
+                    "data": 'role_name'
                 },
                 {
                     "data": 'description'
                 },
                 {
                     "data": 'active'
+                },
+                {
+                    "data": 'nick_name'
                 },
             ],
             columnDefs: [{
@@ -157,6 +162,10 @@
                 {
                     "targets": [6],
                     "visible": false
+                },
+                {
+                    "targets": [7],
+                    "visible": false
                 }
             ],
             fnRowCallback: function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
@@ -169,6 +178,7 @@
             userEmail.value = "";
             userName.value = "";
             userId.value = "";
+            userNickName.value = "";
         });
     }
 
@@ -183,7 +193,8 @@
         const pos = tableusr.row(this).index();
         const row = tableusr.row(pos).data();
         userId.value = row["id"];
-        $("#role").val(row["role"]);
+        userNickName.value = row["nick_name"];
+        $("#role").val(row["role_name"]);
         $("#userName").val(row["name"]);
         $("#userEmail").val(row["email"]);
         user_cmb_active.checked = row["active"] === '1' ? true : false
@@ -191,6 +202,7 @@
 
     function btnSaveOnclick(pthis) {
         if (userId.value != '') {
+            initdataUSRList()
             if (confirm('Are you sure ?')) {
                 pthis.disabled = true
                 $.ajax({
@@ -201,6 +213,7 @@
                         email: userEmail.value,
                         active: user_cmb_active.checked ? '1' : '0',
                         role: role.value,
+                        nick_name: userNickName.value,
                         _token: '{{ csrf_token() }}',
                     },
                     dataType: "JSON",
