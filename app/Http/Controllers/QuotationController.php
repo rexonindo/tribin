@@ -224,7 +224,8 @@ class QuotationController extends Controller
     {
         $dataTobeApproved = [];
         $dataApproved = [];
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
@@ -239,7 +240,7 @@ class QuotationController extends Controller
                 ->whereNull("TQUO_REJCTDT")
                 ->groupBy('TQUO_QUOCD')->get();
         }
-        if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
+        if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
@@ -425,7 +426,8 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
 
     function approve(Request $request)
     {
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
                 ->update([
                     'TQUO_APPRVBY' => Auth::user()->nick_name, 'TQUO_APPRVDT' => date('Y-m-d H:i:s')
@@ -439,7 +441,8 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
 
     function reject(Request $request)
     {
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
                 ->update([
                     'TQUO_REJCTBY' => Auth::user()->nick_name, 'TQUO_REJCTDT' => date('Y-m-d H:i:s')

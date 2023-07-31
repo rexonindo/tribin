@@ -26,6 +26,16 @@ class CompanyGroupController extends Controller
         return view('company_group', ['connections' => $ConnectionList, 'companies' => CompanyGroup::all(), 'roles' => Role::all()]);
     }
 
+    static function getRoleBasedOnCompanyGroup($dedicatedConnection)
+    {
+        $rsCGRole = CompanyGroupAccess::select('role_name', 'description')
+            ->leftJoin('roles', 'role_name', '=', 'name')
+            ->where('nick_name', Auth::user()->nick_name)
+            ->where('connection', $dedicatedConnection)
+            ->whereNull('deleted_at')->first();
+        return ['code' => $rsCGRole->role_name, 'name' => $rsCGRole->description];
+    }
+
     function search()
     {
         return ['data' => CompanyGroup::all()];

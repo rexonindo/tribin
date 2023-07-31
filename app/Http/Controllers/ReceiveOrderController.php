@@ -244,7 +244,8 @@ class ReceiveOrderController extends Controller
     {
         $dataTobeUpproved = [];
         $dataPurchaseRequestApproved = [];
-        if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
             # Query untuk data Purchase Order Draft
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_SLO_DRAFT_DETAIL')
                 ->selectRaw("COUNT(*) TTLDETAIL, TSLODRAFTDETA_SLOCD")

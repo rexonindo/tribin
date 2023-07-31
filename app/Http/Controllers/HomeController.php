@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\T_PCHORDHEAD;
 use App\Models\T_PCHREQHEAD;
 use App\Models\T_QUOHEAD;
-use App\Models\T_SLO_DRAFT_DETAIL;
 use App\Models\T_SLO_DRAFT_HEAD;
 use App\Models\T_SLOHEAD;
 use Illuminate\Http\Request;
@@ -17,7 +16,6 @@ use Illuminate\Support\Facades\Log;
 class HomeController extends Controller
 {
     protected $dedicatedConnection;
-
     public function __construct()
     {
         if (isset($_COOKIE['CGID'])) {
@@ -28,7 +26,8 @@ class HomeController extends Controller
     }
     function index()
     {
-        return view('home');
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        return view('home', ['activeRoleDescription' => $activeRole['name']]);
     }
 
     function supportDashboard()
@@ -86,7 +85,8 @@ class HomeController extends Controller
         $dataApproved = $dataPurchaseRequestApproved = [];
         $dataSalesOrderDraftTobeProcessed = [];
         $dataPurchaseOrderTobeUpproved = [];
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
@@ -128,7 +128,7 @@ class HomeController extends Controller
                 ->whereNull("TPCHORD_REJCTBY")
                 ->groupBy('TPCHORD_PCHCD')->get();
         }
-        if (in_array(Auth::user()->role, ['marketing', 'marketing_adm'])) {
+        if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
@@ -157,7 +157,7 @@ class HomeController extends Controller
                 ->groupBy('TSLODRAFT_SLOCD')->get();
         }
 
-        if (in_array(Auth::user()->role, ['purchasing'])) {
+        if (in_array($activeRole['code'], ['purchasing'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
                 ->groupBy("TPCHREQDETA_PCHCD")

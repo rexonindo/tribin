@@ -2,18 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroupAccess;
 use App\Models\Role;
 use App\Models\Menu;
 use App\Models\MenuRoles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class AccessRulesController extends Controller
 {
+    protected $dedicatedConnection;
+
+    public function __construct()
+    {
+        $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
+    }
+
     public function index()
     {
-        $RSRoles = Role::select('*')->get();
+        $RSRoles = Auth::user()->role === 'root' ? Role::select('*')->get() : Role::select('*')->where('name', '!=', 'root')->get();
         return view('access_rules', ['RSRoles' => $RSRoles]);
     }
 
@@ -80,9 +89,13 @@ class AccessRulesController extends Controller
 
     function getAccessRolesByRoleName()
     {
-        $rs = MenuRoles::select(['code','parent_code', 'name', 'url', 'icon', DB::raw("'0' USED")])
+        $rsCGRole = CompanyGroupAccess::select('role_name')
+            ->where('nick_name', Auth::user()->nick_name)
+            ->where('connection', $this->dedicatedConnection)
+            ->whereNull('deleted_at')->first();
+        $rs = MenuRoles::select(['code', 'parent_code', 'name', 'url', 'icon', DB::raw("'0' USED")])
             ->join('menus', 'menu_code', '=', 'code')
-            ->where('role_name', Auth::user()->role)
+            ->where('role_name', $rsCGRole->role_name)
             ->orderBy('code', 'asc')
             ->get()->toArray();
         $rsfix = [];
@@ -126,6 +139,5 @@ class AccessRulesController extends Controller
         MenuRoles::where("role_name", $grid)->delete();
         MenuRoles::insert($RSTobeSave);
         return $RSTobeSave;
-        // $this->useracc_mod->insert($grid,$sql2);
     }
 }

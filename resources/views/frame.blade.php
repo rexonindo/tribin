@@ -180,16 +180,6 @@
             </div>
         </div>
         <div class="navbar-nav">
-            <!-- <div class="nav-item dropdown text-nowrap">
-                <a class="nav-link dropdown-toggle col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="dropdown" title="Company">
-                    <span class="align-text-bottom fas fa-user"></span> {{ substr(Auth::user()->name, 0 ,21)}}
-                </a>
-                <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end dropdown-menu-sm-end">
-                    <li><a class="dropdown-item text-danger" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
-                            <span data-feather="log-out" class="align-text-bottom"></span> Sign out
-                        </a></li>
-                </ul>
-            </div> -->
             <div class="nav-item text-nowrap">
                 <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd">
                     <span class="align-text-bottom fas fa-user"></span> {{ substr(Auth::user()->name, 0 ,21)}}
@@ -260,18 +250,32 @@
         <div class="offcanvas-body">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col mb-1">
-                        <span class="fas fa-user" title="Your name"></span> {{ substr(Auth::user()->name, 0 ,21)}}
+                    <div class="col-md-2 mb-1 border-end text-center">
+                        <span class="fas fa-user" title="Your name"></span>
+                    </div>
+                    <div class="col-md-10 mb-1">
+                        <strong>{{ substr(Auth::user()->name, 0 ,21)}}</strong>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col mb-1">
-                        <span class="fas fa-city" title="Branch"></span> ...
+                    <div class="col-md-2 mb-1 border-end text-center">
+                        <span class="fas fa-id-badge" title="Role"></span>
+                    </div>
+                    <div class="col-md-10 mb-1">
+                        {{ $activeRoleDescription }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 mb-1 border-end text-center">
+                        <span class="fas fa-city" title="Branch"></span>
+                    </div>
+                    <div class="col-md-10 mb-3">
+                        ...
                     </div>
                 </div>
                 <div class="row">
                     <div class="col">
-                        <a class="text-danger" href="{{route('actionlogout')}}" title="Log out" onclick="btnLogout_eClick(event)">
+                        <a class="btn btn-danger btn-sm" href="{{route('actionlogout')}}" title="Exit from system" onclick="btnLogout_eClick(event)">
                             <span data-feather="log-out" class="align-text-bottom"></span> Sign out
                         </a>
                     </div>

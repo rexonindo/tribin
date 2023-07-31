@@ -631,7 +631,8 @@ class PurchaseController extends Controller
     {
         $dataPurchaseRequestTobeUpproved = [];
         $dataPurchaseRequestApproved = [];
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Purchase Request dengan tipe "Normal" 
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
@@ -646,7 +647,7 @@ class PurchaseController extends Controller
                 ->where("TPCHREQ_TYPE", '2')
                 ->groupBy('TPCHREQ_PCHCD')->get();
         }
-        if (in_array(Auth::user()->role, ['purchasing'])) {
+        if (in_array($activeRole['code'], ['purchasing'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
                 ->groupBy("TPCHREQDETA_PCHCD")
@@ -668,7 +669,8 @@ class PurchaseController extends Controller
     function notificationsPO()
     {
         $data = [];
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Purchase Order
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHORDDETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHORDDETA_PCHCD")
@@ -690,7 +692,8 @@ class PurchaseController extends Controller
 
     function approve(Request $request)
     {
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $PRCode = base64_decode($request->id);
             $RSPR = T_PCHREQHEAD::on($this->dedicatedConnection)->select('TPCHREQ_SUPCD', 'MSUP_CGCON')
                 ->leftJoin('M_SUP', 'TPCHREQ_SUPCD', '=', 'MSUP_SUPCD')
@@ -837,7 +840,8 @@ class PurchaseController extends Controller
 
     function approvePO(Request $request)
     {
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)->where('TPCHORD_PCHCD', base64_decode($request->id))
                 ->update([
                     'TPCHORD_APPRVBY' => Auth::user()->nick_name, 'TPCHORD_APPRVDT' => date('Y-m-d H:i:s')
@@ -851,7 +855,8 @@ class PurchaseController extends Controller
 
     function reject(Request $request)
     {
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
                 ->update([
                     'TPCHREQ_REJCTBY' => Auth::user()->nick_name, 'TPCHREQ_REJCTDT' => date('Y-m-d H:i:s')
@@ -865,7 +870,8 @@ class PurchaseController extends Controller
 
     function rejectPO(Request $request)
     {
-        if (in_array(Auth::user()->role, ['accounting', 'director'])) {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)->where('TPCHORD_PCHCD', base64_decode($request->id))
                 ->update([
                     'TPCHORD_REJCTBY' => Auth::user()->nick_name, 'TPCHORD_REJCTDT' => date('Y-m-d H:i:s')
