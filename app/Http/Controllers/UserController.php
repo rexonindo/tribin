@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CompanyGroupAccess;
+use App\Models\M_BRANCH;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use App\Models\User;
@@ -25,12 +26,12 @@ class UserController extends Controller
 
     public function index()
     {
-        return view('user_registration', ['RSRoles' => $this->RSRoles]);
+        return view('user_registration', ['RSRoles' => $this->RSRoles, 'Branches' => M_BRANCH::on($this->dedicatedConnection)->get()]);
     }
 
     function formManagement()
     {
-        return view('user_management', ['RSRoles' => $this->RSRoles]);
+        return view('user_management', ['RSRoles' => $this->RSRoles, 'Branches' => M_BRANCH::on($this->dedicatedConnection)->get()]);
     }
 
     public function simpan(Request $request)
@@ -41,6 +42,7 @@ class UserController extends Controller
             'nick_name' => 'required|unique:App\Models\User',
             'password' => 'required|min:8',
             'role' => 'required',
+            'branch' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -70,6 +72,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'active' => 1,
             'role' => $request->role,
+            'branch' => $request->branch,
         ]);
 
         $remarks = [];
@@ -107,9 +110,10 @@ class UserController extends Controller
 
     function getPerCompanyGroup()
     {
-        $RS = User::select('users.id', 'users.name', 'email', 'users.created_at', 'role_name', 'description', 'active', 'description', 'users.nick_name')
-        ->leftJoin('COMPANY_GROUP_ACCESSES', 'users.nick_name', '=', 'COMPANY_GROUP_ACCESSES.nick_name')
+        $RS = User::select('users.id', 'users.name', 'email', 'users.created_at', 'role_name', 'description', 'active', 'description', 'users.nick_name', 'branch', 'MBRANCH_NM')
+            ->leftJoin('COMPANY_GROUP_ACCESSES', 'users.nick_name', '=', 'COMPANY_GROUP_ACCESSES.nick_name')
             ->leftJoin('roles', 'role_name', '=', 'roles.name')
+            ->leftJoin('M_BRANCH', 'MBRANCH_CD', '=', 'branch')
             ->where('connection', $this->dedicatedConnection)
             ->whereNull('deleted_at')
             ->get();
@@ -125,7 +129,7 @@ class UserController extends Controller
         }
         $affectedRow = User::where('id', $request->id)
             ->update([
-                'name' => $request->name, 'email' => $request->email, 'active' => $request->active, 'role' => $request->role
+                'name' => $request->name, 'email' => $request->email, 'active' => $request->active, 'branch' => $request->branch
             ]);
 
         CompanyGroupAccess::where('connection', $this->dedicatedConnection)

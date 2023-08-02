@@ -46,12 +46,22 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12 mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon2">Roles</span>
                 <select class="form-select" id="role">
                     @foreach($RSRoles as $r)
                     <option value="{{ $r->name }}">{{ $r->description }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text">Branch</span>
+                <select class="form-select" id="branch">
+                    @foreach($Branches as $r)
+                    <option value="{{ $r->MBRANCH_CD }}">{{ $r->MBRANCH_NM }}</option>
                     @endforeach
                 </select>
             </div>
@@ -85,6 +95,11 @@
             alertify.warning(`User name is required`)
             return
         }
+        if (branch.value.trim().length <= 0) {
+            branch.focus()
+            alertify.warning(`Branch is required`)
+            return
+        }
 
         if (userNickName.value.includes(' ')) {
             alertify.message('should not contain space')
@@ -96,6 +111,7 @@
             email: userEmail.value,
             password: passwordConfirmation.value,
             role: role.value,
+            branch: branch.value,
             _token: '{{ csrf_token() }}',
         }
         if (confirm(`Are you sure ?`)) {
@@ -116,6 +132,7 @@
                     userEmail.value = ''
                     passwordConfirmation.value = ''
                     password.value = ''
+                    branch.value = ''
                 },
                 error: function(xhr, xopt, xthrow) {
                     const respon = Object.keys(xhr.responseJSON)

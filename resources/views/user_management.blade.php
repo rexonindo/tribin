@@ -24,7 +24,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-7 mb-1">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text" id="basic-addon2">Roles</span>
                 <select class="form-select" id="role">
@@ -34,7 +34,20 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-5 mb-1">
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text">Branch</span>
+                <select class="form-select" id="branch">
+                    @foreach($Branches as $r)
+                    <option value="{{ $r->MBRANCH_CD }}">{{ $r->MBRANCH_NM }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        
+    </div>
+    <div class="row">
+        <div class="col-md-12 mb-1 text-center">
             <div class="input-group input-group-sm mb-2">
                 <label class="input-group-text">Status</label>
                 <div class="input-group-text">
@@ -64,6 +77,8 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Nick Name</th>
+                        <th>BranchID</th>
+                        <th>Branch</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -150,6 +165,12 @@
                 {
                     "data": 'nick_name'
                 },
+                {
+                    "data": 'branch'
+                },
+                {
+                    "data": 'MBRANCH_NM'
+                },
             ],
             columnDefs: [{
                     "targets": [0],
@@ -165,6 +186,10 @@
                 },
                 {
                     "targets": [7],
+                    "visible": false
+                },
+                {
+                    "targets": [8],
                     "visible": false
                 }
             ],
@@ -198,11 +223,11 @@
         $("#userName").val(row["name"]);
         $("#userEmail").val(row["email"]);
         user_cmb_active.checked = row["active"] === '1' ? true : false
+        branch.value = row["branch"];
     })
 
     function btnSaveOnclick(pthis) {
         if (userId.value != '') {
-            initdataUSRList()
             if (confirm('Are you sure ?')) {
                 pthis.disabled = true
                 $.ajax({
@@ -214,6 +239,7 @@
                         active: user_cmb_active.checked ? '1' : '0',
                         role: role.value,
                         nick_name: userNickName.value,
+                        branch: branch.value,
                         _token: '{{ csrf_token() }}',
                     },
                     dataType: "JSON",

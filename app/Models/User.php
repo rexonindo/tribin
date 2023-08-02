@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'nick_name',
         'role',
+        'branch',
     ];
 
     /**
