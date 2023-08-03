@@ -270,7 +270,7 @@
                         <span class="fas fa-city" title="Branch"></span>
                     </div>
                     <div class="col-md-10 mb-3">
-                        ...
+                        {{ $BranchName }}
                     </div>
                 </div>
                 <div class="row">

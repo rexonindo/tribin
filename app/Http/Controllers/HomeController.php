@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\M_BRANCH;
 use App\Models\T_PCHORDHEAD;
 use App\Models\T_PCHREQHEAD;
 use App\Models\T_QUOHEAD;
@@ -27,7 +28,8 @@ class HomeController extends Controller
     function index()
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        return view('home', ['activeRoleDescription' => $activeRole['name']]);
+        $Branches = M_BRANCH::select('MBRANCH_NM')->where('MBRANCH_CD', Auth::user()->branch)->first();
+        return view('home', ['activeRoleDescription' => $activeRole['name'], 'BranchName' => $Branches ? $Branches->MBRANCH_NM  : '-']);
     }
 
     function supportDashboard()
