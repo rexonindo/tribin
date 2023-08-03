@@ -57,7 +57,7 @@
                 </div>
             </div>
         </div>
-        <div class="row border-bottom">
+        <div class="row ">
             <div class="col-md-6 mb-3">
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Specification</span>

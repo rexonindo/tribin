@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\M_BRANCH;
 use App\Models\M_COA;
 use App\Models\M_ITM;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -21,7 +23,7 @@ class ItemController extends Controller
     }
     public function index()
     {
-        return view('master.item', ['coas' => M_COA::on($this->dedicatedConnection)->select('*')->get()]);
+        return view('master.item', ['coas' => M_COA::on($this->dedicatedConnection)->select('*')->get(), 'branches' => M_BRANCH::on($this->dedicatedConnection)->get()]);
     }
 
     public function formReport()
@@ -35,7 +37,7 @@ class ItemController extends Controller
         $validator = Validator::make($request->all(), [
             'MITM_ITMCD' => 'required',
             'MITM_ITMCD' => [
-                Rule::unique($this->dedicatedConnection . '.M_ITM', 'MITM_ITMCD')
+                Rule::unique($this->dedicatedConnection . '.M_ITM', 'MITM_ITMCD')->where('MITM_BRANCH', Auth::user()->branch)
             ],
             'MITM_ITMNM' => 'required',
             'MITM_STKUOM' => 'required',
@@ -59,6 +61,7 @@ class ItemController extends Controller
             'MITM_SPEC' => $request->MITM_SPEC,
             'MITM_ITMCAT' => $request->MITM_ITMCAT,
             'MITM_COACD' => $request->MITM_COACD,
+            'MITM_BRANCH' => Auth::user()->branch
         ]);
         return ['msg' => 'OK'];
     }
@@ -72,15 +75,27 @@ class ItemController extends Controller
         ];
         $DataSet = new M_ITM();
         $DataSet->setConnection($this->dedicatedConnection);
-        $RS = $DataSet->select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $RS = $DataSet->select('*')
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->where('MITM_BRANCH', Auth::user()->branch)
+            ->get();
         return ['data' => $RS];
     }
 
     function update(Request $request)
     {
-        $affectedRow = M_ITM::on($this->dedicatedConnection)->where('MITM_ITMCD', base64_decode($request->id))
+        $affectedRow = M_ITM::on($this->dedicatedConnection)
+            ->where('MITM_ITMCD', base64_decode($request->id))
+            ->where('MITM_BRANCH', Auth::user()->branch)
             ->update([
-                'MITM_ITMNM' => $request->MITM_ITMNM, 'MITM_STKUOM' => $request->MITM_STKUOM, 'MITM_ITMTYPE' => $request->MITM_ITMTYPE, 'MITM_BRAND' => $request->MITM_BRAND, 'MITM_MODEL' => $request->MITM_MODEL, 'MITM_SPEC' => $request->MITM_SPEC, 'MITM_ITMCAT' => $request->MITM_ITMCAT, 'MITM_COACD' => $request->MITM_COACD,
+                'MITM_ITMNM' => $request->MITM_ITMNM,
+                'MITM_STKUOM' => $request->MITM_STKUOM,
+                'MITM_ITMTYPE' => $request->MITM_ITMTYPE,
+                'MITM_BRAND' => $request->MITM_BRAND,
+                'MITM_MODEL' => $request->MITM_MODEL,
+                'MITM_SPEC' => $request->MITM_SPEC,
+                'MITM_ITMCAT' => $request->MITM_ITMCAT,
+                'MITM_COACD' => $request->MITM_COACD,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
