@@ -29,7 +29,7 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'MCUS_CUSCD' => 'required',
             'MCUS_CUSCD' => [
-                Rule::unique($this->dedicatedConnection . '.M_CUS', 'MCUS_CUSCD')
+                Rule::unique($this->dedicatedConnection . '.M_CUS', 'MCUS_CUSCD')->where('MCUS_BRANCH', Auth::user()->branch)
             ],
             'MCUS_CUSNM' => 'required',
             'MCUS_CURCD' => 'required',
@@ -51,6 +51,7 @@ class CustomerController extends Controller
             'MCUS_TELNO' => $request->MCUS_TELNO,
             'MCUS_CGCON' => $request->MCUS_CGCON,
             'created_by' => Auth::user()->nick_name,
+            'MCUS_BRANCH' => Auth::user()->branch,
         ]);
         return ['msg' => 'OK'];
     }
@@ -62,13 +63,18 @@ class CustomerController extends Controller
             'MCUS_CUSNM',
             'MCUS_ADDR1',
         ];
-        $RS = M_CUS::on($this->dedicatedConnection)->select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $RS = M_CUS::on($this->dedicatedConnection)->select('*')
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->where('MCUS_BRANCH', Auth::user()->branch)
+            ->get();
         return ['data' => $RS];
     }
 
     function update(Request $request)
     {
-        $affectedRow = M_CUS::on($this->dedicatedConnection)->where('MCUS_CUSCD', base64_decode($request->id))
+        $affectedRow = M_CUS::on($this->dedicatedConnection)
+            ->where('MCUS_CUSCD', base64_decode($request->id))
+            ->where('MCUS_BRANCH', Auth::user()->branch)
             ->update([
                 'MCUS_CUSNM' => $request->MCUS_CUSNM, 'MCUS_CURCD' => $request->MCUS_CURCD, 'MCUS_TAXREG' => $request->MCUS_TAXREG, 'MCUS_ADDR1' => $request->MCUS_ADDR1, 'MCUS_TELNO' => $request->MCUS_TELNO, 'MCUS_CGCON' => $request->MCUS_CGCON
             ]);
