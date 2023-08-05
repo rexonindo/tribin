@@ -29,10 +29,10 @@ class SupplierController extends Controller
         $validator = Validator::make($request->all(), [
             'MSUP_SUPCD' => 'required',
             'MSUP_SUPCD' => [
-                Rule::unique($this->dedicatedConnection . '.M_SUP', 'MSUP_SUPCD')
+                Rule::unique($this->dedicatedConnection . '.M_SUP', 'MSUP_SUPCD')->where('MSUP_BRANCH', Auth::user()->branch)
             ],
             'MSUP_SUPNM' => 'required',
-            'MSUP_CURCD' => 'required',            
+            'MSUP_CURCD' => 'required',
             'MSUP_ADDR1' => 'required',
             'MSUP_TELNO' => 'required',
         ]);
@@ -50,6 +50,7 @@ class SupplierController extends Controller
             'MSUP_TELNO' => $request->MSUP_TELNO,
             'MSUP_CGCON' => $request->MSUP_CGCON,
             'created_by' => Auth::user()->nick_name,
+            'MSUP_BRANCH' => Auth::user()->branch
         ]);
         return ['msg' => 'OK'];
     }
@@ -66,21 +67,28 @@ class SupplierController extends Controller
                 $RS = M_SUP::on($this->dedicatedConnection)->select('*')
                     ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
                     ->whereNotNull("MSUP_CGCON")
+                    ->where('MSUP_BRANCH', Auth::user()->branch)
                     ->get();
             } else {
                 $RS = M_SUP::on($this->dedicatedConnection)->select('*')
-                    ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+                    ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+                    ->where('MSUP_BRANCH', Auth::user()->branch)
+                    ->get();
             }
         } else {
             $RS = M_SUP::on($this->dedicatedConnection)->select('*')
-                ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+                ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+                ->where('MSUP_BRANCH', Auth::user()->branch)
+                ->get();
         }
         return ['data' => $RS];
     }
 
     function update(Request $request)
     {
-        $affectedRow = M_SUP::on($this->dedicatedConnection)->where('MSUP_SUPCD', base64_decode($request->id))
+        $affectedRow = M_SUP::on($this->dedicatedConnection)
+            ->where('MSUP_SUPCD', base64_decode($request->id))
+            ->where('MSUP_BRANCH', Auth::user()->branch)
             ->update([
                 'MSUP_SUPNM' => $request->MSUP_SUPNM, 'MSUP_CURCD' => $request->MSUP_CURCD, 'MSUP_TAXREG' => $request->MSUP_TAXREG, 'MSUP_ADDR1' => $request->MSUP_ADDR1, 'MSUP_TELNO' => $request->MSUP_TELNO, 'MSUP_CGCON' => $request->MSUP_CGCON
             ]);
