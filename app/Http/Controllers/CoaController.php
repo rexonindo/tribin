@@ -28,7 +28,7 @@ class CoaController extends Controller
         $validator = Validator::make($request->all(), [
             'MCOA_COACD' => 'required',
             'MCOA_COACD' => [
-                Rule::unique($this->dedicatedConnection . '.M_COA', 'MCOA_COACD')
+                Rule::unique($this->dedicatedConnection . '.M_COA', 'MCOA_COACD')->where('MCOA_BRANCH', Auth::user()->branch)
             ],
             'MCOA_COANM' => 'required',
         ]);
@@ -40,6 +40,7 @@ class CoaController extends Controller
         M_COA::on($this->dedicatedConnection)->create([
             'MCOA_COACD' => $request->MCOA_COACD,
             'MCOA_COANM' => $request->MCOA_COANM,
+            'MCOA_BRANCH' => Auth::user()->branch
         ]);
         return ['msg' => 'OK'];
     }
@@ -50,13 +51,18 @@ class CoaController extends Controller
             'MCOA_COACD',
             'MCOA_COANM',
         ];
-        $RS = M_COA::on($this->dedicatedConnection)->select('*')->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')->get();
+        $RS = M_COA::on($this->dedicatedConnection)->select('*')
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->where('MCOA_BRANCH', Auth::user()->branch)
+            ->get();
         return ['data' => $RS];
     }
 
     function update(Request $request)
     {
-        $affectedRow = M_COA::on($this->dedicatedConnection)->where('MCOA_COACD', base64_decode($request->id))
+        $affectedRow = M_COA::on($this->dedicatedConnection)
+            ->where('MCOA_COACD', base64_decode($request->id))
+            ->where('MCOA_BRANCH', Auth::user()->branch)
             ->update([
                 'MCOA_COANM' => $request->MCOA_COANM
             ]);

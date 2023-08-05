@@ -9,5 +9,5 @@ class M_COA extends Model
 {
     use HasFactory;
     protected $table = 'M_COA';
-    protected $fillable = ['MCOA_COACD', 'MCOA_COANM'];
+    protected $fillable = ['MCOA_COACD', 'MCOA_COANM', 'MCOA_BRANCH'];
 }
