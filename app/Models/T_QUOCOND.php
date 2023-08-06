@@ -11,6 +11,6 @@ class T_QUOCOND extends Model
     protected $table = 'T_QUOCOND';
     protected $fillable = [
         'deleted_at', 'deleted_by', 'TQUODETA_QUOCD',
-        'TQUODETA_CONDI', 'created_by', 'updated_by'
+        'TQUODETA_CONDI', 'created_by', 'updated_by', 'TQUOCOND_BRANCH'
     ];
 }

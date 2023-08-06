@@ -55,6 +55,7 @@ class QuotationController extends Controller
         $LastLine = DB::connection($this->dedicatedConnection)->table('T_QUOHEAD')
             ->whereMonth('created_at', '=', date('m'))
             ->whereYear('created_at', '=', date('Y'))
+            ->where('TQUO_BRANCH', Auth::user()->branch)
             ->max('TQUO_LINE');
 
         $quotationHeader = [];
@@ -74,8 +75,8 @@ class QuotationController extends Controller
             'TQUO_SBJCT' => $request->TQUO_SBJCT,
             'TQUO_ISSUDT' => $request->TQUO_ISSUDT,
             'created_by' => Auth::user()->nick_name,
+            'TQUO_BRANCH' => Auth::user()->branch
         ];
-        T_QUOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
 
         # data quotation detail item
         $validator = Validator::make($request->all(), [
@@ -108,8 +109,10 @@ class QuotationController extends Controller
                 'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB[$i],
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),
+                'TQUODETA_BRANCH' => Auth::user()->branch
             ];
         }
+        T_QUOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
         if (!empty($quotationDetail)) {
             T_QUODETA::on($this->dedicatedConnection)->insert($quotationDetail);
         }
@@ -129,6 +132,7 @@ class QuotationController extends Controller
             $quotationCondition[] = [
                 'TQUOCOND_QUOCD' => $newQuotationCode,
                 'TQUOCOND_CONDI' => $request->TQUOCOND_CONDI[$i],
+                'TQUOCOND_BRANCH' => Auth::user()->branch,
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
@@ -148,6 +152,7 @@ class QuotationController extends Controller
             'TQUOCOND_CONDI' => $request->TQUOCOND_CONDI,
             'created_by' => Auth::user()->nick_name,
             'created_at' => date('Y-m-d H:i:s'),
+            'TQUOCOND_BRANCH' => Auth::user()->branch
         ];
         if (!empty($quotationCondition)) {
             T_QUOCOND::on($this->dedicatedConnection)->insert($quotationCondition);
@@ -162,7 +167,9 @@ class QuotationController extends Controller
     public function update(Request $request)
     {
         # ubah data header
-        $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
+        $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
+            ->where('TQUO_QUOCD', base64_decode($request->id))
+            ->where('TQUO_BRANCH', Auth::user()->branch)
             ->update([
                 'TQUO_CUSCD' => $request->TQUO_CUSCD, 'TQUO_ATTN' => $request->TQUO_ATTN, 'TQUO_SBJCT' => $request->TQUO_SBJCT, 'TQUO_ISSUDT' => $request->TQUO_ISSUDT
             ]);
@@ -182,10 +189,12 @@ class QuotationController extends Controller
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->whereNotNull("TQUO_APPRVDT")
             ->whereNull("TSLO_QUOCD")
+            ->where('TQUO_BRANCH', Auth::user()->branch)
             ->get()
             : T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->where('TQUO_BRANCH', Auth::user()->branch)
             ->get();
         return ['data' => $RS];
     }
@@ -193,11 +202,16 @@ class QuotationController extends Controller
     function loadById(Request $request)
     {
         $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB"])
-            ->leftJoin("M_ITM", "TQUODETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TQUODETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TQUODETA_BRANCH', '=', 'MITM_BRANCH');
+            })
             ->where('TQUODETA_QUOCD', base64_decode($request->id))
+            ->where('TQUODETA_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
         $RS1 = T_QUOCOND::on($this->dedicatedConnection)->select(["id", "TQUOCOND_CONDI"])
             ->where('TQUOCOND_QUOCD', base64_decode($request->id))
+            ->where('TQUOCOND_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS, 'dataCondition' => $RS1];
     }
@@ -228,22 +242,24 @@ class QuotationController extends Controller
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
-                ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
-                ->groupBy("TQUODETA_QUOCD")
+                ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD,TQUODETA_BRANCH")
+                ->groupBy("TQUODETA_QUOCD", "TQUODETA_BRANCH")
                 ->whereNull('deleted_at');
-            $dataTobeApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN"))
+            $dataTobeApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN,TQUO_BRANCH"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
-                    $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
+                    $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD")
+                        ->on("TQUO_BRANCH", "=", "TQUODETA_BRANCH");
                 })
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
                 ->whereNull("TQUO_APPRVDT")
                 ->whereNull("TQUO_REJCTDT")
-                ->groupBy('TQUO_QUOCD')->get();
+                ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH')->get();
         }
         if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
+                ->where('TQUODETA_BRANCH', Auth::user()->branch)
                 ->whereNull('deleted_at');
             $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
@@ -252,6 +268,7 @@ class QuotationController extends Controller
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
                 ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
                 ->whereNull("TSLO_QUOCD")
+                ->where('TQUO_BRANCH', Auth::user()->branch)
                 ->groupBy('TQUO_QUOCD')->get();
         }
 
@@ -271,6 +288,7 @@ class QuotationController extends Controller
         $RSHeader = T_QUOHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM', 'TQUO_ATTN', 'MCUS_TELNO', 'TQUO_SBJCT', 'TQUO_ISSUDT', 'TQUO_APPRVDT')
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where("TQUO_QUOCD", $doc)
+            ->where('TQUO_BRANCH', Auth::user()->branch)
             ->get()->toArray();
         $MCUS_CUSNM = '';
         $TQUO_ATTN = '';
@@ -288,14 +306,19 @@ class QuotationController extends Controller
         }
 
         $RSDetail = T_QUODETA::on($this->dedicatedConnection)->select('TQUODETA_ITMCD', 'MITM_BRAND', 'MITM_ITMNM', 'MITM_MODEL', 'TQUODETA_USAGE', 'TQUODETA_PRC', 'TQUODETA_OPRPRC', 'TQUODETA_MOBDEMOB')
-            ->leftJoin("M_ITM", "TQUODETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TQUODETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TQUODETA_BRANCH', '=', 'MITM_BRANCH');
+            })
             ->whereNull("deleted_at")
             ->where("TQUODETA_QUOCD", $doc)
+            ->where('TQUODETA_BRANCH', Auth::user()->branch)
             ->get()->toArray();
 
         $RSCondition = T_QUOCOND::on($this->dedicatedConnection)->select('TQUOCOND_CONDI')
             ->where('TQUOCOND_QUOCD', $doc)
             ->whereNull("deleted_at")
+            ->where('TQUOCOND_BRANCH', Auth::user()->branch)
             ->get()->toArray();
 
         $this->fpdf->SetFont('Arial', 'BU', 24);
@@ -428,7 +451,9 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
-            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
+            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
+                ->where('TQUO_QUOCD', base64_decode($request->id))
+                ->where('TQUO_BRANCH', $request->TQUO_BRANCH)
                 ->update([
                     'TQUO_APPRVBY' => Auth::user()->nick_name, 'TQUO_APPRVDT' => date('Y-m-d H:i:s')
                 ]);
@@ -443,7 +468,9 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
-            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)->where('TQUO_QUOCD', base64_decode($request->id))
+            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
+                ->where('TQUO_QUOCD', base64_decode($request->id))
+                ->where('TQUO_BRANCH', $request->TQUO_BRANCH)
                 ->update([
                     'TQUO_REJCTBY' => Auth::user()->nick_name, 'TQUO_REJCTDT' => date('Y-m-d H:i:s')
                 ]);
@@ -462,11 +489,20 @@ Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, a
     function report(Request $request)
     {
         $RS = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_QUOHEAD.*,MCUS_CUSNM,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
-            ->leftJoin('T_QUODETA', 'TQUO_QUOCD', '=', 'TQUODETA_QUOCD')
-            ->leftJoin('M_ITM', 'TQUODETA_ITMCD', '=', 'MITM_ITMCD')
-            ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
+            ->leftJoin('T_QUODETA', function ($join) {
+                $join->on('TQUO_QUOCD', '=', 'TQUODETA_QUOCD')
+                    ->on('TQUO_BRANCH', '=', 'TQUODETA_BRANCH');
+            })
+            ->leftJoin('M_ITM', function ($join) {
+                $join->on('TQUODETA_ITMCD', '=', 'MITM_ITMCD')
+                    ->on('TQUODETA_BRANCH', '=', 'MITM_BRANCH');
+            })
+            ->join('M_CUS', function ($join) {
+                $join->on('TQUO_CUSCD', '=', 'MCUS_CUSCD')->on('TQUO_BRANCH', '=', 'MCUS_BRANCH');
+            })
             ->where("TQUO_ISSUDT", ">=", $request->dateFrom)
             ->where("TQUO_ISSUDT", "<=", $request->dateTo)
+            ->whereNull("T_QUODETA.deleted_at")
             ->get()->toArray();
         if ($request->fileType === 'json') {
             return ['data' => $RS];

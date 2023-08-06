@@ -83,6 +83,11 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <input type="hidden" id="branch" value="">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="nav-condition" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
@@ -161,6 +166,7 @@
                         labelQuotationInModal.innerHTML = arrayItem['TQUO_QUOCD']
                         quotationAttn.value = arrayItem['TQUO_ATTN']
                         quotationSubject.value = arrayItem['TQUO_SBJCT']
+                        branch.value = arrayItem['TQUO_BRANCH']
                         const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
                         myModal.show()
                         loadQuotationDetail({
@@ -197,7 +203,8 @@
                 type: "PUT",
                 url: `approve/quotations/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
-                    _token: '{{ csrf_token() }}'
+                    _token: '{{ csrf_token() }}',
+                    TQUO_BRANCH: branch.value
                 },
                 dataType: "json",
                 success: function(response) {
@@ -232,7 +239,8 @@
                 type: "PUT",
                 url: `reject/quotations/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
-                    _token: '{{ csrf_token() }}'
+                    _token: '{{ csrf_token() }}',
+                    TQUO_BRANCH: branch.value
                 },
                 dataType: "json",
                 success: function(response) {
@@ -320,7 +328,7 @@
                     newcell.innerHTML = numeral(subTotal).format(',')
                 })
                 myStrong.innerText = numeral(grandTotal).format(',')
-               
+
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
                 quotationConditionContainer.innerHTML = ''

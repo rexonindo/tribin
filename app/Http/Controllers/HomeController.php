@@ -91,17 +91,18 @@ class HomeController extends Controller
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
-                ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
-                ->groupBy("TQUODETA_QUOCD")
+                ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD, TQUODETA_BRANCH")
+                ->groupBy("TQUODETA_QUOCD", "TQUODETA_BRANCH")
                 ->whereNull('deleted_at');
-            $dataTobeApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN"))
+            $dataTobeApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN,TQUO_BRANCH"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
-                    $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
+                    $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD")
+                        ->on("TQUO_BRANCH", "=", "TQUODETA_BRANCH");
                 })
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
                 ->whereNull("TQUO_APPRVDT")
                 ->whereNull("TQUO_REJCTDT")
-                ->groupBy('TQUO_QUOCD')->get();
+                ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH')->get();
 
             # Query untuk data Purchase Request dengan tipe "Auto PO" 
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
@@ -133,15 +134,17 @@ class HomeController extends Controller
         if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
-                ->groupBy("TQUODETA_QUOCD")
-                ->whereNull('deleted_at');
-            $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT"))
+                ->where('TQUODETA_BRANCH', Auth::user()->branch)
+                ->whereNull('deleted_at')
+                ->groupBy("TQUODETA_QUOCD");
+            $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT,TQUO_BRANCH"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
                 ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
                 ->whereNull("TSLO_QUOCD")
+                ->where('TQUO_BRANCH', Auth::user()->branch)
                 ->groupBy('TQUO_QUOCD')->get();
 
             # Query untuk data Purchase Order Draft
