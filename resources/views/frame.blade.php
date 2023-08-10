@@ -250,27 +250,21 @@
         <div class="offcanvas-body">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-2 mb-1 border-end text-center">
+                    <div class="col border-end">
                         <span class="fas fa-user" title="Your name"></span>
-                    </div>
-                    <div class="col-md-10 mb-1">
-                        <strong>{{ substr(Auth::user()->name, 0 ,21)}}</strong>
+                        <strong class="ms-3">{{ substr(Auth::user()->name, 0 ,21)}}</strong>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2 mb-1 border-end text-center">
+                    <div class="col mb-1 border-end">
                         <span class="fas fa-id-badge" title="Role"></span>
-                    </div>
-                    <div class="col-md-10 mb-1">
-                        {{ $activeRoleDescription }}
+                        <small class="ms-3">{{ $activeRoleDescription }}</small>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2 mb-1 border-end text-center">
+                    <div class="col mb-1 border-end">
                         <span class="fas fa-city" title="Branch"></span>
-                    </div>
-                    <div class="col-md-10 mb-3">
-                        {{ $BranchName }}
+                        <strong class="ms-2">{{ $BranchName }}</strong>
                     </div>
                 </div>
                 <div class="row">
