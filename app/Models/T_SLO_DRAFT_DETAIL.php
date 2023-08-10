@@ -12,6 +12,6 @@ class T_SLO_DRAFT_DETAIL extends Model
     protected $fillable = [
         'deleted_at', 'deleted_by',
         'TSLODRAFTDETA_SLOCD',  'TSLODRAFTDETA_ITMCD', 'TSLODRAFTDETA_ITMQT', 'TSLODRAFTDETA_ITMPRC_PER',
-        'created_by', 'updated_by'
+        'created_by', 'updated_by', 'TSLODRAFTDETA_BRANCH'
     ];
 }

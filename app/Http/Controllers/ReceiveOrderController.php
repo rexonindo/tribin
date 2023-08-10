@@ -46,6 +46,7 @@ class ReceiveOrderController extends Controller
         $LastLine = DB::connection($this->dedicatedConnection)->table('T_SLOHEAD')
             ->whereMonth('created_at', '=', date('m'))
             ->whereYear('created_at', '=', date('Y'))
+            ->where('TSLO_BRANCH', Auth::user()->branch)
             ->max('TSLO_LINE');
 
 
@@ -59,8 +60,6 @@ class ReceiveOrderController extends Controller
             $LastLine++;
             $newDocumentCode = substr('00' . $LastLine, -3) . '/PT/SLO/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         }
-
-
 
         if ($request->TSLO_POCD == '') {
             $POLastLine = DB::connection($this->dedicatedConnection)->table('T_SLOHEAD')
@@ -89,8 +88,9 @@ class ReceiveOrderController extends Controller
             'TSLO_ISSUDT' => $request->TSLO_ISSUDT,
             'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
             'created_by' => Auth::user()->nick_name,
+            'TSLO_BRANCH' => Auth::user()->branch
         ];
-        T_SLOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
+
 
         # data quotation detail item
         $validator = Validator::make($request->all(), [
@@ -123,8 +123,11 @@ class ReceiveOrderController extends Controller
                 'TSLODETA_MOBDEMOB' => $request->TSLODETA_MOBDEMOB[$i],
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),
+                'TSLODETA_BRANCH' => Auth::user()->branch
             ];
         }
+
+        T_SLOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
         if (!empty($quotationDetail)) {
             T_SLODETA::on($this->dedicatedConnection)->insert($quotationDetail);
         }
@@ -143,8 +146,12 @@ class ReceiveOrderController extends Controller
         ];
 
         $RS = T_SLOHEAD::on($this->dedicatedConnection)->select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN", "TSLO_PLAN_DLVDT"])
-            ->leftJoin("M_CUS", "TSLO_CUSCD", "=", "MCUS_CUSCD")
+            ->leftJoin("M_CUS", function ($join) {
+                $join->on("TSLO_CUSCD", "=", "MCUS_CUSCD")
+                    ->on('TSLO_BRANCH', '=', 'MCUS_BRANCH');
+            })
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->where('TSLO_BRANCH', Auth::user()->branch)
             ->get();
         return ['data' => $RS];
     }
@@ -158,10 +165,17 @@ class ReceiveOrderController extends Controller
         ];
 
         $RS = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(["TSLODRAFT_SLOCD", "TSLODRAFT_CUSCD", "MCUS_CUSNM", "TSLODRAFT_ISSUDT", "TSLODRAFT_POCD", "TSLODRAFT_ATTN"])
-            ->leftJoin("M_CUS", "TSLODRAFT_CUSCD", "=", "MCUS_CUSCD")
-            ->leftJoin("T_SLOHEAD", "TSLODRAFT_SLOCD", "=", "TSLO_QUOCD")
+            ->leftJoin("M_CUS", function ($join) {
+                $join->on("TSLODRAFT_CUSCD", "=", "MCUS_CUSCD")
+                    ->on('TSLODRAFT_BRANCH', '=', 'MCUS_BRANCH');
+            })
+            ->leftJoin("T_SLOHEAD", function ($join) {
+                $join->on("TSLODRAFT_SLOCD", "=", "TSLO_QUOCD")
+                    ->on('TSLODRAFT_BRANCH', '=', 'TSLO_BRANCH');
+            })
             ->whereNull("TSLO_QUOCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->where('TSLODRAFT_BRANCH', Auth::user()->branch)
             ->get();
         return ['data' => $RS];
     }
@@ -169,8 +183,12 @@ class ReceiveOrderController extends Controller
     function loadById(Request $request)
     {
         $RS = T_SLODETA::on($this->dedicatedConnection)->select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE", "TSLODETA_ITMQT", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
-            ->leftJoin("M_ITM", "TSLODETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TSLODETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TSLODETA_BRANCH', '=', 'MITM_BRANCH');
+            })
             ->where('TSLODETA_SLOCD', base64_decode($request->id))
+            ->where('TSLODETA_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS];
     }
@@ -178,15 +196,21 @@ class ReceiveOrderController extends Controller
     function loadDraftById(Request $request)
     {
         $RS = T_SLO_DRAFT_DETAIL::on($this->dedicatedConnection)->select(["id", "TSLODRAFTDETA_ITMCD", "MITM_ITMNM", "TSLODRAFTDETA_ITMQT", "TSLODRAFTDETA_ITMPRC_PER"])
-            ->leftJoin("M_ITM", "TSLODRAFTDETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TSLODRAFTDETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TSLODRAFTDETA_BRANCH', '=', 'MITM_BRANCH');
+            })
             ->where('TSLODRAFTDETA_SLOCD', base64_decode($request->id))
+            ->where('TSLODRAFTDETA_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS];
     }
 
     function deleteItemById(Request $request)
     {
-        $affectedRow = T_SLODETA::on($this->dedicatedConnection)->where('id', $request->id)
+        $affectedRow = T_SLODETA::on($this->dedicatedConnection)
+            ->where('id', $request->id)
+            ->where('TSLODETA_BRANCH', Auth::user()->branch)
             ->update([
                 'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
             ]);
@@ -196,7 +220,9 @@ class ReceiveOrderController extends Controller
     public function update(Request $request)
     {
         # ubah data header
-        $affectedRow = T_SLOHEAD::on($this->dedicatedConnection)->where('TSLO_SLOCD', base64_decode($request->id))
+        $affectedRow = T_SLOHEAD::on($this->dedicatedConnection)
+            ->where('TSLO_SLOCD', base64_decode($request->id))
+            ->where('TSLO_BRANCH', Auth::user()->branch)
             ->update([
                 'TSLO_CUSCD' => $request->TSLO_CUSCD, 'TSLO_ATTN' => $request->TSLO_ATTN, 'TSLO_POCD' => $request->TSLO_POCD, 'TSLO_ISSUDT' => $request->TSLO_ISSUDT, 'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT
             ]);
@@ -209,11 +235,18 @@ class ReceiveOrderController extends Controller
     function report(Request $request)
     {
         $RS = T_SLOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_SLOHEAD.*,MCUS_CUSNM,TSLODETA_ITMCD,MITM_ITMNM,TSLODETA_ITMQT,TSLODETA_USAGE,TSLODETA_PRC,TSLODETA_OPRPRC,TSLODETA_MOBDEMOB"))
-            ->leftJoin('T_SLODETA', 'TSLO_SLOCD', '=', 'TSLODETA_SLOCD')
-            ->leftJoin('M_ITM', 'TSLODETA_ITMCD', '=', 'MITM_ITMCD')
-            ->join('M_CUS', 'TSLO_CUSCD', '=', 'MCUS_CUSCD')
+            ->leftJoin('T_SLODETA', function ($join) {
+                $join->on('TSLO_SLOCD', '=', 'TSLODETA_SLOCD')->on('TSLO_BRANCH', '=', 'TSLODETA_BRANCH');
+            })
+            ->leftJoin('M_ITM', function ($join) {
+                $join->on('TSLODETA_ITMCD', '=', 'MITM_ITMCD')->on('TSLODETA_BRANCH', '=', 'MITM_BRANCH');
+            })
+            ->join('M_CUS', function ($join) {
+                $join->on('TSLO_CUSCD', '=', 'MCUS_CUSCD')->on('TSLO_BRANCH', '=', 'MCUS_BRANCH');
+            })
             ->where("TSLO_ISSUDT", ">=", $request->dateFrom)
             ->where("TSLO_ISSUDT", "<=", $request->dateTo)
+            ->where('TSLO_BRANCH', Auth::user()->branch)
             ->get()->toArray();
         if ($request->fileType === 'json') {
             return ['data' => $RS];
@@ -250,12 +283,14 @@ class ReceiveOrderController extends Controller
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_SLO_DRAFT_DETAIL')
                 ->selectRaw("COUNT(*) TTLDETAIL, TSLODRAFTDETA_SLOCD")
                 ->groupBy("TSLODRAFTDETA_SLOCD")
+                ->where('TSLODRAFTDETA_BRANCH', Auth::user()->branch)
                 ->whereNull('deleted_at');
             $dataTobeUpproved = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(DB::raw("TSLODRAFT_SLOCD,max(TTLDETAIL) TTLDETAIL, max(T_SLO_DRAFT_HEAD.created_at) CREATED_AT,max(TSLODRAFT_POCD) TSLODRAFT_POCD"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TSLODRAFT_SLOCD", "=", "TSLODRAFTDETA_SLOCD");
                 })
                 ->whereNull("TSLODRAFT_APPRVDT")
+                ->where('TSLODRAFT_BRANCH', Auth::user()->branch)
                 ->groupBy('TSLODRAFT_SLOCD')->get();
         }
         return [
