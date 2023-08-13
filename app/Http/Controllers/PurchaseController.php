@@ -952,7 +952,7 @@ class PurchaseController extends Controller
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)
                 ->where('TPCHREQ_PCHCD', base64_decode($request->id))
-                ->where('TPCHREQ_BRANCH', $request->TPCHORD_BRANCH)
+                ->where('TPCHREQ_BRANCH', $request->TPCHREQ_BRANCH)
                 ->update([
                     'TPCHREQ_REJCTBY' => Auth::user()->nick_name, 'TPCHREQ_REJCTDT' => date('Y-m-d H:i:s')
                 ]);
