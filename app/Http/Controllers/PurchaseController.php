@@ -62,6 +62,7 @@ class PurchaseController extends Controller
             $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHREQHEAD')
                 ->whereMonth('created_at', '=', date('m'))
                 ->whereYear('created_at', '=', date('Y'))
+                ->where('TPCHREQ_BRANCH', Auth::user()->branch)
                 ->max('TPCHREQ_LINE');
 
             $quotationHeader = [];
@@ -81,9 +82,8 @@ class PurchaseController extends Controller
                 'TPCHREQ_LINE' => $LastLine,
                 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT,
                 'created_by' => Auth::user()->nick_name,
+                'TPCHREQ_BRANCH' => Auth::user()->branch
             ];
-
-            T_PCHREQHEAD::on($this->dedicatedConnection)->create($quotationHeader);
 
             # data quotation detail item
             $validator = Validator::make($request->all(), [
@@ -98,6 +98,8 @@ class PurchaseController extends Controller
                 return response()->json($validator->errors(), 406);
             }
             $countDetail = count($request->TPCHREQDETA_ITMCD);
+
+            T_PCHREQHEAD::on($this->dedicatedConnection)->create($quotationHeader);
             $quotationDetail = [];
             for ($i = 0; $i < $countDetail; $i++) {
                 $quotationDetail[] = [
@@ -108,6 +110,7 @@ class PurchaseController extends Controller
                     'TPCHREQDETA_REMARK' => $request->TPCHREQDETA_REMARK[$i],
                     'created_by' => Auth::user()->nick_name,
                     'created_at' => date('Y-m-d H:i:s'),
+                    'TPCHREQDETA_BRANCH' => Auth::user()->branch
                 ];
             }
             if (!empty($quotationDetail)) {
@@ -124,6 +127,7 @@ class PurchaseController extends Controller
                 'TPCHREQDETA_ITMQT' => $request->TPCHREQDETA_ITMQT,
                 'TPCHREQDETA_REQDT' => $request->TPCHREQDETA_REQDT,
                 'TPCHREQDETA_REMARK' => $request->TPCHREQDETA_REMARK,
+                'TPCHREQDETA_BRANCH' => Auth::user()->branch,
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
@@ -148,11 +152,6 @@ class PurchaseController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
-        $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHREQHEAD')
-            ->whereMonth('created_at', '=', date('m'))
-            ->whereYear('created_at', '=', date('Y'))
-            ->max('TPCHREQ_LINE');
-
         # Generate Nomor PO
         $RSAlias = CompanyGroup::select('alias_code')
             ->where('connection', $this->dedicatedConnection)
@@ -161,6 +160,7 @@ class PurchaseController extends Controller
         $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHORDHEAD')
             ->whereMonth('created_at', '=', date('m'))
             ->whereYear('created_at', '=', date('Y'))
+            ->where('TPCHORD_BRANCH', Auth::user()->branch)
             ->max('TPCHORD_LINE');
 
         $newPOCode = '';
@@ -180,9 +180,8 @@ class PurchaseController extends Controller
             'TPCHORD_ISSUDT' => $request->TPCHORD_ISSUDT,
             'TPCHORD_REQCD' => $request->TPCHORD_REQCD,
             'created_by' => Auth::user()->nick_name,
+            'TPCHORD_BRANCH' => Auth::user()->branch
         ];
-
-        T_PCHORDHEAD::on($this->dedicatedConnection)->create($headerTable);
 
         # data detail item
         $validator = Validator::make($request->all(), [
@@ -197,6 +196,8 @@ class PurchaseController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
+        T_PCHORDHEAD::on($this->dedicatedConnection)->create($headerTable);
+
         $countDetail = count($request->TPCHORDDETA_ITMCD);
         $itemDetail = [];
         for ($i = 0; $i < $countDetail; $i++) {
@@ -207,6 +208,7 @@ class PurchaseController extends Controller
                 'TPCHORDDETA_ITMPRC_PER' => $request->TPCHORDDETA_ITMPRC_PER[$i],
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),
+                'TPCHORDDETA_BRANCH' => Auth::user()->branch
             ];
         }
         if (!empty($itemDetail)) {
@@ -221,7 +223,9 @@ class PurchaseController extends Controller
     public function update(Request $request)
     {
         # ubah data header
-        $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
+        $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)
+            ->where('TPCHREQ_PCHCD', base64_decode($request->id))
+            ->where('TPCHREQ_BRANCH', Auth::user()->branch)
             ->update([
                 'TPCHREQ_PURPOSE' => $request->TPCHREQ_PURPOSE, 'TPCHREQ_ISSUDT' => $request->TPCHREQ_ISSUDT, 'TPCHREQ_TYPE' => $request->TPCHREQ_TYPE, 'TPCHREQ_SUPCD' => $request->TPCHREQ_SUPCD
             ]);
@@ -231,7 +235,8 @@ class PurchaseController extends Controller
     public function updatePODetail(Request $request)
     {
         # ubah data header
-        $affectedRow = T_PCHORDDETA::on($this->dedicatedConnection)->where('id', $request->id)
+        $affectedRow = T_PCHORDDETA::on($this->dedicatedConnection)
+            ->where('id', $request->id)
             ->update([
                 'TPCHORDDETA_ITMPRC_PER' => $request->TPCHORDDETA_ITMPRC_PER
             ]);
@@ -248,21 +253,30 @@ class PurchaseController extends Controller
         if ($request->approval == '1') {
             $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME", "TPCHREQ_SUPCD", "MSUP_SUPNM"])
                 ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
-                ->leftJoin("M_SUP", "TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
-                ->leftJoin("T_PCHORDHEAD", "TPCHREQ_PCHCD", "=", "TPCHORD_REQCD")
+                ->leftJoin("M_SUP", function ($join) {
+                    $join->on("TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
+                        ->on('TPCHREQ_BRANCH', '=', 'MSUP_BRANCH');
+                })
+                ->leftJoin("T_PCHORDHEAD", function ($join) {
+                    $join->on("TPCHREQ_PCHCD", "=", "TPCHORD_REQCD")
+                        ->on('TPCHREQ_BRANCH', '=', 'TPCHORD_BRANCH');
+                })
                 ->where('TPCHREQ_TYPE', '1')
                 ->whereNull("TPCHORD_REQCD")
+                ->where('TPCHREQ_BRANCH', Auth::user()->branch)
                 ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
                 ->get();
         } else {
             $RS = T_PCHREQHEAD::on($this->dedicatedConnection)->select(["TPCHREQ_PCHCD", "TPCHREQ_PURPOSE", "TPCHREQ_ISSUDT", "TPCHREQ_TYPE", "MPCHREQTYPE_NAME", "TPCHREQ_SUPCD", "MSUP_SUPNM"])
                 ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
-                ->leftJoin("M_SUP", "TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
+                ->leftJoin("M_SUP", function ($join) {
+                    $join->on("TPCHREQ_SUPCD", "=", "MSUP_SUPCD")
+                        ->on('TPCHREQ_BRANCH', '=', 'MSUP_BRANCH');
+                })
+                ->where('TPCHREQ_BRANCH', Auth::user()->branch)
                 ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
                 ->get();
         }
-
-
         return ['data' => $RS];
     }
 
@@ -274,7 +288,11 @@ class PurchaseController extends Controller
         ];
 
         $RS = T_PCHORDHEAD::on($this->dedicatedConnection)->select(["TPCHORD_PCHCD", "TPCHORD_SUPCD", "MSUP_SUPNM", "TPCHORD_ISSUDT", "TPCHORD_DLVDT", "TPCHORD_REQCD"])
-            ->leftJoin("M_SUP", "TPCHORD_SUPCD", "=", "MSUP_SUPCD")
+            ->leftJoin("M_SUP", function ($join) {
+                $join->on("TPCHORD_SUPCD", "=", "MSUP_SUPCD")
+                    ->on('TPCHORD_BRANCH', '=', 'MSUP_BRANCH');
+            })
+            ->where('TPCHORD_BRANCH', Auth::user()->branch)
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->get();
 
@@ -284,8 +302,24 @@ class PurchaseController extends Controller
     function loadById(Request $request)
     {
         $RS = T_PCHREQDETA::on($this->dedicatedConnection)->select(["id", "TPCHREQDETA_ITMCD", "MITM_ITMNM", "TPCHREQDETA_ITMQT", "TPCHREQDETA_REQDT", "TPCHREQDETA_REMARK"])
-            ->leftJoin("M_ITM", "TPCHREQDETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TPCHREQDETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TPCHREQDETA_BRANCH', '=', 'MITM_BRANCH');
+            })
             ->where('TPCHREQDETA_PCHCD', base64_decode($request->id))
+            ->where('TPCHREQDETA_BRANCH', Auth::user()->branch)
+            ->whereNull('deleted_at')->get();
+        return ['dataItem' => $RS];
+    }
+    function loadByIdApproval(Request $request)
+    {
+        $RS = T_PCHREQDETA::on($this->dedicatedConnection)->select(["id", "TPCHREQDETA_ITMCD", "MITM_ITMNM", "TPCHREQDETA_ITMQT", "TPCHREQDETA_REQDT", "TPCHREQDETA_REMARK"])
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TPCHREQDETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TPCHREQDETA_BRANCH', '=', 'MITM_BRANCH');
+            })
+            ->where('TPCHREQDETA_PCHCD', base64_decode($request->id))
+            ->where('TPCHREQDETA_BRANCH', $request->TPCHREQDETA_BRANCH)
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS];
     }
@@ -293,8 +327,24 @@ class PurchaseController extends Controller
     function loadPOById(Request $request)
     {
         $RS = T_PCHORDDETA::on($this->dedicatedConnection)->select(["id", "TPCHORDDETA_ITMCD", "MITM_ITMNM", "TPCHORDDETA_ITMQT", "TPCHORDDETA_ITMPRC_PER"])
-            ->leftJoin("M_ITM", "TPCHORDDETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TPCHORDDETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TPCHORDDETA_BRANCH', '=', 'MITM_BRANCH');
+            })
             ->where('TPCHORDDETA_PCHCD', base64_decode($request->id))
+            ->where('TPCHORDDETA_BRANCH', Auth::user()->branch)
+            ->whereNull('deleted_at')->get();
+        return ['dataItem' => $RS];
+    }
+    function loadPOByIdApproval(Request $request)
+    {
+        $RS = T_PCHORDDETA::on($this->dedicatedConnection)->select(["id", "TPCHORDDETA_ITMCD", "MITM_ITMNM", "TPCHORDDETA_ITMQT", "TPCHORDDETA_ITMPRC_PER"])
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TPCHORDDETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TPCHORDDETA_BRANCH', '=', 'MITM_BRANCH');
+            })
+            ->where('TPCHORDDETA_PCHCD', base64_decode($request->id))
+            ->where('TPCHORDDETA_BRANCH', $request->TPCHORDDETA_BRANCH)
             ->whereNull('deleted_at')->get();
         return ['dataItem' => $RS];
     }
@@ -313,6 +363,7 @@ class PurchaseController extends Controller
         $doc = base64_decode($request->id);
         $RSHeader = T_PCHREQHEAD::on($this->dedicatedConnection)->select('TPCHREQ_PURPOSE', 'TPCHREQ_ISSUDT', 'TPCHREQ_APPRVBY')
             ->where("TPCHREQ_PCHCD", $doc)
+            ->where('TPCHREQ_BRANCH', Auth::user()->branch)
             ->get()->toArray();
         $TPCHREQ_PURPOSE = '';
         $TPCHREQ_ISSUDT = '';
@@ -325,8 +376,12 @@ class PurchaseController extends Controller
         }
 
         $RSDetail = T_PCHREQDETA::on($this->dedicatedConnection)->select('TPCHREQDETA_ITMCD', 'MITM_BRAND', 'MITM_ITMNM', 'MITM_MODEL', 'TPCHREQDETA_ITMQT', 'TPCHREQDETA_REQDT', 'TPCHREQDETA_REMARK')
-            ->leftJoin("M_ITM", "TPCHREQDETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TPCHREQDETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on("TPCHREQDETA_BRANCH", "=", "MITM_BRANCH");
+            })
             ->whereNull("deleted_at")
+            ->where('TPCHREQDETA_BRANCH', Auth::user()->branch)
             ->where("TPCHREQDETA_PCHCD", $doc)
             ->get()->toArray();
 
@@ -385,8 +440,12 @@ class PurchaseController extends Controller
             ->where('connection', $this->dedicatedConnection)
             ->first();
         $RSHeader = T_PCHORDHEAD::on($this->dedicatedConnection)->select('T_PCHORDHEAD.created_by', 'TPCHORD_ISSUDT', 'TPCHORD_APPRVBY', 'MSUP_SUPNM', 'MSUP_ADDR1', 'MSUP_TELNO', 'MSUP_TAXREG')
-            ->leftJoin('M_SUP', 'TPCHORD_SUPCD', '=', 'MSUP_SUPCD')
+            ->leftJoin('M_SUP', function ($join) {
+                $join->on('TPCHORD_SUPCD', '=', 'MSUP_SUPCD')
+                    ->on('TPCHORD_BRANCH', '=', 'MSUP_BRANCH');
+            })
             ->where("TPCHORD_PCHCD", $doc)
+            ->where('TPCHORD_BRANCH', Auth::user()->branch)
             ->get()->toArray();
         $created_by = '';
         $TPCHORD_ISSUDT = '';
@@ -408,7 +467,10 @@ class PurchaseController extends Controller
         $RSUserWhoPrepare = User::select('name')->whereIn('nick_name', [$created_by])->first();
 
         $RSDetail = T_PCHORDDETA::on($this->dedicatedConnection)->select('TPCHORDDETA_ITMCD', 'MITM_BRAND', 'MITM_ITMNM', 'MITM_MODEL', 'TPCHORDDETA_ITMQT', 'TPCHORDDETA_ITMPRC_PER', 'MITM_STKUOM')
-            ->leftJoin("M_ITM", "TPCHORDDETA_ITMCD", "=", "MITM_ITMCD")
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("TPCHORDDETA_ITMCD", "=", "MITM_ITMCD")
+                    ->on('TPCHORDDETA_BRANCH', '=', 'MITM_BRANCH');
+            })
             ->whereNull("deleted_at")
             ->where("TPCHORDDETA_PCHCD", $doc)
             ->get()->toArray();
@@ -635,31 +697,37 @@ class PurchaseController extends Controller
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Purchase Request dengan tipe "Normal" 
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
-                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
-                ->groupBy("TPCHREQDETA_PCHCD")
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD,TPCHREQDETA_BRANCH")
+                ->groupBy("TPCHREQDETA_PCHCD", "TPCHREQDETA_BRANCH")
                 ->whereNull('deleted_at');
-            $dataPurchaseRequestTobeUpproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE"))
+            $dataPurchaseRequestTobeUpproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE,TPCHREQ_BRANCH"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
-                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
+                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD")
+                        ->on('TPCHREQ_BRANCH', '=', 'TPCHREQDETA_BRANCH');
                 })
                 ->whereNull("TPCHREQ_APPRVDT")
                 ->whereNull("TPCHREQ_REJCTDT")
                 ->where("TPCHREQ_TYPE", '2')
-                ->groupBy('TPCHREQ_PCHCD')->get();
+                ->groupBy('TPCHREQ_PCHCD', 'TPCHREQ_BRANCH')->get();
         }
         if (in_array($activeRole['code'], ['purchasing'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
-                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
-                ->groupBy("TPCHREQDETA_PCHCD")
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD, TPCHREQDETA_BRANCH")
+                ->groupBy("TPCHREQDETA_PCHCD", "TPCHREQDETA_BRANCH")
                 ->whereNull('deleted_at');
             $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT,MPCHREQTYPE_NAME,TPCHREQ_TYPE"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
-                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
+                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD")
+                        ->on('TPCHREQ_BRANCH', '=', 'TPCHREQDETA_BRANCH');
                 })
                 ->leftJoin("M_PCHREQTYPE", "TPCHREQ_TYPE", "=", "MPCHREQTYPE_ID")
-                ->leftJoin('T_PCHORDHEAD', 'TPCHREQ_PCHCD', '=', 'TPCHORD_REQCD')
+                ->leftJoin('T_PCHORDHEAD', function ($join) {
+                    $join->on('TPCHREQ_PCHCD', '=', 'TPCHORD_REQCD')
+                        ->on('TPCHREQ_BRANCH', '=', 'TPCHORD_BRANCH');
+                })
                 ->whereNull('TPCHORD_REQCD')
-                ->groupBy('TPCHREQ_PCHCD', 'MPCHREQTYPE_NAME', 'TPCHREQ_TYPE')->get();
+                ->where('TPCHREQ_BRANCH', Auth::user()->branch)
+                ->groupBy('TPCHREQ_PCHCD', 'MPCHREQTYPE_NAME', 'TPCHREQ_TYPE', 'TPCHREQ_BRANCH')->get();
         }
         return [
             'data' => $dataPurchaseRequestTobeUpproved, 'dataApproved' => $dataPurchaseRequestApproved
@@ -673,17 +741,21 @@ class PurchaseController extends Controller
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Purchase Order
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHORDDETA')
-                ->selectRaw("COUNT(*) TTLDETAIL, TPCHORDDETA_PCHCD")
-                ->groupBy("TPCHORDDETA_PCHCD")
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHORDDETA_PCHCD, TPCHORDDETA_BRANCH")
+                ->groupBy("TPCHORDDETA_PCHCD", 'TPCHORDDETA_BRANCH')
                 ->whereNull('deleted_at');
-            $data = T_PCHORDHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHORD_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHORDHEAD.created_at) CREATED_AT, MAX(MSUP_SUPNM) MSUP_SUPNM"))
+            $data = T_PCHORDHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHORD_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHORDHEAD.created_at) CREATED_AT, MAX(MSUP_SUPNM) MSUP_SUPNM,TPCHORD_BRANCH"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
-                    $join->on("TPCHORD_PCHCD", "=", "TPCHORDDETA_PCHCD");
+                    $join->on("TPCHORD_PCHCD", "=", "TPCHORDDETA_PCHCD")
+                        ->on('TPCHORD_BRANCH', '=', 'TPCHORDDETA_BRANCH');
                 })
-                ->leftJoin('M_SUP', 'TPCHORD_SUPCD', '=', 'MSUP_SUPCD')
+                ->leftJoin('M_SUP', function ($join) {
+                    $join->on('TPCHORD_SUPCD', '=', 'MSUP_SUPCD')
+                        ->on('TPCHORD_BRANCH', '=', 'MSUP_BRANCH');
+                })
                 ->whereNull("TPCHORD_APPRVDT")
                 ->whereNull("TPCHORD_REJCTBY")
-                ->groupBy('TPCHORD_PCHCD')->get();
+                ->groupBy('TPCHORD_PCHCD', 'TPCHORD_BRANCH')->get();
         }
         return [
             'data' => $data
@@ -696,8 +768,12 @@ class PurchaseController extends Controller
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             $PRCode = base64_decode($request->id);
             $RSPR = T_PCHREQHEAD::on($this->dedicatedConnection)->select('TPCHREQ_SUPCD', 'MSUP_CGCON')
-                ->leftJoin('M_SUP', 'TPCHREQ_SUPCD', '=', 'MSUP_SUPCD')
+                ->leftJoin('M_SUP', function ($join) {
+                    $join->on('TPCHREQ_SUPCD', '=', 'MSUP_SUPCD')
+                        ->on('TPCHREQ_BRANCH', '=', 'MSUP_BRANCH');
+                })
                 ->where('TPCHREQ_PCHCD', $PRCode)
+                ->where('TPCHREQ_BRANCH', $request->TPCHREQ_BRANCH)
                 ->first();
 
             # Periksa registrasi CG aktif di CG tujuan pada Customer Master
@@ -710,12 +786,19 @@ class PurchaseController extends Controller
 
             # registrasi Item (jika belum ada) di CG tujuan pada Item Master
             $RSPRDetail = T_PCHREQDETA::on($this->dedicatedConnection)->select('TPCHREQDETA_ITMQT', 'M_ITM.*')
-                ->leftJoin('M_ITM', 'TPCHREQDETA_ITMCD', '=', 'MITM_ITMCD')
+                ->leftJoin('M_ITM', function ($join) {
+                    $join->on('TPCHREQDETA_ITMCD', '=', 'MITM_ITMCD')
+                        ->on('TPCHREQDETA_BRANCH', '=', 'MITM_BRANCH');
+                })
                 ->where('TPCHREQDETA_PCHCD', $PRCode)
+                ->where('TPCHREQDETA_BRANCH', $request->TPCHREQ_BRANCH)
                 ->whereNull('deleted_at')
                 ->get();
             foreach ($RSPRDetail as $r) {
-                $totalRow = M_ITM::on($RSPR->MSUP_CGCON)->where('MITM_ITMCD', $r->MITM_ITMCD)->count();
+                $totalRow = M_ITM::on($RSPR->MSUP_CGCON)
+                    ->where('MITM_ITMCD', $r->MITM_ITMCD)
+                    ->where('MITM_BRANCH', $r->MITM_BRANCH)
+                    ->count();
                 if ($totalRow === 0) {
                     M_ITM::on($RSPR->MSUP_CGCON)->create([
                         'MITM_ITMCD' => $r->MITM_ITMCD,
@@ -727,11 +810,14 @@ class PurchaseController extends Controller
                         'MITM_SPEC' => $r->MITM_SPEC,
                         'MITM_ITMCAT' => $r->MITM_ITMCAT,
                         'MITM_COACD' => $r->MITM_COACD,
+                        'MITM_BRANCH' => $r->MITM_BRANCH,
                     ]);
                 }
             }
 
-            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', $PRCode)
+            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)
+                ->where('TPCHREQ_PCHCD', $PRCode)
+                ->where('TPCHREQ_BRANCH', $request->TPCHREQ_BRANCH)
                 ->update([
                     'TPCHREQ_APPRVBY' => Auth::user()->nick_name, 'TPCHREQ_APPRVDT' => date('Y-m-d H:i:s')
                 ]);
@@ -745,6 +831,7 @@ class PurchaseController extends Controller
                 $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHORDHEAD')
                     ->whereMonth('created_at', '=', date('m'))
                     ->whereYear('created_at', '=', date('Y'))
+                    ->whereYear('TPCHORD_BRANCH', '=', $request->TPCHREQ_BRANCH)
                     ->max('TPCHORD_LINE');
 
                 $newPOCode = '';
@@ -766,6 +853,7 @@ class PurchaseController extends Controller
                     'TPCHORD_APPRVDT' => date('Y-m-d H:i:s'),
                     'TPCHORD_REQCD' => $PRCode,
                     'created_by' => Auth::user()->nick_name,
+                    'TPCHORD_BRANCH' => $request->TPCHREQ_BRANCH,
                 ];
 
                 $detailTable = [];
@@ -777,6 +865,7 @@ class PurchaseController extends Controller
                         'TPCHORDDETA_ITMPRC_PER' => 0,
                         'created_by' => Auth::user()->nick_name,
                         'created_at' => date('Y-m-d H:i:s'),
+                        'TPCHORDDETA_BRANCH' => $request->TPCHREQ_BRANCH,
                     ];
                 }
 
@@ -790,6 +879,7 @@ class PurchaseController extends Controller
                 $LastLine = DB::connection($RSPR->MSUP_CGCON)->table('T_SLO_DRAFT_HEAD')
                     ->whereMonth('created_at', '=', date('m'))
                     ->whereYear('created_at', '=', date('Y'))
+                    ->whereYear('TSLODRAFT_BRANCH', '=', $request->TPCHREQ_BRANCH)
                     ->max('TSLODRAFT_LINE');
 
                 $newDocumentCode = '';
@@ -808,6 +898,7 @@ class PurchaseController extends Controller
                     'TSLODRAFT_POCD' => $newPOCode,
                     'TSLODRAFT_ISSUDT' => date('Y-m-d'),
                     'created_by' => Auth::user()->nick_name,
+                    'TSLODRAFT_BRANCH' => $request->TPCHREQ_BRANCH,
                 ];
 
                 # Simpan data ke Tabel RO Header di CG tujuan
@@ -823,10 +914,10 @@ class PurchaseController extends Controller
                         'TSLODRAFTDETA_ITMPRC_PER' => 0,
                         'created_by' => Auth::user()->nick_name,
                         'created_at' => date('Y-m-d H:i:s'),
+                        'TSLODRAFTDETA_BRANCH' => $request->TPCHREQ_BRANCH,
                     ];
                 }
                 T_SLO_DRAFT_DETAIL::on($RSPR->MSUP_CGCON)->insert($detailTable);
-
                 $message = 'Approved';
             } else {
                 $message =  'Something wrong please contact admin';
@@ -842,7 +933,9 @@ class PurchaseController extends Controller
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
-            $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)->where('TPCHORD_PCHCD', base64_decode($request->id))
+            $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)
+                ->where('TPCHORD_PCHCD', base64_decode($request->id))
+                ->where('TPCHORD_BRANCH', $request->TPCHORD_BRANCH)
                 ->update([
                     'TPCHORD_APPRVBY' => Auth::user()->nick_name, 'TPCHORD_APPRVDT' => date('Y-m-d H:i:s')
                 ]);
@@ -857,7 +950,9 @@ class PurchaseController extends Controller
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
-            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)->where('TPCHREQ_PCHCD', base64_decode($request->id))
+            $affectedRow = T_PCHREQHEAD::on($this->dedicatedConnection)
+                ->where('TPCHREQ_PCHCD', base64_decode($request->id))
+                ->where('TPCHREQ_BRANCH', $request->TPCHORD_BRANCH)
                 ->update([
                     'TPCHREQ_REJCTBY' => Auth::user()->nick_name, 'TPCHREQ_REJCTDT' => date('Y-m-d H:i:s')
                 ]);
@@ -872,7 +967,9 @@ class PurchaseController extends Controller
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
-            $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)->where('TPCHORD_PCHCD', base64_decode($request->id))
+            $affectedRow = T_PCHORDHEAD::on($this->dedicatedConnection)
+                ->where('TPCHORD_PCHCD', base64_decode($request->id))
+                ->where('TPCHORD_BRANCH', $request->TPCHORD_BRANCH)
                 ->update([
                     'TPCHORD_REJCTBY' => Auth::user()->nick_name, 'TPCHORD_REJCTDT' => date('Y-m-d H:i:s')
                 ]);

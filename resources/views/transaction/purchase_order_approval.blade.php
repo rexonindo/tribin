@@ -63,6 +63,11 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <input type="hidden" id="branch" value="">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -128,11 +133,13 @@
                     elButton2.onclick = () => {
                         event.preventDefault()
                         labelQuotationInModal.innerHTML = arrayItem['TPCHORD_PCHCD']
+                        branch.value = arrayItem['TPCHORD_BRANCH']
                         supplierName.value = arrayItem['MSUP_SUPNM']
                         const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
                         myModal.show()
                         loadQuotationDetail({
-                            doc: arrayItem['TPCHORD_PCHCD']
+                            doc: arrayItem['TPCHORD_PCHCD'],
+                            branch: arrayItem['TPCHORD_BRANCH']
                         })
                     }
 
@@ -165,6 +172,7 @@
                 type: "PUT",
                 url: `approve/purchase-order/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
+                    TPCHORD_BRANCH: branch.value,
                     _token: '{{ csrf_token() }}'
                 },
                 dataType: "json",
@@ -200,6 +208,7 @@
                 type: "PUT",
                 url: `reject/purchase-order/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
+                    TPCHORD_BRANCH: branch.value,
                     _token: '{{ csrf_token() }}'
                 },
                 dataType: "json",
@@ -231,7 +240,10 @@
     function loadQuotationDetail(data) {
         $.ajax({
             type: "GET",
-            url: `purchase-order/document/${btoa(data.doc)}`,
+            url: `purchase-order/approval-document/${btoa(data.doc)}`,
+            data: {
+                TPCHORDDETA_BRANCH: data.branch
+            },
             dataType: "json",
             success: function(response) {
                 let myContainer = document.getElementById("quotationTableContainer");

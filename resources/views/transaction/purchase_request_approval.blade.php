@@ -62,6 +62,11 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <input type="hidden" id="branch" value="">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -127,11 +132,13 @@
                     elButton2.onclick = () => {
                         event.preventDefault()
                         labelQuotationInModal.innerHTML = arrayItem['TPCHREQ_PCHCD']
+                        branch.value = arrayItem['TPCHREQ_BRANCH']
                         quotationSubject.value = arrayItem['TPCHREQ_PURPOSE']
                         const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
                         myModal.show()
                         loadQuotationDetail({
-                            doc: arrayItem['TPCHREQ_PCHCD']
+                            doc: arrayItem['TPCHREQ_PCHCD'],
+                            branch: arrayItem['TPCHREQ_BRANCH']
                         })
                     }
 
@@ -164,6 +171,7 @@
                 type: "PUT",
                 url: `approve/purchase-request/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
+                    TPCHREQ_BRANCH: branch.value,
                     _token: '{{ csrf_token() }}'
                 },
                 dataType: "json",
@@ -199,6 +207,7 @@
                 type: "PUT",
                 url: `reject/purchase-request/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
+                    TPCHREQ_BRANCH: branch.value,
                     _token: '{{ csrf_token() }}'
                 },
                 dataType: "json",
@@ -230,7 +239,10 @@
     function loadQuotationDetail(data) {
         $.ajax({
             type: "GET",
-            url: `purchase-request/${btoa(data.doc)}`,
+            url: `purchase-request-approval/${btoa(data.doc)}`,
+            data: {
+                TPCHREQDETA_BRANCH: data.branch
+            },
             dataType: "json",
             success: function(response) {
                 let myContainer = document.getElementById("quotationTableContainer");

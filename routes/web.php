@@ -171,6 +171,7 @@ Route::post('purchase-request', [PurchaseController::class, 'save'])->middleware
 Route::get('purchase-request', [PurchaseController::class, 'search'])->middleware('auth');
 Route::put('purchase-request/{id}', [PurchaseController::class, 'update'])->middleware('auth');
 Route::get('purchase-request/{id}', [PurchaseController::class, 'loadById'])->middleware('auth');
+Route::get('purchase-request-approval/{id}', [PurchaseController::class, 'loadByIdApproval'])->middleware('auth');
 Route::delete('purchase-request/items/{id}', [PurchaseController::class, 'deleteItemById'])->middleware('auth');
 
 # Terkait Purchase Order Transaction
@@ -178,6 +179,7 @@ Route::get('purchase-order/form', [PurchaseController::class, 'formOrder'])->mid
 Route::post('purchase-order', [PurchaseController::class, 'savePO'])->middleware('auth');
 Route::get('purchase-order', [PurchaseController::class, 'searchPO'])->middleware('auth');
 Route::get('purchase-order/document/{id}', [PurchaseController::class, 'loadPOById'])->middleware('auth');
+Route::get('purchase-order/approval-document/{id}', [PurchaseController::class, 'loadPOByIdApproval'])->middleware('auth');
 Route::put('purchase-order/items/{id}', [PurchaseController::class, 'updatePODetail'])->middleware('auth');
 Route::delete('purchase-order/items/{id}', [PurchaseController::class, 'updatePODetail'])->middleware('auth');
 
