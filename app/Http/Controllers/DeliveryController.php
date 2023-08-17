@@ -187,12 +187,36 @@ class DeliveryController extends Controller
     function loadByDocument(Request $request)
     {
         return [
-            'data' => T_DLVORDDETA::on($this->dedicatedConnection)->select('T_DLVORDDETA.id','TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT', 'MITM_ITMNM')
+            'data' => T_DLVORDDETA::on($this->dedicatedConnection)->select('T_DLVORDDETA.id', 'TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT', 'MITM_ITMNM')
                 ->leftJoin("M_ITM", function ($join) {
                     $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'MITM_BRANCH');
                 })
                 ->where('TDLVORDDETA_DLVCD', base64_decode($request->id))
-                ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get()
+                ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get(), 'input' => base64_decode($request->id)
         ];
+    }
+
+    function search(Request $request)
+    {
+        $columnMap = [
+            'TDLVORD_DLVCD',
+            'MCUS_CUSNM',
+        ];
+        $RSSub = T_DLVORDDETA::on($this->dedicatedConnection)->select('TDLVORDDETA_DLVCD', 'TDLVORDDETA_BRANCH', DB::raw('MAX(TDLVORDDETA_SLOCD) TDLVORDDETA_SLOCD'))
+            ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
+            ->groupBy('TDLVORDDETA_DLVCD', 'TDLVORDDETA_BRANCH');
+        $RS = T_DLVORDHEAD::on($this->dedicatedConnection)->select(["TDLVORD_DLVCD", "TDLVORD_CUSCD", "TDLVORD_ISSUDT", "MCUS_CUSNM", 'TDLVORDDETA_SLOCD'])
+            ->leftJoin("M_CUS", function ($join) {
+                $join->on("TDLVORD_CUSCD", "=", "MCUS_CUSCD")
+                    ->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+            })
+            ->leftJoinSub($RSSub, 'V1', function ($join) {
+                $join->on('TDLVORD_DLVCD', '=', 'TDLVORDDETA_DLVCD')
+                    ->on('TDLVORD_BRANCH', '=', 'TDLVORDDETA_BRANCH');
+            })
+            ->where('TDLVORD_BRANCH', Auth::user()->branch)
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->get();
+        return ['data' => $RS];
     }
 }

@@ -19,7 +19,7 @@
                 <label for="orderCode" class="form-label">Code</label>
                 <div class="input-group mb-1">
                     <input type="text" id="orderCode" class="form-control" placeholder="SP..." maxlength="17" disabled>
-                    <button class="btn btn-primary" type="button" onclick="btnShowReceiveModal()"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-primary" type="button" onclick="btnShowSavedDeliveryModal()"><i class="fas fa-search"></i></button>
                 </div>
             </div>
             <div class="col-md-6 mb-1">
@@ -129,6 +129,50 @@
                                             <th>Code</th>
                                             <th>Customer</th>
                                             <th>Delivery Plan Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Created DO Modal -->
+<div class="modal fade" id="DeliveryorderModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Delivery Order List</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col mb-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <span class="input-group-text">Search by</span>
+                                <select id="DeliveryOrderSearchBy" class="form-select" onchange="DeliveryOrderSearch.focus()">
+                                    <option value="0">Order Code</option>
+                                    <option value="1">Customer</option>
+                                </select>
+                                <input type="text" id="DeliveryOrderSearch" class="form-control" maxlength="50" onkeypress="DeliveryOrderSearchOnKeypress(event)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="table-responsive" id="DeliveryOrderSavedTabelContainer">
+                                <table id="DeliveryOrderSavedTabel" class="table table-sm table-striped table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Customer</th>
+                                            <th>Issue Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -302,7 +346,7 @@
                         }
                     }
                     newcell = newrow.insertCell(0)
-                    newcell.classList.add('d-none')                    
+                    newcell.classList.add('d-none')
                     newcell = newrow.insertCell(1)
                     newcell.innerHTML = arrayItem['TSLODETA_ITMCD']
                     newcell = newrow.insertCell(2)
@@ -532,7 +576,7 @@
                     }
                     newcell = newrow.insertCell(0)
                     newcell.classList.add('d-none')
-                    newcell.innerText = arrayItem['id']                    
+                    newcell.innerText = arrayItem['id']
                     newcell = newrow.insertCell(1)
                     newcell.innerHTML = arrayItem['TDLVORDDETA_ITMCD']
                     newcell = newrow.insertCell(2)
@@ -548,5 +592,68 @@
                 alertify.warning(xthrow);
             }
         });
+    }
+
+    function btnShowSavedDeliveryModal() {
+        const myModal = new bootstrap.Modal(document.getElementById('DeliveryorderModal'), {})
+        DeliveryorderModal.addEventListener('shown.bs.modal', () => {
+            DeliveryOrderSearch.focus()
+        })
+        myModal.show()
+    }
+
+    function DeliveryOrderSearchOnKeypress(e) {
+        if (e.key === 'Enter') {
+            e.target.disabled = true
+            const data = {
+                searchBy: DeliveryOrderSearchBy.value,
+                searchValue: e.target.value,
+            }
+            DeliveryOrderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="3">Please wait</td></tr>`
+            $.ajax({
+                type: "GET",
+                url: "delivery",
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    e.target.disabled = false
+                    let myContainer = document.getElementById("DeliveryOrderSavedTabelContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = DeliveryOrderSavedTabel.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("DeliveryOrderSavedTabel");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    response.data.forEach((arrayItem) => {
+                        newrow = myTableBody.insertRow(-1)
+                        newcell = newrow.insertCell(0)
+                        newcell.innerHTML = arrayItem['TDLVORD_DLVCD']
+                        newcell.style.cssText = 'cursor:pointer'
+                        newcell.onclick = () => {
+                            $('#DeliveryorderModal').modal('hide')
+                            orderCode.value = arrayItem['TDLVORD_DLVCD']
+                            orderCustomer.value = arrayItem['MCUS_CUSNM']
+                            orderCustomerCode.value = arrayItem['TDLVORD_CUSCD']
+                            orderIssueDate.value = arrayItem['TDLVORD_ISSUDT']
+                            SalesOrderQuotation.value = arrayItem['TDLVORDDETA_SLOCD']
+                            loadDeliveryOrderDetail({
+                                doc: arrayItem['TDLVORD_DLVCD']
+                            })
+                        }
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['MCUS_CUSNM']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['TDLVORD_ISSUDT']
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    e.target.disabled = false
+                    DeliveryOrderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="3">Please try again</td></tr>`
+                }
+            });
+        }
     }
 </script>
