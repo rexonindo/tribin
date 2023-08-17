@@ -5,6 +5,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CoaController;
 use App\Http\Controllers\CompanyGroupController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
@@ -194,3 +195,9 @@ Route::get('receive/form', [ReceiveController::class, 'index'])->middleware('aut
 Route::get('branch/form', [BranchController::class, 'index'])->middleware('auth');
 Route::post('branch', [BranchController::class, 'save'])->middleware('auth');
 Route::get('branch', [BranchController::class, 'search'])->middleware('auth');
+
+# Terkait Delivery
+Route::get('delivery/form', [DeliveryController::class, 'index'])->middleware('auth');
+Route::get('delivery/outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse'])->middleware('auth');
+Route::get('delivery/outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument'])->middleware('auth');
+Route::put('delivery/items/{id}', [DeliveryController::class, 'updateDODetail'])->middleware('auth');
