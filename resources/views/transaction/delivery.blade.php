@@ -28,25 +28,19 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="orderQuotation" class="form-label">Sales Order</label>
                 <div class="input-group mb-1">
                     <input type="text" id="SalesOrderQuotation" class="form-control" placeholder="../SLO/..." disabled>
                     <button class="btn btn-primary" type="button" onclick="btnShowSalesOrderModal()"><i class="fas fa-search"></i></button>
                 </div>
             </div>
-        </div>
-        <div class="row">
             <div class="col-md-6 mb-1">
                 <label for="orderCustomer" class="form-label">Customer</label>
                 <div class="input-group mb-1">
                     <input type="text" id="orderCustomer" class="form-control" maxlength="50" disabled>
                     <input type="hidden" id="orderCustomerCode">
                 </div>
-            </div>
-            <div class="col-md-6 mb-1">
-                <label for="orderAttn" class="form-label">Attn.</label>
-                <input type="text" id="orderAttn" class="form-control" maxlength="50">
             </div>
         </div>
         <div class="row border-top">
@@ -235,7 +229,6 @@
                             SalesOrderQuotation.value = arrayItem['TSLO_SLOCD']
                             orderCustomer.value = arrayItem['MCUS_CUSNM']
                             orderCustomerCode.value = arrayItem['TSLO_CUSCD']
-                            orderAttn.focus()
                             loadSalesOrderDetail({
                                 doc: arrayItem['TSLO_SLOCD']
                             })
@@ -309,8 +302,7 @@
                         }
                     }
                     newcell = newrow.insertCell(0)
-                    newcell.classList.add('d-none')
-                    newcell.innerHTML = arrayItem['id']
+                    newcell.classList.add('d-none')                    
                     newcell = newrow.insertCell(1)
                     newcell.innerHTML = arrayItem['TSLODETA_ITMCD']
                     newcell = newrow.insertCell(2)
@@ -385,7 +377,176 @@
     function updateSelectedTable(pindex) {
         orderTable.rows[pindex].cells[1].innerText = orderItemCode.value
         orderTable.rows[pindex].cells[2].innerText = orderItemName.value
-        orderTable.rows[pindex].cells[3].innerText = orderQty.value        
+        orderTable.rows[pindex].cells[3].innerText = orderQty.value
         tribinClearTextBoxByClassName('orderInputItem')
+    }
+
+    function btnSaveOnclick(pthis) {
+        let itemCode = []
+        let itemQty = []
+        let itemPrice = []
+        let salesOrder = []
+
+        const ttlrows = orderTable.rows.length
+        for (let i = 1; i < ttlrows; i++) {
+            itemCode.push(orderTable.rows[i].cells[1].innerText.trim())
+            itemQty.push(orderTable.rows[i].cells[3].innerText.trim())
+            itemPrice.push(0)
+            salesOrder.push(SalesOrderQuotation.value)
+        }
+        if (ttlrows === 1) {
+            alertify.message('nothing to be saved')
+            return
+        }
+        if (orderIssueDate.value.length === 0) {
+            alertify.message('issue date is required')
+            orderIssueDate.focus()
+            return
+        }
+
+        if (orderCode.value.length === 0) {
+            const data = {
+                TDLVORD_CUSCD: orderCustomerCode.value.trim(),
+                TDLVORD_ISSUDT: orderIssueDate.value.trim(),
+                TDLVORDDETA_ITMCD: itemCode,
+                TDLVORDDETA_ITMQT: itemQty,
+                TDLVORDDETA_PRC: itemPrice,
+                TDLVORDDETA_SLOCD: salesOrder,
+                _token: '{{ csrf_token() }}',
+            }
+            if (confirm(`Are you sure want to save ?`)) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "POST",
+                    url: "delivery",
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+                        orderCode.value = response.doc
+                        loadDeliveryOrderDetail({
+                            doc: response.doc
+                        })
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        ${msg}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
+        } else {
+            const data = {
+                TPCHORD_SUPCD: orderCustomerCode.value.trim(),
+                TPCHORD_ISSUDT: orderIssueDate.value.trim(),
+                TPCHORD_DLVDT: orderDeliveryDate.value.trim(),
+                _token: '{{ csrf_token() }}',
+            }
+            if (confirm(`Are you sure want to update ?`)) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "PUT",
+                    url: `purchase-order/${btoa(orderCode.value)}`,
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        ${msg}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
+        }
+    }
+
+    function loadDeliveryOrderDetail(data) {
+        $.ajax({
+            type: "GET",
+            url: `delivery/document/${btoa(data.doc)}`,
+            dataType: "json",
+            success: function(response) {
+                let myContainer = document.getElementById("orderTableContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = orderTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("orderTable");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                response.data.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newrow.onclick = (event) => {
+                        const selrow = orderTable.rows[event.target.parentElement.rowIndex]
+                        if (selrow.title === 'selected') {
+                            selrow.title = 'not selected'
+                            selrow.classList.remove('table-info')
+                            selectedRowAtOrderTable.value = -1
+                            orderItemCode.value = ''
+                            orderItemName.value = ''
+                            orderQty.value = ''
+                            orderQtyBackup.value = ''
+                        } else {
+                            const ttlrows = orderTable.rows.length
+                            for (let i = 1; i < ttlrows; i++) {
+                                orderTable.rows[i].classList.remove('table-info')
+                                orderTable.rows[i].title = 'not selected'
+                            }
+                            selrow.title = 'selected'
+                            selrow.classList.add('table-info')
+                            selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                            orderItemCode.value = selrow.cells[1].innerText
+                            orderItemName.value = selrow.cells[2].innerText
+                            orderQty.value = selrow.cells[3].innerText
+                            orderQtyBackup.value = selrow.cells[3].innerText
+                        }
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.classList.add('d-none')
+                    newcell.innerText = arrayItem['id']                    
+                    newcell = newrow.insertCell(1)
+                    newcell.innerHTML = arrayItem['TDLVORDDETA_ITMCD']
+                    newcell = newrow.insertCell(2)
+                    newcell.innerHTML = arrayItem['MITM_ITMNM']
+                    newcell = newrow.insertCell(3)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['TDLVORDDETA_ITMQT']
+                })
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+            }
+        });
     }
 </script>

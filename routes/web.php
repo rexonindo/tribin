@@ -201,3 +201,5 @@ Route::get('delivery/form', [DeliveryController::class, 'index'])->middleware('a
 Route::get('delivery/outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse'])->middleware('auth');
 Route::get('delivery/outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument'])->middleware('auth');
 Route::put('delivery/items/{id}', [DeliveryController::class, 'updateDODetail'])->middleware('auth');
+Route::post('delivery', [DeliveryController::class, 'save'])->middleware('auth');
+Route::get('delivery/document/{id}', [DeliveryController::class, 'loadByDocument'])->middleware('auth');

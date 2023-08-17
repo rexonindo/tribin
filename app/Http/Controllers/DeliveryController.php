@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\T_DLVORDDETA;
+use App\Models\T_DLVORDHEAD;
 use App\Models\T_SLODETA;
 use App\Models\T_SLOHEAD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class DeliveryController extends Controller
 {
@@ -108,5 +110,89 @@ class DeliveryController extends Controller
                 'TDLVORDDETA_ITMQT' => $request->TDLVORDDETA_ITMQT
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
+
+    public function save(Request $request)
+    {
+        # data quotation header
+        $validator = Validator::make($request->all(), [
+            'TDLVORD_CUSCD' => 'required',
+            'TDLVORD_ISSUDT' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        $LastLine = DB::connection($this->dedicatedConnection)->table('T_DLVORDHEAD')
+            ->whereMonth('created_at', '=', date('m'))
+            ->whereYear('created_at', '=', date('Y'))
+            ->where('TDLVORD_BRANCH', Auth::user()->branch)
+            ->max('TDLVORD_LINE');
+
+        $quotationHeader = [];
+        $newQuotationCode = '';
+        if (!$LastLine) {
+            $LastLine = 1;
+            $newQuotationCode = 'SP-0001';
+        } else {
+            $LastLine++;
+            $newQuotationCode = 'SP-' . substr('000' . $LastLine, -4);
+        }
+        $quotationHeader = [
+            'TDLVORD_DLVCD' => $newQuotationCode,
+            'TDLVORD_CUSCD' => $request->TDLVORD_CUSCD,
+            'TDLVORD_LINE' => $LastLine,
+            'TDLVORD_ISSUDT' => $request->TDLVORD_ISSUDT,
+            'TDLVORD_BRANCH' => Auth::user()->branch
+        ];
+
+        # data quotation detail item
+        $validator = Validator::make($request->all(), [
+            'TDLVORDDETA_ITMCD' => 'required|array',
+            'TDLVORDDETA_ITMQT' => 'required|array',
+            'TDLVORDDETA_ITMQT.*' => 'required|numeric',
+            'TDLVORDDETA_PRC' => 'required|array',
+            'TDLVORDDETA_PRC.*' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+        $countDetail = count($request->TDLVORDDETA_ITMCD);
+
+
+        T_DLVORDHEAD::on($this->dedicatedConnection)->create($quotationHeader);
+        $quotationDetail = [];
+        for ($i = 0; $i < $countDetail; $i++) {
+            $quotationDetail[] = [
+                'TDLVORDDETA_DLVCD' => $newQuotationCode,
+                'TDLVORDDETA_ITMCD' => $request->TDLVORDDETA_ITMCD[$i],
+                'TDLVORDDETA_ITMQT' => $request->TDLVORDDETA_ITMQT[$i],
+                'TDLVORDDETA_PRC' => $request->TDLVORDDETA_PRC[$i],
+                'created_by' => Auth::user()->nick_name,
+                'created_at' => date('Y-m-d H:i:s'),
+                'TDLVORDDETA_BRANCH' => Auth::user()->branch,
+                'TDLVORDDETA_SLOCD' => $request->TDLVORDDETA_SLOCD[$i]
+            ];
+        }
+        if (!empty($quotationDetail)) {
+            T_DLVORDDETA::on($this->dedicatedConnection)->insert($quotationDetail);
+        }
+        return [
+            'msg' => 'OK', 'doc' => $newQuotationCode
+        ];
+    }
+
+    function loadByDocument(Request $request)
+    {
+        return [
+            'data' => T_DLVORDDETA::on($this->dedicatedConnection)->select('T_DLVORDDETA.id','TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT', 'MITM_ITMNM')
+                ->leftJoin("M_ITM", function ($join) {
+                    $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'MITM_BRANCH');
+                })
+                ->where('TDLVORDDETA_DLVCD', base64_decode($request->id))
+                ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get()
+        ];
     }
 }
