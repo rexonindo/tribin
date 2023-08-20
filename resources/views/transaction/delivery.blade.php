@@ -28,11 +28,11 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-6 mb-1">
                 <label for="orderQuotation" class="form-label">Sales Order</label>
                 <div class="input-group mb-1">
                     <input type="text" id="SalesOrderQuotation" class="form-control" placeholder="../SLO/..." disabled>
-                    <button class="btn btn-primary" type="button" onclick="btnShowSalesOrderModal()"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-primary" type="button" id="btnShowSalesOrder" onclick="btnShowSalesOrderModal()"><i class="fas fa-search"></i></button>
                 </div>
             </div>
             <div class="col-md-6 mb-1">
@@ -40,6 +40,14 @@
                 <div class="input-group mb-1">
                     <input type="text" id="orderCustomer" class="form-control" maxlength="50" disabled>
                     <input type="hidden" id="orderCustomerCode">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <div class="input-group mb-1">
+                    <span class="input-group-text">Remark</span>
+                    <input type="text" id="orderRemarkHead" class="form-control">
                 </div>
             </div>
         </div>
@@ -221,7 +229,7 @@
             </div>
             <div class="modal-footer">
                 <div class="col mb-1 text-center">
-                    <button class="btn btn-sm btn-primary" title="Print" id="txfg_btnprintseldocs"><i class="fas fa-print"></i></button>
+                    <button class="btn btn-sm btn-primary" title="Print" id="txfg_btnprintseldocs" onclick="btnPrintOnclick()"><i class="fas fa-print"></i></button>
                 </div>
             </div>
         </div>
@@ -231,6 +239,7 @@
     function btnNewOnclick() {
         tribinClearTextBox()
         orderTable.getElementsByTagName('tbody')[0].innerHTML = ``
+        btnShowSalesOrder.disabled = false
     }
 
     function btnShowSalesOrderModal() {
@@ -272,7 +281,7 @@
                             $('#orderModal').modal('hide')
                             SalesOrderQuotation.value = arrayItem['TSLO_SLOCD']
                             orderCustomer.value = arrayItem['MCUS_CUSNM']
-                            orderCustomerCode.value = arrayItem['TSLO_CUSCD']
+                            orderCustomerCode.value = arrayItem['TSLO_CUSCD']                            
                             loadSalesOrderDetail({
                                 doc: arrayItem['TSLO_SLOCD']
                             })
@@ -452,6 +461,7 @@
             const data = {
                 TDLVORD_CUSCD: orderCustomerCode.value.trim(),
                 TDLVORD_ISSUDT: orderIssueDate.value.trim(),
+                TDLVORD_REMARK: orderRemarkHead.value.trim(),
                 TDLVORDDETA_ITMCD: itemCode,
                 TDLVORDDETA_ITMQT: itemQty,
                 TDLVORDDETA_PRC: itemPrice,
@@ -495,9 +505,8 @@
             }
         } else {
             const data = {
-                TPCHORD_SUPCD: orderCustomerCode.value.trim(),
-                TPCHORD_ISSUDT: orderIssueDate.value.trim(),
-                TPCHORD_DLVDT: orderDeliveryDate.value.trim(),
+                TDLVORD_ISSUDT: orderIssueDate.value.trim(),
+                TDLVORD_REMARK: orderRemarkHead.value.trim(),
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -505,7 +514,7 @@
                 pthis.disabled = true
                 $.ajax({
                     type: "PUT",
-                    url: `purchase-order/${btoa(orderCode.value)}`,
+                    url: `delivery/${btoa(orderCode.value)}`,
                     data: data,
                     dataType: "json",
                     success: function(response) {
@@ -636,6 +645,8 @@
                             orderCustomerCode.value = arrayItem['TDLVORD_CUSCD']
                             orderIssueDate.value = arrayItem['TDLVORD_ISSUDT']
                             SalesOrderQuotation.value = arrayItem['TDLVORDDETA_SLOCD']
+                            orderRemarkHead.value = arrayItem['TDLVORD_REMARK']
+                            btnShowSalesOrder.disabled = true
                             loadDeliveryOrderDetail({
                                 doc: arrayItem['TDLVORD_DLVCD']
                             })
@@ -655,5 +666,19 @@
                 }
             });
         }
+    }
+
+    function btnPrintOnclick(pthis) {
+        let mckdo = txfg_ckDO.checked ? '1' : '0';
+        let mckinv = txfg_ckINV.checked ? '1' : '0';
+        if (orderCode.value.trim().length === 0) {
+            alertify.message('Delivery Document is required')
+            orderCode.focus()
+            return
+        }
+        Cookies.set('JOS_PRINT_FORM', (mckdo + mckinv), {
+            expires: 365
+        });
+        window.open(`PDF/delivery-order/${btoa(orderCode.value)}`, '_blank');
     }
 </script>

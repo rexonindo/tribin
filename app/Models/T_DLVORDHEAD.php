@@ -11,6 +11,6 @@ class T_DLVORDHEAD extends Model
     protected $table = 'T_DLVORDHEAD';
     protected $fillable = [
         'TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'TDLVORD_CUSCD', 'TDLVORD_LINE',
-        'TDLVORD_ISSUDT'
+        'TDLVORD_ISSUDT', 'TDLVORD_REMARK'
     ];
 }

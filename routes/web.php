@@ -81,7 +81,6 @@ Route::get('coa', [CoaController::class, 'search'])->middleware('auth');
 Route::post('coa', [CoaController::class, 'simpan'])->middleware('auth');
 Route::put('coa/{id}', [CoaController::class, 'update'])->middleware('auth');
 
-
 # Terkait Quotation Transaction
 Route::get('quotation/form', [QuotationController::class, 'index'])->middleware('auth');
 Route::post('quotation', [QuotationController::class, 'save'])->middleware('auth');
@@ -143,6 +142,7 @@ Route::get('report-form/maintenance-schedule', [MaintenanceController::class, 'f
 Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');
 Route::get('PDF/purchase-request/{id}', [PurchaseController::class, 'toPDF'])->middleware('auth');
 Route::get('PDF/purchase-order/{id}', [PurchaseController::class, 'POtoPDF'])->middleware('auth');
+Route::get('PDF/delivery-order/{id}', [DeliveryController::class, 'toPDF'])->middleware('auth');
 
 # Terkait Company Group
 Route::get('company/form', [CompanyGroupController::class, 'index'])->middleware('auth');
@@ -152,7 +152,6 @@ Route::put('company/{id}', [CompanyGroupController::class, 'update'])->middlewar
 Route::get('company/access/{id}', [CompanyGroupController::class, 'loadByNickName'])->middleware('auth');
 Route::post('company/access', [CompanyGroupController::class, 'saveAccess'])->middleware('auth');
 Route::delete('company/access/{id}', [CompanyGroupController::class, 'deleteAccess'])->middleware('auth');
-
 
 #Terkait config
 Route::get('ACL/database', function () {
@@ -203,4 +202,5 @@ Route::get('delivery/outstanding-warehouse/{id}', [DeliveryController::class, 'o
 Route::put('delivery/items/{id}', [DeliveryController::class, 'updateDODetail'])->middleware('auth');
 Route::post('delivery', [DeliveryController::class, 'save'])->middleware('auth');
 Route::get('delivery', [DeliveryController::class, 'search'])->middleware('auth');
+Route::put('delivery/{id}', [DeliveryController::class, 'update'])->middleware('auth');
 Route::get('delivery/document/{id}', [DeliveryController::class, 'loadByDocument'])->middleware('auth');
