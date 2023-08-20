@@ -165,6 +165,7 @@
                     <li>
                         <h6 class="dropdown-header">Delivery</h6>
                     <li><a class="dropdown-item" href="#" onclick="liDeliveryAssignmentOnclick(event)">Delivery Assignment <span class="badge text-bg-info" id="labelNotifDeliveryAssignment"></span></a></li>
+                    <li><a class="dropdown-item" href="#" onclick="liDeliveryOnGoingOnclick(event)">On going <span class="badge text-bg-info" id="labelNotifDeliveryOnGoing"></span></a></li>
                     </li>
                 </ul>
             </div>
@@ -366,9 +367,10 @@
 
                     // Delivery Order
                     const totalNotifQTDeliveryNoDriver = response.dataDeliveryOrderNoDriver.length
+                    const totalNotifQTDeliveryUndelivered = response.dataDeliveryOrderUndelivered.length
 
                     const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest + totalNotifQTSalesOrderDraft +
-                        totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver
+                        totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver + totalNotifQTDeliveryUndelivered
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
 
                     labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
@@ -382,6 +384,7 @@
                     labelNotifApprovalPurchaseOrder.innerText = totalNotifQTPurchaseOrder === 0 ? '' : totalNotifQTPurchaseOrder
 
                     labelNotifDeliveryAssignment.innerText = totalNotifQTDeliveryNoDriver === 0 ? '' : totalNotifQTDeliveryNoDriver
+                    labelNotifDeliveryOnGoing.innerText = totalNotifQTDeliveryUndelivered === 0 ? '' : totalNotifQTDeliveryUndelivered
                 }
             });
         }
@@ -408,6 +411,19 @@
                 $.ajax({
                     type: "GET",
                     url: "/assignment-driver/form/delivery",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
+        }
+        function liDeliveryOnGoingOnclick(e) {
+            e.preventDefault()
+            if (labelNotifDeliveryOnGoing.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/confirmation/form/delivery",
                     success: function(response) {
                         setInnerHTML(ContentContainer, response)
                     }

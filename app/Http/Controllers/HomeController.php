@@ -89,6 +89,7 @@ class HomeController extends Controller
         $dataSalesOrderDraftTobeProcessed = [];
         $dataPurchaseOrderTobeUpproved = [];
         $dataDeliveryOrderNoDriver = [];
+        $dataDeliveryOrderUndelivered = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Quotation
@@ -189,12 +190,24 @@ class HomeController extends Controller
                 ->get();
         }
 
+        if (in_array($activeRole['code'], ['driver'])) {
+            $dataDeliveryOrderUndelivered = T_DLVORDHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM')
+                ->leftJoin('M_CUS', function ($join) {
+                    $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+                })
+                ->where('TDLVORD_DELIVERED_BY', Auth::user()->nick_name)
+                ->whereNull('TDLVORD_DELIVERED_AT')
+                ->where('TDLVORD_BRANCH', Auth::user()->branch)
+                ->get();
+        }
+
         return [
             'data' => $dataTobeApproved, 'dataApproved' => $dataApproved,
             'dataPurchaseRequest' => $dataPurchaseRequestTobeUpproved, 'dataPurchaseRequestApproved' => $dataPurchaseRequestApproved,
             'dataSalesOrderDraft' => $dataSalesOrderDraftTobeProcessed,
             'dataPurchaseOrder' => $dataPurchaseOrderTobeUpproved,
-            'dataDeliveryOrderNoDriver' => $dataDeliveryOrderNoDriver
+            'dataDeliveryOrderNoDriver' => $dataDeliveryOrderNoDriver,
+            'dataDeliveryOrderUndelivered' => $dataDeliveryOrderUndelivered,
         ];
     }
 }

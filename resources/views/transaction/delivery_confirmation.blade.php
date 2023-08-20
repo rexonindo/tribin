@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Driver Assignment</h1>
+    <h1 class="h2">Driver Confirmation</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
 
     </div>
@@ -44,18 +44,6 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm mb-1">
-                                                    <span class="input-group-text">Driver</span>
-                                                    <select class="form-select" id="driver">
-                                                        @foreach($Drivers as $r)
-                                                        <option value="{{ $r->nick_name }}">{{ $r->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="col">
                                                 <input type="hidden" id="branch" value="">
                                             </div>
@@ -74,7 +62,7 @@
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" id="btnAction">Action</button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Assign</a></li>
+                                    <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Confirm</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -89,7 +77,7 @@
         approvalContainer.innerHTML = 'Please wait'
         $.ajax({
             type: "GET",
-            url: "/assignment-driver/data/delivery",
+            url: "/confirmation/data/delivery",
             dataType: "json",
             success: function(response) {
                 let innerHTML = ''
@@ -120,14 +108,13 @@
 
                     const elButton2 = document.createElement('button')
                     elButton2.classList.add(...['btn', 'btn-outline-primary'])
-                    elButton2.innerHTML = 'Assign a driver'
+                    elButton2.innerHTML = 'Confirm'
                     elButton2.onclick = () => {
                         event.preventDefault()
                         quotationCustomer.value = arrayItem['MCUS_CUSNM']
                         labelQuotationInModal.innerHTML = arrayItem['TDLVORD_DLVCD']
                         branch.value = arrayItem['TDLVORD_BRANCH']
-                        const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
-                        myModal.show()
+                        approveQuotation()
                     }
 
                     const elSmalltext = document.createElement('small')
@@ -152,16 +139,15 @@
     }
     loadApprovalList()
 
-    function approveQuotation(pthis) {
+    function approveQuotation() {
         if (confirm('Are you sure ?')) {
             btnAction.disabled = true
             $.ajax({
                 type: "PUT",
-                url: `assignment-driver/form/delivery/${btoa(labelQuotationInModal.innerText)}`,
+                url: `confirmation/form/delivery/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
                     _token: '{{ csrf_token() }}',
                     TDLVORD_BRANCH: branch.value,
-                    TDLVORD_DELIVERED_BY: driver.value,
                 },
                 dataType: "json",
                 success: function(response) {
