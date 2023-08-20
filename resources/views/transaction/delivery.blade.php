@@ -44,6 +44,14 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-md-12 mb-1">
+                <div class="input-group mb-1">
+                    <span class="input-group-text">Invoice Code</span>
+                    <input type="text" id="orderInvoiceCode" class="form-control" maxlength="40">
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-12 mb-3">
                 <div class="input-group mb-1">
                     <span class="input-group-text">Remark</span>
@@ -462,6 +470,7 @@
                 TDLVORD_CUSCD: orderCustomerCode.value.trim(),
                 TDLVORD_ISSUDT: orderIssueDate.value.trim(),
                 TDLVORD_REMARK: orderRemarkHead.value.trim(),
+                TDLVORD_INVCD: orderInvoiceCode.value.trim(),
                 TDLVORDDETA_ITMCD: itemCode,
                 TDLVORDDETA_ITMQT: itemQty,
                 TDLVORDDETA_PRC: itemPrice,
@@ -507,6 +516,7 @@
             const data = {
                 TDLVORD_ISSUDT: orderIssueDate.value.trim(),
                 TDLVORD_REMARK: orderRemarkHead.value.trim(),
+                TDLVORD_INVCD: orderInvoiceCode.value.trim(),
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -646,6 +656,7 @@
                             orderIssueDate.value = arrayItem['TDLVORD_ISSUDT']
                             SalesOrderQuotation.value = arrayItem['TDLVORDDETA_SLOCD']
                             orderRemarkHead.value = arrayItem['TDLVORD_REMARK']
+                            orderInvoiceCode.value = arrayItem['TDLVORD_INVCD']
                             btnShowSalesOrder.disabled = true
                             loadDeliveryOrderDetail({
                                 doc: arrayItem['TDLVORD_DLVCD']

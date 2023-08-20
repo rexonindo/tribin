@@ -198,7 +198,10 @@ class DeliveryController extends Controller
             ->where('TDLVORD_DLVCD', base64_decode($request->id))
             ->where('TDLVORD_BRANCH', Auth::user()->branch)
             ->update([
-                'TDLVORD_REMARK' => $request->TDLVORD_REMARK, 'TDLVORD_ISSUDT' => $request->TDLVORD_ISSUDT
+                'TDLVORD_REMARK' => $request->TDLVORD_REMARK, 
+                'TDLVORD_ISSUDT' => $request->TDLVORD_ISSUDT,
+                'TDLVORD_INVCD' => $request->TDLVORD_INVCD,
+                'updated_by' => Auth::user()->nick_name,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
@@ -226,7 +229,7 @@ class DeliveryController extends Controller
             ->groupBy('TDLVORDDETA_DLVCD', 'TDLVORDDETA_BRANCH');
         $RS = T_DLVORDHEAD::on($this->dedicatedConnection)->select([
             "TDLVORD_DLVCD", "TDLVORD_CUSCD", "TDLVORD_ISSUDT",
-            "MCUS_CUSNM", 'TDLVORDDETA_SLOCD', 'TDLVORD_REMARK'
+            "MCUS_CUSNM", 'TDLVORDDETA_SLOCD', 'TDLVORD_REMARK','TDLVORD_INVCD'
         ])
             ->leftJoin("M_CUS", function ($join) {
                 $join->on("TDLVORD_CUSCD", "=", "MCUS_CUSCD")
@@ -352,6 +355,11 @@ class DeliveryController extends Controller
         $this->fpdf->Cell(50, 2, '(                   )', 0, 0, 'L');
         $this->fpdf->Cell(50, 2, '(                       )', 0, 0, 'L');
         $this->fpdf->Cell(5, 2, '(' . $Dibuat->name . ')', 0, 0, 'L');
+        
+        $this->fpdf->AddPage("P", 'A4');
+        $this->fpdf->SetFont('Arial', 'B', 17);
+        $this->fpdf->SetXY(7, 5);
+        $this->fpdf->Cell(0, 8, $Company->name, 1, 0, 'C');
 
         $this->fpdf->Output('delivery order ' . $doc . '.pdf', 'I');
         exit;
