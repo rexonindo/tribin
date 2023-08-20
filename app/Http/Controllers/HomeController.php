@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\M_BRANCH;
+use App\Models\T_DLVORDHEAD;
 use App\Models\T_PCHORDHEAD;
 use App\Models\T_PCHREQHEAD;
 use App\Models\T_QUOHEAD;
@@ -87,6 +88,7 @@ class HomeController extends Controller
         $dataApproved = $dataPurchaseRequestApproved = [];
         $dataSalesOrderDraftTobeProcessed = [];
         $dataPurchaseOrderTobeUpproved = [];
+        $dataDeliveryOrderNoDriver = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director'])) {
             # Query untuk data Quotation
@@ -169,18 +171,30 @@ class HomeController extends Controller
                 ->whereNull('deleted_at');
             $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
-                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
+                    $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD")->on('TPCHREQ_BRANCH', '=', 'TPCHREQDETA_BRANCH');
                 })
                 ->leftJoin('T_PCHORDHEAD', 'TPCHREQ_PCHCD', '=', 'TPCHORD_REQCD')
                 ->whereNull('TPCHORD_REQCD')
+                ->where('TPCHREQ_BRANCH', Auth::user()->branch)
                 ->groupBy('TPCHREQ_PCHCD')->get();
+        }
+
+        if (in_array($activeRole['code'], ['ga'])) {
+            $dataDeliveryOrderNoDriver = T_DLVORDHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM')
+                ->leftJoin('M_CUS', function ($join) {
+                    $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+                })
+                ->whereNull('TDLVORD_DELIVERED_BY')
+                ->where('TDLVORD_BRANCH', Auth::user()->branch)
+                ->get();
         }
 
         return [
             'data' => $dataTobeApproved, 'dataApproved' => $dataApproved,
             'dataPurchaseRequest' => $dataPurchaseRequestTobeUpproved, 'dataPurchaseRequestApproved' => $dataPurchaseRequestApproved,
             'dataSalesOrderDraft' => $dataSalesOrderDraftTobeProcessed,
-            'dataPurchaseOrder' => $dataPurchaseOrderTobeUpproved
+            'dataPurchaseOrder' => $dataPurchaseOrderTobeUpproved,
+            'dataDeliveryOrderNoDriver' => $dataDeliveryOrderNoDriver
         ];
     }
 }

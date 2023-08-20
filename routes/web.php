@@ -204,3 +204,6 @@ Route::post('delivery', [DeliveryController::class, 'save'])->middleware('auth')
 Route::get('delivery', [DeliveryController::class, 'search'])->middleware('auth');
 Route::put('delivery/{id}', [DeliveryController::class, 'update'])->middleware('auth');
 Route::get('delivery/document/{id}', [DeliveryController::class, 'loadByDocument'])->middleware('auth');
+Route::get('assignment-driver/form/delivery', [DeliveryController::class, 'formDriverAssignment'])->middleware('auth');
+Route::get('assignment-driver/data/delivery', [DeliveryController::class, 'emptyDriver'])->middleware('auth');
+Route::put('assignment-driver/form/delivery/{id}', [DeliveryController::class, 'assignDriver'])->middleware('auth');

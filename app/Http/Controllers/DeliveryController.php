@@ -502,4 +502,39 @@ class DeliveryController extends Controller
         }
         return $temp;
     }
+
+    function formDriverAssignment()
+    {
+        return view(
+            'transaction.delivery_assignment',
+            ['Drivers' => User::select('nick_name', 'name')
+                ->where('branch', Auth::user()->branch)
+                ->where('role', 'driver')
+                ->get()]
+        );
+    }
+
+    function emptyDriver(Request $request)
+    {
+        $data = T_DLVORDHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM', 'TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'T_DLVORDHEAD.created_at')
+            ->leftJoin('M_CUS', function ($join) {
+                $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+            })
+            ->whereNull('TDLVORD_DELIVERED_BY')
+            ->where('TDLVORD_BRANCH', Auth::user()->branch)
+            ->get();
+        return ['data' => $data];
+    }
+
+    function assignDriver(Request $request)
+    {
+        $affectedRow = T_DLVORDHEAD::on($this->dedicatedConnection)
+            ->where('TDLVORD_DLVCD', base64_decode($request->id))
+            ->where('TDLVORD_BRANCH', $request->TDLVORD_BRANCH)
+            ->update([
+                'TDLVORD_DELIVERED_BY' => $request->TDLVORD_DELIVERED_BY
+            ]);
+        $message = $affectedRow ? 'Assigned' : 'Something wrong please contact admin';
+        return ['message' => $message];
+    }
 }

@@ -162,6 +162,10 @@
                         <h6 class="dropdown-header">Sales Order Draft</h6>
                     <li><a class="dropdown-item" href="#" onclick="liApprovalSalesOrderDraftOnclick(event)">Sales Order Draft Status <span class="badge text-bg-info" id="labelNotifApprovalSalesOrderDraft"></span></a></li>
                     </li>
+                    <li>
+                        <h6 class="dropdown-header">Delivery</h6>
+                    <li><a class="dropdown-item" href="#" onclick="liDeliveryAssignmentOnclick(event)">Delivery Assignment <span class="badge text-bg-info" id="labelNotifDeliveryAssignment"></span></a></li>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -360,8 +364,11 @@
                     // Purchase Order
                     const totalNotifQTPurchaseOrder = response.dataPurchaseOrder.length
 
+                    // Delivery Order
+                    const totalNotifQTDeliveryNoDriver = response.dataDeliveryOrderNoDriver.length
+
                     const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest + totalNotifQTSalesOrderDraft +
-                        totalNotifQTPurchaseOrder
+                        totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
 
                     labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
@@ -373,6 +380,8 @@
                     labelNotifApprovalSalesOrderDraft.innerText = totalNotifQTSalesOrderDraft === 0 ? '' : totalNotifQTSalesOrderDraft
 
                     labelNotifApprovalPurchaseOrder.innerText = totalNotifQTPurchaseOrder === 0 ? '' : totalNotifQTPurchaseOrder
+
+                    labelNotifDeliveryAssignment.innerText = totalNotifQTDeliveryNoDriver === 0 ? '' : totalNotifQTDeliveryNoDriver
                 }
             });
         }
@@ -386,6 +395,19 @@
                 $.ajax({
                     type: "GET",
                     url: "/approval/form/quotation",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
+        }
+        function liDeliveryAssignmentOnclick(e) {
+            e.preventDefault()
+            if (labelNotifDeliveryAssignment.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/assignment-driver/form/delivery",
                     success: function(response) {
                         setInnerHTML(ContentContainer, response)
                     }
