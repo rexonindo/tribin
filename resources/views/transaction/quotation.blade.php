@@ -1,7 +1,11 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Quotation</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-
+    <div class="btn-toolbar mb-1 mb-md-0">
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)" title="New"><i class="fas fa-file"></i></button>
+            <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)" title="Save"><i class="fas fa-save"></i></button>
+            <button type="button" class="btn btn-outline-primary" id="btnPrint" onclick="btnPrintOnclick(this)" title="Print"><i class="fas fa-print"></i></button>
+        </div>
     </div>
 </div>
 <form id="quotation-form">
@@ -55,86 +59,178 @@
                                 </div>
                             </div>
                             <div class="row border-top">
-                                <div class="col-md-12 mb-1">
-                                    <div class="table-responsive" id="quotationTableContainer">
-                                        <table id="quotationTable" class="table table-sm table-hover table-bordered caption-top">
-                                            <caption>List of items</caption>
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th class="d-none">idLine</th>
-                                                    <th>Item Code</th>
-                                                    <th>Item Name</th>
-                                                    <th class="text-center">Usage</th>
-                                                    <th class="text-end">Price</th>
-                                                    <th class="text-end">Operator</th>
-                                                    <th class="text-end">MOB DEMOB</th>
-                                                    <th class="text-end">SUB TOTAL</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <td colspan="6" class="text-end"> <b>Grand Total</b></td>
-                                                    <td class="text-end"><strong id="strongGrandTotal">0</strong></td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
+                                <div class="col mt-2">
+                                    <nav>
+                                        <div class="nav nav-tabs" id="quotation-type-nav-tab" role="tablist">
+                                            <button class="nav-link active" id="nav-rental-tab" data-bs-toggle="tab" data-bs-target="#nav-rental" type="button" role="tab">Rental</button>
+                                            <button class="nav-link" id="nav-sale-tab" data-bs-toggle="tab" data-bs-target="#nav-sale" type="button" role="tab">Sale</button>
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content" id="quotation-type-nav-tabContent">
+                                        <div class="tab-pane fade show active" id="nav-rental" role="tabpanel" tabindex="0">
+                                            <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-1">
+                                                        <div class="table-responsive" id="quotationTableContainer">
+                                                            <table id="quotationTable" class="table table-sm table-hover table-bordered caption-top">
+                                                                <caption>List of items</caption>
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th class="d-none">idLine</th>
+                                                                        <th>Item Code</th>
+                                                                        <th>Item Name</th>
+                                                                        <th class="text-center">Usage</th>
+                                                                        <th class="text-end">Price</th>
+                                                                        <th class="text-end">Operator</th>
+                                                                        <th class="text-end">MOB DEMOB</th>
+                                                                        <th class="text-end">SUB TOTAL</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <td colspan="6" class="text-end"> <b>Grand Total</b></td>
+                                                                        <td class="text-end"><strong id="strongGrandTotal">0</strong></td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Item Code</span>
+                                                            <input type="text" id="quotationItemCode" class="form-control quotationInputItem" placeholder="Item Code" disabled>
+                                                            <button class="btn btn-primary" type="button" onclick="btnShowItemModal('1')"><i class="fas fa-search"></i></button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Item Name</span>
+                                                            <input type="text" id="quotationItemName" class="form-control quotationInputItem" disabled>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Usage</span>
+                                                            <input type="text" id="quotationUsage" class="form-control quotationInputItem" title="price per hour">
+                                                            <span class="input-group-text">Hour</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Price</span>
+                                                            <input type="text" id="quotationPrice" class="form-control quotationInputItem" title="price per hour">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Operator Price</span>
+                                                            <input type="text" id="quotationOperator" class="form-control quotationInputItem" title="price per man">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">MOBDEMOB</span>
+                                                            <input type="text" id="quotationMOBDEMOB" class="form-control quotationInputItem">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-1 text-center">
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" class="btn btn-outline-secondary" id="btnSaveLine" onclick="btnSaveLineOnclick(this)">Save line</button>
+                                                            <button type="button" class="btn btn-outline-secondary" id="btnRemoveLine" onclick="btnRemoveLineOnclick(this)">Remove line</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade show" id="nav-sale" role="tabpanel" tabindex="0">
+                                            <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-1">
+                                                        <label for="quotationServiceCost" class="form-label">Service & Transportation Price</label>
+                                                        <input type="text" id="quotationServiceCost" class="form-control form-control-sm" maxlength="50">
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-1">
+                                                        <div class="table-responsive" id="quotationSaleTableContainer">
+                                                            <table id="quotationSaleTable" class="table table-sm table-hover table-bordered caption-top">
+                                                                <caption>List of Sale items</caption>
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th class="d-none">idLine</th>
+                                                                        <th>Item Code</th>
+                                                                        <th>Item Name</th>
+                                                                        <th class="text-center">Qty</th>
+                                                                        <th class="text-end">Price</th>
+                                                                        <th class="text-end">Sub Total</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <td class="text-end d-none"></td>
+                                                                        <td colspan="4" class="text-end"> <b>Grand Total</b></td>
+                                                                        <td class="text-end"><strong id="strongGrandTotalSale">0</strong></td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Item Code</span>
+                                                            <input type="text" id="quotationItemCodeSale" class="form-control quotationInputItem" placeholder="Item Code" disabled>
+                                                            <button class="btn btn-primary" type="button" onclick="btnShowItemModal('2')"><i class="fas fa-search"></i></button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Item Name</span>
+                                                            <input type="text" id="quotationItemNameSale" class="form-control quotationInputItem" disabled>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Qty</span>
+                                                            <input type="text" id="quotationQtySale" class="form-control quotationInputItem">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-1">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Price</span>
+                                                            <input type="text" id="quotationPriceSale" class="form-control quotationInputItem">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-1 text-center">
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" class="btn btn-outline-secondary" id="btnSaveLineSale" onclick="btnSaveLineSaleOnclick(this)">Save line</button>
+                                                            <button type="button" class="btn btn-outline-secondary" id="btnRemoveLineSale" onclick="btnRemoveLineSaleOnclick(this)">Remove line</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-1">
-                                    <div class="input-group input-group-sm mb-1">
-                                        <span class="input-group-text">Item Code</span>
-                                        <input type="text" id="quotationItemCode" class="form-control quotationInputItem" placeholder="Item Code" disabled>
-                                        <button class="btn btn-primary" type="button" onclick="btnShowItemModal()"><i class="fas fa-search"></i></button>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-1">
-                                    <div class="input-group input-group-sm mb-1">
-                                        <span class="input-group-text">Item Name</span>
-                                        <input type="text" id="quotationItemName" class="form-control quotationInputItem" disabled>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-1">
-                                    <div class="input-group input-group-sm mb-1">
-                                        <span class="input-group-text">Usage</span>
-                                        <input type="text" id="quotationUsage" class="form-control quotationInputItem" title="price per hour">
-                                        <span class="input-group-text">Hour</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-1">
-                                    <div class="input-group input-group-sm mb-1">
-                                        <span class="input-group-text">Price</span>
-                                        <input type="text" id="quotationPrice" class="form-control quotationInputItem" title="price per hour">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-1">
-                                    <div class="input-group input-group-sm mb-1">
-                                        <span class="input-group-text">Operator Price</span>
-                                        <input type="text" id="quotationOperator" class="form-control quotationInputItem" title="price per man">
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-1">
-                                    <div class="input-group input-group-sm mb-1">
-                                        <span class="input-group-text">MOBDEMOB</span>
-                                        <input type="text" id="quotationMOBDEMOB" class="form-control quotationInputItem">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12 mb-1 text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-outline-secondary" id="btnSaveLine" onclick="btnSaveLineOnclick(this)">Save line</button>
-                                        <button type="button" class="btn btn-outline-secondary" id="btnRemoveLine" onclick="btnRemoveLineOnclick(this)">Remove line</button>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
@@ -167,11 +263,7 @@
 
         <div class="row">
             <div class="col mt-1 mb-1">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)" title="New"><i class="fas fa-file"></i></button>
-                    <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)" title="Save"><i class="fas fa-save"></i></button>
-                    <button type="button" class="btn btn-outline-primary" id="btnPrint" onclick="btnPrintOnclick(this)" title="Print"><i class="fas fa-print"></i></button>
-                </div>
+
             </div>
         </div>
         <input type="hidden" id="quotationInputMode" value="0">
@@ -489,7 +581,10 @@
         }
     }
 
-    function btnShowItemModal() {
+    var QuotationType = '2'
+
+    function btnShowItemModal(paramString) {
+        QuotationType = paramString
         const myModal = new bootstrap.Modal(document.getElementById('itemModal'), {})
         itemModal.addEventListener('shown.bs.modal', () => {
             itemSearch.focus()
@@ -526,8 +621,13 @@
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
                             $('#itemModal').modal('hide')
-                            quotationItemCode.value = arrayItem['MITM_ITMCD']
-                            quotationItemName.value = arrayItem['MITM_ITMNM']
+                            if (QuotationType === '1') {
+                                quotationItemCode.value = arrayItem['MITM_ITMCD']
+                                quotationItemName.value = arrayItem['MITM_ITMNM']
+                            } else {
+                                quotationItemCodeSale.value = arrayItem['MITM_ITMCD']
+                                quotationItemNameSale.value = arrayItem['MITM_ITMNM']
+                            }
                         }
                         newcell = newrow.insertCell(1)
                         newcell.innerHTML = arrayItem['MITM_ITMNM']
@@ -616,12 +716,64 @@
         tribinClearTextBoxByClassName('quotationInputItem')
     }
 
+    function btnSaveLineSaleOnclick() {
+        if (quotationItemCodeSale.value.length === 0) {
+            quotationItemCodeSale.focus()
+            alertify.warning(`Item Code is required`)
+            return
+        }
+        const quotationTableBody = quotationSaleTable.getElementsByTagName('tbody')[0]
+        const subTotal = numeral(quotationPriceSale.value).value() *
+            numeral(quotationQtySale.value).value()
+        newrow = quotationTableBody.insertRow(-1)
+        newrow.title = 'not selected'
+        newrow.onclick = (event) => {
+            const selrow = quotationSaleTable.rows[event.target.parentElement.rowIndex]
+            if (selrow.title === 'selected') {
+                selrow.title = 'not selected'
+                selrow.classList.remove('table-info')
+            } else {
+                const ttlrows = quotationSaleTable.rows.length
+                for (let i = 1; i < ttlrows; i++) {
+                    quotationSaleTable.rows[i].classList.remove('table-info')
+                    quotationSaleTable.rows[i].title = 'not selected'
+                }
+                selrow.title = 'selected'
+                selrow.classList.add('table-info')
+            }
+        }
+        newcell = newrow.insertCell(0)
+        newcell.classList.add('d-none')
+
+        newcell = newrow.insertCell(1)
+        newcell.innerHTML = quotationItemCodeSale.value
+
+        newcell = newrow.insertCell(2)
+        newcell.innerHTML = quotationItemNameSale.value
+
+        newcell = newrow.insertCell(3)
+        newcell.innerHTML = quotationQtySale.value
+        newcell.classList.add('text-center')
+
+        newcell = newrow.insertCell(4)
+        newcell.innerHTML = numeral(quotationPriceSale.value).format(',')
+        newcell.classList.add('text-end')
+
+        newcell = newrow.insertCell(5)
+        newcell.innerHTML = numeral(subTotal).format(',')
+        newcell.classList.add('text-end')
+
+        grandTotal += subTotal
+        strongGrandTotalSale.innerText = numeral(grandTotal).format(',')
+        tribinClearTextBoxByClassName('quotationInputItem')
+    }
+
     function btnNewOnclick() {
         tribinClearTextBox()
         quotationTable.getElementsByTagName('tbody')[0].innerHTML = ``
+        quotationSaleTable.getElementsByTagName('tbody')[0].innerHTML = ``
         quotationConditionContainer.innerHTML = ``
         grandTotal = 0
-        tdGrandTotal.innerText = grandTotal
     }
 
     function btnRemoveLineOnclick(pthis) {
@@ -673,6 +825,55 @@
         }
     }
 
+    function btnRemoveLineSaleOnclick(pthis) {
+        const ttlrows = quotationSaleTable.rows.length
+        let idItem = ''
+        let iFounded = 0
+        for (let i = 1; i < ttlrows; i++) {
+            if (quotationSaleTable.rows[i].title === 'selected') {
+                idItem = quotationSaleTable.rows[i].cells[0].innerText.trim()
+                iFounded = i
+                break
+            }
+        }
+
+        if (iFounded > 0) {
+            if (confirm(`Are you sure ?`)) {
+                if (idItem.length >= 1) {
+                    pthis.disabled = true
+                    pthis.innerHTML = `Please wait`
+                    $.ajax({
+                        type: "DELETE",
+                        url: `quotation/items/${idItem}`,
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        dataType: "json",
+                        success: function(response) {
+                            pthis.innerHTML = `Remove line`
+                            pthis.disabled = false
+                            grandTotal -= numeral(quotationSaleTable.rows[iFounded].cells[5].innerText).value()
+                            strongGrandTotal.innerText = numeral(grandTotal).format(',')
+                            quotationSaleTable.rows[iFounded].remove()
+                            alertify.message(response.msg)
+                        },
+                        error: function(xhr, xopt, xthrow) {
+                            alertify.warning(xthrow);
+                            pthis.disabled = false
+                            pthis.innerHTML = `Remove line`
+                        }
+                    });
+                } else {
+                    grandTotal -= numeral(quotationSaleTable.rows[iFounded].cells[5].innerText).value()
+                    strongGrandTotal.innerText = numeral(grandTotal).format(',')
+                    quotationSaleTable.rows[iFounded].remove()
+                }
+            }
+        } else {
+            alertify.message('nothing selected item')
+        }
+    }
+
     function btnSaveOnclick(pthis) {
         let itemCode = []
         let itemQty = []
@@ -681,15 +882,33 @@
         let itemOperatorPrice = []
         let itemMobDemob = []
         let quotationCondition = []
-        const ttlrows = quotationTable.rows.length - 1
-        for (let i = 1; i < ttlrows; i++) {
-            itemCode.push(quotationTable.rows[i].cells[1].innerText.trim())
-            itemUsage.push(quotationTable.rows[i].cells[3].innerText.trim())
-            itemQty.push(1)
-            itemPrice.push(numeral(quotationTable.rows[i].cells[4].innerText.trim()).value())
-            itemOperatorPrice.push(numeral(quotationTable.rows[i].cells[5].innerText.trim()).value())
-            itemMobDemob.push(numeral(quotationTable.rows[i].cells[6].innerText.trim()).value())
+        const NavRental = document.getElementById('nav-rental')
+        let FinalQuotationType = '1'
+        let ttlrows = 0
+        if (NavRental.classList.contains('active')) {
+            FinalQuotationType = '1'
+            ttlrows = quotationTable.rows.length - 1
+            for (let i = 1; i < ttlrows; i++) {
+                itemCode.push(quotationTable.rows[i].cells[1].innerText.trim())
+                itemUsage.push(quotationTable.rows[i].cells[3].innerText.trim())
+                itemQty.push(1)
+                itemPrice.push(numeral(quotationTable.rows[i].cells[4].innerText.trim()).value())
+                itemOperatorPrice.push(numeral(quotationTable.rows[i].cells[5].innerText.trim()).value())
+                itemMobDemob.push(numeral(quotationTable.rows[i].cells[6].innerText.trim()).value())
+            }
+        } else {
+            FinalQuotationType = '2'
+            ttlrows = quotationSaleTable.rows.length - 1
+            for (let i = 1; i < ttlrows; i++) {
+                itemCode.push(quotationSaleTable.rows[i].cells[1].innerText.trim())
+                itemUsage.push(1)
+                itemQty.push(numeral(quotationSaleTable.rows[i].cells[3].innerText.trim()).value())
+                itemPrice.push(numeral(quotationSaleTable.rows[i].cells[4].innerText.trim()).value())
+                itemOperatorPrice.push(0)
+                itemMobDemob.push(0)
+            }
         }
+
         if (ttlrows === 1) {
             alertify.message('nothing to be saved')
             return
@@ -714,6 +933,8 @@
                 TQUO_ATTN: quotationAttn.value.trim(),
                 TQUO_SBJCT: quotationSubject.value.trim(),
                 TQUO_ISSUDT: quotationIssueDate.value.trim(),
+                TQUO_TYPE: FinalQuotationType,
+                TQUO_SERVTRANS_COST: quotationServiceCost.value,
                 TQUODETA_ITMCD: itemCode,
                 TQUODETA_ITMQT: itemQty,
                 TQUODETA_USAGE: itemUsage,
@@ -764,6 +985,7 @@
                 TQUO_ATTN: quotationAttn.value.trim(),
                 TQUO_SBJCT: quotationSubject.value.trim(),
                 TQUO_ISSUDT: quotationIssueDate.value.trim(),
+                TQUO_SERVTRANS_COST: quotationServiceCost.value,
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -872,63 +1094,123 @@
             url: `quotation/${btoa(data.doc)}`,
             dataType: "json",
             success: function(response) {
-                let myContainer = document.getElementById("quotationTableContainer");
-                let myfrag = document.createDocumentFragment();
-                let cln = quotationTable.cloneNode(true);
-                myfrag.appendChild(cln);
-                let myTable = myfrag.getElementById("quotationTable");
-                let myStrong = myfrag.getElementById("strongGrandTotal");
-                let myTableBody = myTable.getElementsByTagName("tbody")[0];
-                myTableBody.innerHTML = ''
-                grandTotal = 0
-                response.dataItem.forEach((arrayItem) => {
-                    const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() +
-                        numeral(arrayItem['TQUODETA_OPRPRC']).value() +
-                        numeral(arrayItem['TQUODETA_MOBDEMOB']).value()
-                    newrow = myTableBody.insertRow(-1)
-                    newrow.onclick = (event) => {
-                        const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
-                        if (selrow.title === 'selected') {
-                            selrow.title = 'not selected'
-                            selrow.classList.remove('table-info')
-                        } else {
-                            const ttlrows = quotationTable.rows.length
-                            for (let i = 1; i < ttlrows; i++) {
-                                quotationTable.rows[i].classList.remove('table-info')
-                                quotationTable.rows[i].title = 'not selected'
+                if (response.dataHeader[0].TQUO_TYPE === '1') {
+                    let myContainer = document.getElementById("quotationTableContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = quotationTable.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("quotationTable");
+                    let myStrong = myfrag.getElementById("strongGrandTotal");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    grandTotal = 0
+                    response.dataItem.forEach((arrayItem) => {
+                        const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() +
+                            numeral(arrayItem['TQUODETA_OPRPRC']).value() +
+                            numeral(arrayItem['TQUODETA_MOBDEMOB']).value()
+                        newrow = myTableBody.insertRow(-1)
+                        newrow.onclick = (event) => {
+                            const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
+                            if (selrow.title === 'selected') {
+                                selrow.title = 'not selected'
+                                selrow.classList.remove('table-info')
+                            } else {
+                                const ttlrows = quotationTable.rows.length
+                                for (let i = 1; i < ttlrows; i++) {
+                                    quotationTable.rows[i].classList.remove('table-info')
+                                    quotationTable.rows[i].title = 'not selected'
+                                }
+                                selrow.title = 'selected'
+                                selrow.classList.add('table-info')
                             }
-                            selrow.title = 'selected'
-                            selrow.classList.add('table-info')
                         }
-                    }
-                    newcell = newrow.insertCell(0)
-                    newcell.classList.add('d-none')
-                    newcell.innerHTML = arrayItem['id']
-                    newcell = newrow.insertCell(1)
-                    newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
-                    newcell = newrow.insertCell(2)
-                    newcell.innerHTML = arrayItem['MITM_ITMNM']
-                    newcell = newrow.insertCell(3)
-                    newcell.classList.add('text-center')
-                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
-                    newcell = newrow.insertCell(4)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
-                    newcell = newrow.insertCell(5)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
-                    newcell = newrow.insertCell(6)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
-                    newcell = newrow.insertCell(7)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(subTotal).format(',')
+                        newcell = newrow.insertCell(0)
+                        newcell.classList.add('d-none')
+                        newcell.innerHTML = arrayItem['id']
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['MITM_ITMNM']
+                        newcell = newrow.insertCell(3)
+                        newcell.classList.add('text-center')
+                        newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                        newcell = newrow.insertCell(4)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
+                        newcell = newrow.insertCell(5)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
+                        newcell = newrow.insertCell(6)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
+                        newcell = newrow.insertCell(7)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(subTotal).format(',')
 
-                    grandTotal += subTotal
-                })
-                myStrong.innerText = numeral(grandTotal).format(',')
-                myContainer.innerHTML = ''
-                myContainer.appendChild(myfrag)
+                        grandTotal += subTotal
+                    })
+                    myStrong.innerText = numeral(grandTotal).format(',')
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                    let firstTabEl = document.querySelector('#quotation-type-nav-tab button[data-bs-target="#nav-rental"]')
+                    let thetab = new bootstrap.Tab(firstTabEl)
+                    thetab.show()
+
+                    quotationSaleTable.getElementsByTagName('tbody')[0].innerHTML = ''
+                } else {
+                    let myContainer = document.getElementById("quotationSaleTableContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = quotationSaleTable.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("quotationSaleTable");
+                    let myStrong = myfrag.getElementById("strongGrandTotalSale");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    grandTotal = 0
+                    response.dataItem.forEach((arrayItem) => {
+                        const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() * arrayItem['TQUODETA_ITMQT']
+                        newrow = myTableBody.insertRow(-1)
+                        newrow.onclick = (event) => {
+                            const selrow = quotationSaleTable.rows[event.target.parentElement.rowIndex]
+                            if (selrow.title === 'selected') {
+                                selrow.title = 'not selected'
+                                selrow.classList.remove('table-info')
+                            } else {
+                                const ttlrows = quotationSaleTable.rows.length
+                                for (let i = 1; i < ttlrows; i++) {
+                                    quotationSaleTable.rows[i].classList.remove('table-info')
+                                    quotationSaleTable.rows[i].title = 'not selected'
+                                }
+                                selrow.title = 'selected'
+                                selrow.classList.add('table-info')
+                            }
+                        }
+                        newcell = newrow.insertCell(0)
+                        newcell.classList.add('d-none')
+                        newcell.innerHTML = arrayItem['id']
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['MITM_ITMNM']
+                        newcell = newrow.insertCell(3)
+                        newcell.classList.add('text-center')
+                        newcell.innerHTML = arrayItem['TQUODETA_ITMQT']
+                        newcell = newrow.insertCell(4)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
+                        newcell = newrow.insertCell(5)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(subTotal).format(',')
+                        grandTotal += subTotal
+                    })
+                    myStrong.innerText = numeral(grandTotal).format(',')
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                    let firstTabEl = document.querySelector('#quotation-type-nav-tab button[data-bs-target="#nav-sale"]')
+                    let thetab = new bootstrap.Tab(firstTabEl)
+                    thetab.show()
+                    quotationTable.getElementsByTagName('tbody')[0].innerHTML = ''
+                }
                 quotationConditionContainer.innerHTML = ''
                 response.dataCondition.forEach((arrayItem) => {
                     const liElement = document.createElement('li')
@@ -1066,7 +1348,7 @@
                         }
                     }))
                 })
-                $.when.apply($,functionListPhysic_adj).then(function() {
+                $.when.apply($, functionListPhysic_adj).then(function() {
                     loadQuotationDetail({
                         doc: quotationCode.value
                     })

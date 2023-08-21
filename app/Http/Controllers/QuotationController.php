@@ -75,7 +75,9 @@ class QuotationController extends Controller
             'TQUO_SBJCT' => $request->TQUO_SBJCT,
             'TQUO_ISSUDT' => $request->TQUO_ISSUDT,
             'created_by' => Auth::user()->nick_name,
-            'TQUO_BRANCH' => Auth::user()->branch
+            'TQUO_BRANCH' => Auth::user()->branch,
+            'TQUO_TYPE' => $request->TQUO_TYPE,
+            'TQUO_SERVTRANS_COST' => $request->TQUO_SERVTRANS_COST,
         ];
 
         # data quotation detail item
@@ -112,10 +114,6 @@ class QuotationController extends Controller
                 'TQUODETA_BRANCH' => Auth::user()->branch
             ];
         }
-        T_QUOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
-        if (!empty($quotationDetail)) {
-            T_QUODETA::on($this->dedicatedConnection)->insert($quotationDetail);
-        }
 
         # data quotation condition
         $validator = Validator::make($request->all(), [
@@ -126,6 +124,12 @@ class QuotationController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 406);
         }
+
+        T_QUOHEAD::on($this->dedicatedConnection)->create($quotationHeader);
+        if (!empty($quotationDetail)) {
+            T_QUODETA::on($this->dedicatedConnection)->insert($quotationDetail);
+        }
+
         $countDetailCondition = count($request->TQUOCOND_CONDI);
         $quotationCondition = [];
         for ($i = 0; $i < $countDetailCondition; $i++) {
@@ -183,7 +187,7 @@ class QuotationController extends Controller
             'MCUS_CUSNM',
         ];
 
-        $RS = $request->approval == '1' ? T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
+        $RS = $request->approval == '1' ? T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST'])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
@@ -191,7 +195,7 @@ class QuotationController extends Controller
             ->whereNull("TSLO_QUOCD")
             ->where('TQUO_BRANCH', Auth::user()->branch)
             ->get()
-            : T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN"])
+            : T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST'])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->where('TQUO_BRANCH', Auth::user()->branch)
@@ -201,7 +205,7 @@ class QuotationController extends Controller
 
     function loadById(Request $request)
     {
-        $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB"])
+        $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB", 'TQUODETA_ITMQT'])
             ->leftJoin("M_ITM", function ($join) {
                 $join->on("TQUODETA_ITMCD", "=", "MITM_ITMCD")
                     ->on('TQUODETA_BRANCH', '=', 'MITM_BRANCH');
@@ -213,7 +217,11 @@ class QuotationController extends Controller
             ->where('TQUOCOND_QUOCD', base64_decode($request->id))
             ->where('TQUOCOND_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
-        return ['dataItem' => $RS, 'dataCondition' => $RS1];
+        $RSHeader = T_QUOHEAD::on($this->dedicatedConnection)->select('TQUO_TYPE', 'TQUO_SERVTRANS_COST')
+            ->where('TQUO_QUOCD', base64_decode($request->id))
+            ->where('TQUO_BRANCH', Auth::user()->branch)
+            ->get();
+        return ['dataItem' => $RS, 'dataCondition' => $RS1, 'dataHeader' => $RSHeader];
     }
 
     function deleteConditionById(Request $request)
