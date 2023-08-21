@@ -20,17 +20,25 @@ class UserController extends Controller
 
     public function __construct()
     {
-        $this->RSRoles = Role::select('*')->where('name', '!=', 'root')->get();
         $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
+        $this->RSRoles = Role::select('*')->where('name', '!=', 'root')->get();
     }
 
     public function index()
     {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if ($activeRole['code'] === 'root') {
+            $this->RSRoles = Role::select('*')->get();
+        }
         return view('user_registration', ['RSRoles' => $this->RSRoles, 'Branches' => M_BRANCH::on($this->dedicatedConnection)->get()]);
     }
 
     function formManagement()
     {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if ($activeRole['code'] === 'root') {
+            $this->RSRoles = Role::select('*')->get();
+        }
         return view('user_management', ['RSRoles' => $this->RSRoles, 'Branches' => M_BRANCH::on($this->dedicatedConnection)->get()]);
     }
 
