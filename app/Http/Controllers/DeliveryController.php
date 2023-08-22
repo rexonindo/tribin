@@ -516,7 +516,7 @@ class DeliveryController extends Controller
 
     function emptyDriver(Request $request)
     {
-        $data = T_DLVORDHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM', 'TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'T_DLVORDHEAD.created_at')
+        $data = T_DLVORDHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM', 'TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'T_DLVORDHEAD.created_at', 'MCUS_ADDR1')
             ->leftJoin('M_CUS', function ($join) {
                 $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
             })
