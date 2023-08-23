@@ -381,7 +381,7 @@ class QuotationController extends Controller
         $this->fpdf->Cell(5, 5, ': ' . $doc, 0, 0, 'L');
         $this->fpdf->SetXY(140, 41);
         $this->fpdf->Cell(15, 5, 'From', 0, 0, 'L');
-        $this->fpdf->Cell(5, 5, ': ' . $_COOKIE['JOS_BNM'], 0, 0, 'L');
+        // $this->fpdf->Cell(5, 5, ': ' . $_COOKIE['JOS_BNM'], 0, 0, 'L');
         $this->fpdf->SetXY(140, 46);
         $this->fpdf->Cell(15, 5, 'Telp', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ':', 0, 0, 'L');
