@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('TSLODRAFTDETA_SLOCD', 25);
             $table->string('TSLODRAFTDETA_ITMCD', 25);
             $table->float('TSLODRAFTDETA_ITMQT');
-            $table->float('TSLODRAFTDETA_ITMPRC_PER');
+            $table->float('TSLODRAFTDETA_ITMPRC_PER',18,2);
             $table->string('created_by', 16);
             $table->string('updated_by', 16)->nullable();
             $table->timestamps();
