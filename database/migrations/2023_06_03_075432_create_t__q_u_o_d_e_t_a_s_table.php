@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('TQUODETA_ITMCD', 25);
             $table->float('TQUODETA_ITMQT');
             $table->float('TQUODETA_USAGE');
-            $table->float('TQUODETA_PRC',10,2);
-            $table->float('TQUODETA_OPRPRC',10,2);
-            $table->float('TQUODETA_MOBDEMOB',10,2);
+            $table->float('TQUODETA_PRC',18,2);
+            $table->float('TQUODETA_OPRPRC',18,2);
+            $table->float('TQUODETA_MOBDEMOB',18,2);
             $table->string('created_by', 16);
             $table->string('updated_by', 16)->nullable();
             $table->timestamps();

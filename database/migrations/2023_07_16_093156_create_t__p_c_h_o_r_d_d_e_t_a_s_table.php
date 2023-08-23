@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('TPCHORDDETA_PCHCD', 25);
             $table->string('TPCHORDDETA_ITMCD', 25);
             $table->float('TPCHORDDETA_ITMQT');
-            $table->float('TPCHORDDETA_ITMPRC_PER');
+            $table->float('TPCHORDDETA_ITMPRC_PER', 18, 2);
             $table->string('created_by', 16);
             $table->string('updated_by', 16)->nullable();
             $table->timestamps();
