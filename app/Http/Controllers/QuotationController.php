@@ -78,7 +78,7 @@ class QuotationController extends Controller
             'created_by' => Auth::user()->nick_name,
             'TQUO_BRANCH' => Auth::user()->branch,
             'TQUO_TYPE' => $request->TQUO_TYPE,
-            'TQUO_SERVTRANS_COST' => $request->TQUO_SERVTRANS_COST,
+            'TQUO_SERVTRANS_COST' => $request->TQUO_SERVTRANS_COST ? $request->TQUO_SERVTRANS_COST : 0,
         ];
 
         # data quotation detail item
