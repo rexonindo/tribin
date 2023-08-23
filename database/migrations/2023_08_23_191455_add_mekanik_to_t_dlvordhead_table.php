@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('T_QUOHEAD', function (Blueprint $table) {
-            $table->string('TQUO_TYPE', 1);
-            $table->float('TQUO_SERVTRANS_COST', 18, 2);
+        Schema::table('T_DLVORDHEAD', function (Blueprint $table) {
+            $table->string('TDLVORD_MEKANIK', 45)->nullable();
+            $table->float('TDLVORD_JALAN_COST', 18, 2)->nullable();
+            $table->string('TDLVORD_VEHICLE_REGNUM', 15)->nullable();
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('T_QUOHEAD', function (Blueprint $table) {
+        Schema::table('T_DLVORDHEAD', function (Blueprint $table) {
             //
         });
     }

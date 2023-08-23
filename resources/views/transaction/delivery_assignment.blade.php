@@ -45,7 +45,7 @@
                                             <div class="col-md-6 mb-1">
                                                 <label for="quotationCustomer" class="form-label">Address</label>
                                                 <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationCustomerAddress" class="form-control"  disabled>
+                                                    <input type="text" id="quotationCustomerAddress" class="form-control" disabled>
                                                 </div>
                                             </div>
                                         </div>
@@ -60,6 +60,26 @@
                                                     </select>
                                                 </div>
                                             </div>
+                                            <div class="col-md-6 mb-1">
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <span class="input-group-text">Mechanic</span>
+                                                    <input type="text" id="quotationMechanic" class="form-control" maxlength="45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-1">
+                                                <label for="quotationCustomer" class="form-label">Vehicle Reg. Number</label>
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <input type="text" id="quotationVehicleRegistrationNumber" class="form-control" maxlength="45">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-1">
+                                                <label for="quotationCustomer" class="form-label"><i>Uang Jalan</i></label>
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <input type="text" id="quotationUangJalan" class="form-control" maxlength="15">
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="row border-top">
                                             <div class="col-md-12 mb-1">
@@ -71,7 +91,7 @@
                                                                 <th class="d-none">idLine</th>
                                                                 <th>Item Code</th>
                                                                 <th>Item Name</th>
-                                                                <th class="text-center">Qty</th>                                                                
+                                                                <th class="text-center">Qty</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -192,6 +212,9 @@
                     _token: '{{ csrf_token() }}',
                     TDLVORD_BRANCH: branch.value,
                     TDLVORD_DELIVERED_BY: driver.value,
+                    TDLVORD_MEKANIK: quotationMechanic.value,
+                    TDLVORD_JALAN_COST: quotationUangJalan.value,
+                    TDLVORD_VEHICLE_REGNUM: quotationVehicleRegistrationNumber.value,
                 },
                 dataType: "json",
                 success: function(response) {
@@ -262,7 +285,7 @@
                     newcell.innerHTML = arrayItem['MITM_ITMNM']
                     newcell = newrow.insertCell(3)
                     newcell.classList.add('text-end')
-                    newcell.innerHTML = arrayItem['TDLVORDDETA_ITMQT']                   
+                    newcell.innerHTML = arrayItem['TDLVORDDETA_ITMQT']
                 })
 
                 myContainer.innerHTML = ''

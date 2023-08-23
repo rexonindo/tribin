@@ -528,11 +528,23 @@ class DeliveryController extends Controller
 
     function assignDriver(Request $request)
     {
+        # data quotation header
+        $validator = Validator::make($request->all(), [
+            'TDLVORD_JALAN_COST' => 'numeric'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
         $affectedRow = T_DLVORDHEAD::on($this->dedicatedConnection)
             ->where('TDLVORD_DLVCD', base64_decode($request->id))
             ->where('TDLVORD_BRANCH', $request->TDLVORD_BRANCH)
             ->update([
-                'TDLVORD_DELIVERED_BY' => $request->TDLVORD_DELIVERED_BY
+                'TDLVORD_DELIVERED_BY' => $request->TDLVORD_DELIVERED_BY,
+                'TDLVORD_MEKANIK' => $request->TDLVORD_MEKANIK,
+                'TDLVORD_JALAN_COST' => $request->TDLVORD_JALAN_COST,
+                'TDLVORD_VEHICLE_REGNUM' => $request->TDLVORD_VEHICLE_REGNUM,
             ]);
         $message = $affectedRow ? 'Assigned' : 'Something wrong please contact admin';
         return ['message' => $message];
