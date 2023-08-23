@@ -6,6 +6,7 @@ use App\Models\M_Condition;
 use App\Models\T_QUOCOND;
 use App\Models\T_QUODETA;
 use App\Models\T_QUOHEAD;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -303,7 +304,8 @@ class QuotationController extends Controller
             'TQUO_ISSUDT',
             'TQUO_APPRVDT',
             'TQUO_TYPE',
-            'TQUO_SERVTRANS_COST'
+            'TQUO_SERVTRANS_COST',
+            'T_QUOHEAD.created_by'
         )
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where("TQUO_QUOCD", $doc)
@@ -343,6 +345,7 @@ class QuotationController extends Controller
             ->whereNull("deleted_at")
             ->where('TQUOCOND_BRANCH', Auth::user()->branch)
             ->get()->toArray();
+        $User = User::where('nick_name', $RSHeader->created_by)->select('name')->first();
 
         $this->fpdf->SetFont('Arial', 'BU', 24);
         $this->fpdf->AddPage("P", 'A4');
@@ -383,7 +386,7 @@ class QuotationController extends Controller
         $this->fpdf->Cell(5, 5, ': ' . $doc, 0, 0, 'L');
         $this->fpdf->SetXY(140, 41);
         $this->fpdf->Cell(15, 5, 'From', 0, 0, 'L');
-        // $this->fpdf->Cell(5, 5, ': ' . $_COOKIE['JOS_BNM'], 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $User->name, 0, 0, 'L');
         $this->fpdf->SetXY(140, 46);
         $this->fpdf->Cell(15, 5, 'Telp', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ':', 0, 0, 'L');
