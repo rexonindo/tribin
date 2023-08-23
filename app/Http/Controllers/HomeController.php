@@ -102,7 +102,9 @@ class HomeController extends Controller
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD")
                         ->on("TQUO_BRANCH", "=", "TQUODETA_BRANCH");
                 })
-                ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
+                ->join('M_CUS', function ($join) {
+                    $join->on('TQUO_CUSCD', '=', 'MCUS_CUSCD')->on('TQUO_BRANCH', '=', 'MCUS_BRANCH');
+                })
                 ->whereNull("TQUO_APPRVDT")
                 ->whereNull("TQUO_REJCTDT")
                 ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH')->get();
@@ -144,17 +146,22 @@ class HomeController extends Controller
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
-                ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
-                ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
+                ->join('M_CUS', function ($join) {
+                    $join->on('TQUO_CUSCD', '=', 'MCUS_CUSCD')->on('TQUO_BRANCH', '=', 'MCUS_BRANCH');
+                })
+                ->leftJoin('T_SLOHEAD', function ($join) {
+                    $join->on('TQUO_QUOCD', '=', 'TSLO_QUOCD')->on('TQUO_BRANCH', '=', 'TSLO_BRANCH');
+                })
                 ->whereNull("TSLO_QUOCD")
                 ->where('TQUO_BRANCH', Auth::user()->branch)
-                ->groupBy('TQUO_QUOCD')->get();
+                ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH')->get();
 
             # Query untuk data Purchase Order Draft
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_SLO_DRAFT_DETAIL')
                 ->selectRaw("COUNT(*) TTLDETAIL, TSLODRAFTDETA_SLOCD")
                 ->groupBy("TSLODRAFTDETA_SLOCD")
-                ->whereNull('deleted_at');
+                ->whereNull('deleted_at')
+                ->where('TSLODRAFTDETA_BRANCH', Auth::user()->branch);
             $dataSalesOrderDraftTobeProcessed = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(DB::raw("TSLODRAFT_SLOCD,max(TTLDETAIL) TTLDETAIL, max(T_SLO_DRAFT_HEAD.created_at) CREATED_AT,max(TSLODRAFT_POCD) TSLODRAFT_POCD"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TSLODRAFT_SLOCD", "=", "TSLODRAFTDETA_SLOCD");
@@ -162,14 +169,16 @@ class HomeController extends Controller
                 ->leftJoin("T_SLOHEAD", "TSLODRAFT_SLOCD", "=", "TSLO_QUOCD")
                 ->whereNull("TSLODRAFT_APPRVDT")
                 ->whereNull("TSLO_QUOCD")
+                ->where('TSLODRAFT_BRANCH', Auth::user()->branch)
                 ->groupBy('TSLODRAFT_SLOCD')->get();
         }
 
         if (in_array($activeRole['code'], ['purchasing'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
-                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
-                ->groupBy("TPCHREQDETA_PCHCD")
-                ->whereNull('deleted_at');
+                ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD, TPCHREQDETA_BRANCH")
+                ->groupBy("TPCHREQDETA_PCHCD", "TPCHREQDETA_BRANCH")
+                ->whereNull('deleted_at')
+                ->where('TPCHREQDETA_BRANCH', Auth::user()->branch);
             $dataPurchaseRequestApproved = T_PCHREQHEAD::on($this->dedicatedConnection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE, max(TPCHREQ_REJCTDT) TPCHREQ_REJCTDT, max(TPCHREQ_APPRVDT) TPCHREQ_APPRVDT"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD")->on('TPCHREQ_BRANCH', '=', 'TPCHREQDETA_BRANCH');

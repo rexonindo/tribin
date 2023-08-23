@@ -273,7 +273,9 @@ class QuotationController extends Controller
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
-                ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
+                ->join('M_CUS', function ($join) {
+                    $join->on('TQUO_CUSCD', '=', 'MCUS_CUSCD')->on('TQUO_BRANCH', '=', 'MCUS_BRANCH');
+                })
                 ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
                 ->whereNull("TSLO_QUOCD")
                 ->where('TQUO_BRANCH', Auth::user()->branch)
