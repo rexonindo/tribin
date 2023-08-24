@@ -277,8 +277,11 @@ class QuotationController extends Controller
                 ->join('M_CUS', function ($join) {
                     $join->on('TQUO_CUSCD', '=', 'MCUS_CUSCD')->on('TQUO_BRANCH', '=', 'MCUS_BRANCH');
                 })
-                ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
+                ->leftJoin('T_SLOHEAD', function($join){
+                    $join->on('TQUO_QUOCD', '=', 'TSLO_QUOCD')->on('TQUO_BRANCH', '=', 'TSLO_BRANCH');
+                })
                 ->whereNull("TSLO_QUOCD")
+                ->where('T_QUOHEAD.created_by', Auth::user()->nick_name)
                 ->where('TQUO_BRANCH', Auth::user()->branch)
                 ->groupBy('TQUO_QUOCD')->get();
         }

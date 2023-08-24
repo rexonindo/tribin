@@ -154,6 +154,7 @@ class HomeController extends Controller
                 })
                 ->whereNull("TSLO_QUOCD")
                 ->where('TQUO_BRANCH', Auth::user()->branch)
+                ->where('T_QUOHEAD.created_by', Auth::user()->nick_name)
                 ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH')->get();
 
             # Query untuk data Purchase Order Draft
