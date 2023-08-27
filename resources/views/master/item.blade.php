@@ -1,7 +1,10 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Item Master</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-
+        <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
+            <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
+        </div>
     </div>
 </div>
 <form id="item-form">
@@ -94,14 +97,6 @@
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="itemType" id="radio3" value="3">
                     <label class="form-check-label" for="radio3">Services</label>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col mb-1">
-                <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
-                    <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
                 </div>
             </div>
         </div>

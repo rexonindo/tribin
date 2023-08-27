@@ -1,7 +1,10 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Chart of Account</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-
+        <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
+            <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
+        </div>
     </div>
 </div>
 <form id="coa-form">
@@ -21,15 +24,6 @@
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Name</span>
                 <input type="text" id="coaName" class="form-control" placeholder="Coa Name" maxlength="50">
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col mb-1">
-            <div class="btn-group btn-group-sm">
-                <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
-                <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
             </div>
         </div>
     </div>
@@ -213,11 +207,11 @@
                             $('#coaModal').modal('hide')
                             coaInputMode.value = 1
                             coaCode.value = arrayItem['MCOA_COACD']
-                            coaName.value = arrayItem['MCOA_COANM']                           
+                            coaName.value = arrayItem['MCOA_COANM']
                             coaCode.disabled = true
                         }
                         newcell = newrow.insertCell(1)
-                        newcell.innerHTML = arrayItem['MCOA_COANM']                       
+                        newcell.innerHTML = arrayItem['MCOA_COANM']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
