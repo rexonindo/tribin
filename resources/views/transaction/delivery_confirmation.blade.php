@@ -42,6 +42,31 @@
                                                     <input type="text" id="quotationCustomer" class="form-control" maxlength="50" disabled>
                                                 </div>
                                             </div>
+                                            <div class="col-md-6 mb-1">
+                                                <label for="quotationCustomer" class="form-label">Address</label>
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <input type="text" id="quotationCustomerAddress" class="form-control" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row border-top">
+                                            <div class="col-md-12 mb-1">
+                                                <div class="table-responsive" id="quotationTableContainer">
+                                                    <table id="quotationTable" class="table table-sm table-hover table-bordered caption-top">
+                                                        <caption>List of items</caption>
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th class="d-none">idLine</th>
+                                                                <th>Item Code</th>
+                                                                <th>Item Name</th>
+                                                                <th class="text-center">Qty</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="row">
                                             <div class="col">
@@ -108,13 +133,19 @@
 
                     const elButton2 = document.createElement('button')
                     elButton2.classList.add(...['btn', 'btn-outline-primary'])
-                    elButton2.innerHTML = 'Confirm'
+                    elButton2.innerHTML = 'Details'
                     elButton2.onclick = () => {
                         event.preventDefault()
                         quotationCustomer.value = arrayItem['MCUS_CUSNM']
                         labelQuotationInModal.innerHTML = arrayItem['TDLVORD_DLVCD']
+                        quotationCustomerAddress.value = arrayItem['MCUS_ADDR1']
                         branch.value = arrayItem['TDLVORD_BRANCH']
-                        approveQuotation()
+                        const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
+                        myModal.show()
+                        loadQuotationDetail({
+                            doc: arrayItem['TDLVORD_DLVCD'],
+                            branch: arrayItem['TDLVORD_BRANCH']
+                        })
                     }
 
                     const elSmalltext = document.createElement('small')
@@ -173,5 +204,60 @@
                 }
             });
         }
+    }
+
+    function loadQuotationDetail(data) {
+        $.ajax({
+            type: "GET",
+            url: `delivery/document/${btoa(data.doc)}`,
+            data: {
+                TDLVORDDETA_BRANCH: data.branch
+            },
+            dataType: "json",
+            success: function(response) {
+                let myContainer = document.getElementById("quotationTableContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = quotationTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("quotationTable");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                let grandTotal = 0
+                response.data.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newrow.onclick = (event) => {
+                        const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
+                        if (selrow.title === 'selected') {
+                            selrow.title = 'not selected'
+                            selrow.classList.remove('table-info')
+                        } else {
+                            const ttlrows = quotationTable.rows.length
+                            for (let i = 1; i < ttlrows; i++) {
+                                quotationTable.rows[i].classList.remove('table-info')
+                                quotationTable.rows[i].title = 'not selected'
+                            }
+                            selrow.title = 'selected'
+                            selrow.classList.add('table-info')
+                        }
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.classList.add('d-none')
+                    newcell.innerHTML = arrayItem['id']
+                    newcell = newrow.insertCell(1)
+                    newcell.innerHTML = arrayItem['TDLVORDDETA_ITMCD']
+                    newcell = newrow.insertCell(2)
+                    newcell.innerHTML = arrayItem['MITM_ITMNM']
+                    newcell = newrow.insertCell(3)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['TDLVORDDETA_ITMQT']
+                })
+
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+            }
+        });
     }
 </script>

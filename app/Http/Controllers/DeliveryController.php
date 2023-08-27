@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\C_ITRN;
 use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
 use App\Models\T_DLVORDDETA;
@@ -215,7 +216,8 @@ class DeliveryController extends Controller
                     $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'MITM_BRANCH');
                 })
                 ->where('TDLVORDDETA_DLVCD', base64_decode($request->id))
-                ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get(), 'input' => base64_decode($request->id)
+                ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get(),
+            'input' => base64_decode($request->id)
         ];
     }
 
@@ -571,7 +573,7 @@ class DeliveryController extends Controller
 
     function emptyDeliveryDateTime(Request $request)
     {
-        $data = T_DLVORDHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM', 'TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'T_DLVORDHEAD.created_at')
+        $data = T_DLVORDHEAD::on($this->dedicatedConnection)->select('MCUS_CUSNM', 'MCUS_ADDR1', 'TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'T_DLVORDHEAD.created_at')
             ->leftJoin('M_CUS', function ($join) {
                 $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
             })
@@ -580,5 +582,34 @@ class DeliveryController extends Controller
             ->where('TDLVORD_BRANCH', Auth::user()->branch)
             ->get();
         return ['data' => $data];
+    }
+
+    function emptyOutgoingConfirmation()
+    {
+        $RSDeliverySub = T_DLVORDDETA::select('TDLVORDDETA_DLVCD', 'TDLVORDDETA_BRANCH', DB::raw('COUNT(*) TTLROW'))
+            ->whereNull('deleted_at')
+            ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
+            ->groupBy('TDLVORDDETA_DLVCD', 'TDLVORDDETA_BRANCH');
+        $RSITRN = C_ITRN::select('CITRN_BRANCH', 'CITRN_DOCNO')
+            ->whereNull('deleted_at')
+            ->groupBy('CITRN_DOCNO')
+            ->where('CITRN_BRANCH', Auth::user()->branch)
+            ->groupBy('CITRN_BRANCH', 'CITRN_DOCNO');
+        $RSDelivery = T_DLVORDHEAD::on($this->dedicatedConnection)
+            ->leftJoin('M_CUS', function ($join) {
+                $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+            })
+            ->leftJoinSub($RSDeliverySub, 'V1', function ($join) {
+                $join->on('TDLVORD_BRANCH', '=', 'TDLVORDDETA_BRANCH')
+                    ->on('TDLVORD_DLVCD', '=', 'TDLVORDDETA_DLVCD');
+            })
+            ->leftJoin($RSITRN, 'V2', function ($join) {
+                $join->on('TDLVORD_BRANCH', '=', 'CITRN_BRANCH')
+                    ->on('TDLVORD_DLVCD', '=', 'CITRN_DOCNO');
+            })
+            ->select('MCUS_CUSNM', 'TDLVORD_DLVCD')
+            ->whereRaw('IFNULL(TTLROW,0)>0')
+            ->whereNull('CITRN_DOCNO');
+        return ['data' => $RSDelivery->get()];
     }
 }
