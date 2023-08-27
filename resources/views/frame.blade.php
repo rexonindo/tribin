@@ -143,29 +143,21 @@
                     <span data-feather="mail" class="align-text-bottom"></span>
                     <span class="badge text-bg-info" id="labelNotifAll"></span>
                 </a>
-                <ul class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
-                    <li>
+                <ul id="ulHeadContainer" class="dropdown-menu position-absolute dropdown-menu-lg-end dropdown-menu-md-end">
+                    <li id="liHeadQuotation">
                         <h6 class="dropdown-header">Quotation</h6>
                     </li>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovalOnclick(event)">Quotation Approval <span class="badge text-bg-info" id="labelNotifApprovalQuotation"></span></a></li>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovedQuotationOnclick(event)">Quotation Recent Updates <span class="badge text-bg-info" id="labelNotifApprovedQuotation"></span></a></li>
-                    <li>
+                    <li id="liHeadPurchaseRequest">
                         <h6 class="dropdown-header">Purchase Request</h6>
                     </li>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovalPurchaseRequestOnclick(event)">Purchase Request Approval <span class="badge text-bg-info" id="labelNotifApprovalPurchaseRequest"></span></a></li>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovedPurchaseRequestOnclick(event)">Purchase Request Recent Updates <span class="badge text-bg-info" id="labelNotifApprovedPurchaseRequest"></span></a></li>
-                    <li>
+                    <li id="liHeadPurchaseOrder">
                         <h6 class="dropdown-header">Purchase Order</h6>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovalPurchaseOrderOnclick(event)">Purchase Order Approval <span class="badge text-bg-info" id="labelNotifApprovalPurchaseOrder"></span></a></li>
                     </li>
-                    <li>
+                    <li id="liHeadSalesOrderDraft">
                         <h6 class="dropdown-header">Sales Order Draft</h6>
-                    <li><a class="dropdown-item" href="#" onclick="liApprovalSalesOrderDraftOnclick(event)">Sales Order Draft Status <span class="badge text-bg-info" id="labelNotifApprovalSalesOrderDraft"></span></a></li>
                     </li>
-                    <li>
+                    <li id="liHeadDelivery">
                         <h6 class="dropdown-header">Delivery</h6>
-                    <li><a class="dropdown-item" href="#" onclick="liDeliveryAssignmentOnclick(event)">Delivery Assignment <span class="badge text-bg-info" id="labelNotifDeliveryAssignment"></span></a></li>
-                    <li><a class="dropdown-item" href="#" onclick="liDeliveryOnGoingOnclick(event)">On going <span class="badge text-bg-info" id="labelNotifDeliveryOnGoing"></span></a></li>
                     </li>
                 </ul>
             </div>
@@ -373,23 +365,62 @@
                         totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver + totalNotifQTDeliveryUndelivered
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
 
-                    labelNotifApprovalQuotation.innerHTML = totalNotifQT === 0 ? '' : totalNotifQT
-                    labelNotifApprovedQuotation.innerHTML = totalNotifApprovedQT === 0 ? '' : totalNotifApprovedQT
+                    // Quotations Group
+                    createLiItem('linotif1', 'labelNotifApprovalQuotation', 'Quotation Approval', totalNotifQT, liHeadQuotation, liApprovalOnclick)
+                    createLiItem('linotif2', 'labelNotifApprovedQuotation', 'Quotation Recent Updates', totalNotifApprovedQT, liHeadQuotation, liApprovedQuotationOnclick)
 
-                    labelNotifApprovalPurchaseRequest.innerHTML = totalNotifQTPurchaseRequest === 0 ? '' : totalNotifQTPurchaseRequest
-                    labelNotifApprovedPurchaseRequest.innerText = totalNotifApprovedQTPurchaseRequest === 0 ? '' : totalNotifApprovedQTPurchaseRequest
+                    // Purchase Request Group
+                    createLiItem('linotif3', 'labelNotifApprovalPurchaseRequest', 'Purchase Request Approval', totalNotifQTPurchaseRequest, liHeadPurchaseRequest, liApprovalPurchaseRequestOnclick)
+                    createLiItem('linotif4', 'labelNotifApprovedPurchaseRequest', 'Purchase Request Recent Updates', totalNotifApprovedQTPurchaseRequest, liHeadPurchaseRequest, liApprovedPurchaseRequestOnclick)
 
-                    labelNotifApprovalSalesOrderDraft.innerText = totalNotifQTSalesOrderDraft === 0 ? '' : totalNotifQTSalesOrderDraft
+                    // Purchase Order Group
+                    createLiItem('linotif5', 'labelNotifApprovalPurchaseOrder', 'Purchase Order Approval', totalNotifQTPurchaseOrder, liHeadPurchaseOrder, liApprovalPurchaseOrderOnclick)
 
-                    labelNotifApprovalPurchaseOrder.innerText = totalNotifQTPurchaseOrder === 0 ? '' : totalNotifQTPurchaseOrder
+                    // Sales Order Draft Group
+                    createLiItem('linotif6', 'labelNotifApprovalSalesOrderDraft', 'Sales Order Draft Status', totalNotifQTSalesOrderDraft, liHeadSalesOrderDraft, liApprovalSalesOrderDraftOnclick)
 
-                    labelNotifDeliveryAssignment.innerText = totalNotifQTDeliveryNoDriver === 0 ? '' : totalNotifQTDeliveryNoDriver
-                    labelNotifDeliveryOnGoing.innerText = totalNotifQTDeliveryUndelivered === 0 ? '' : totalNotifQTDeliveryUndelivered
+                    // Delivery Group
+                    createLiItem('linotif7', 'labelNotifDeliveryAssignment', 'Delivery Assignment', totalNotifQTDeliveryNoDriver, liHeadDelivery, liDeliveryAssignmentOnclick)
+                    createLiItem('linotif8', 'labelNotifDeliveryOnGoing', 'On going', totalNotifQTDeliveryUndelivered, liHeadDelivery, liDeliveryOnGoingOnclick)
                 }
             });
         }
 
         showNotificationToApprove()
+
+        function createLiItem(IDElement, IDElementChild, description, totalNotif, IDTop, callback) {
+            let collectionsLi = ulHeadContainer.getElementsByTagName('li')
+            let isFound = false
+            for (let i of collectionsLi) {
+                if (i.id === IDElement) {
+                    isFound = true
+                    break
+                }
+            }
+            if (!isFound) {
+                let elemLi = document.createElement('li')
+                let elemA = document.createElement('a')
+                let elemSpan = document.createElement('span')
+                elemSpan.classList.add('badge', 'text-bg-info')
+                elemSpan.innerText = totalNotif === 0 ? '' : totalNotif
+                elemSpan.id = IDElementChild
+                elemLi.id = IDElement
+                elemA.innerText = description + ' '
+                elemA.classList.add('dropdown-item')
+                elemA.appendChild(elemSpan)
+                elemA.onclick = callback
+                elemA.href = '#'
+                elemLi.append(elemA)
+                IDTop.insertAdjacentElement('afterend', elemLi)
+            } else {
+                const elemNotif = document.getElementById(IDElementChild)
+                elemNotif.innerText = totalNotif === 0 ? '' : totalNotif
+            }
+        }
+
+        function liDeliveryConfirmOnClick() {
+            alert('konfirmasi pengiriman')
+        }
 
         function liApprovalOnclick(e) {
             e.preventDefault()
@@ -404,6 +435,7 @@
                 });
             }
         }
+
         function liDeliveryAssignmentOnclick(e) {
             e.preventDefault()
             if (labelNotifDeliveryAssignment.innerText.length > 0) {
@@ -417,6 +449,7 @@
                 });
             }
         }
+
         function liDeliveryOnGoingOnclick(e) {
             e.preventDefault()
             if (labelNotifDeliveryOnGoing.innerText.length > 0) {
