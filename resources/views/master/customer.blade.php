@@ -14,16 +14,40 @@
     </div>
     <div class="row">
         <div class="col-md-6 mb-1">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="customerType" id="radio1" value="1" checked>
+                <label class="form-check-label" for="radio1">Personal</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="customerType" id="radio2" value="2">
+                <label class="form-check-label" for="radio2">Corporate</label>
+            </div>
+        </div>
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text">Reference</span>
+                <input type="text" id="customerReference" class="form-control" maxlength="70">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Customer Code</span>
                 <input type="text" id="customerCode" class="form-control" placeholder="Customer Code" aria-label="Customer Code" maxlength="10">
                 <button class="btn btn-primary" type="button" onclick="btnShowCustomerModal()"><i class="fas fa-search"></i></button>
             </div>
         </div>
-        <div class="col-md-6 mb-1">
+        <div class="col-md-4 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Customer Name</span>
                 <input type="text" id="customerName" class="form-control" placeholder="Customer Name" maxlength="50">
+            </div>
+        </div>
+        <div class="col-md-4 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text">Group</span>
+                <input type="text" id="customerGroup" class="form-control" placeholder="Customer Group" maxlength="70">
             </div>
         </div>
     </div>
@@ -53,7 +77,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Telephone</span>
                 <input type="text" id="customerTelephone" class="form-control" placeholder="021..." maxlength="20">
@@ -61,13 +85,83 @@
         </div>
         <div class="col-md-6 mb-1">
             <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text">Company</span>
+                <span class="input-group-text">Connector</span>
                 <select class="form-select" id="companyGroup">
                     <option value="-" selected>-</option>
                     @foreach ($companies as $r)
                     <option value="{{$r->connection}}">{{$r->name}}</option>
                     @endforeach
                 </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text" title="Person in charge">PIC</span>
+                <input type="text" id="customerPerson" class="form-control" maxlength="70">
+            </div>
+        </div>
+        <div class="col-md-4 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text" title="Person in charge">Phone</span>
+                <input type="text" id="customerPersonPhone" class="form-control" maxlength="20">
+            </div>
+        </div>
+        <div class="col-md-4 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text" title="Person in charge">Email</span>
+                <input type="email" id="customerEmail" class="form-control" maxlength="70">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col mb-1">
+            <h4>Required File</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <label class="input-group-text" for="customerKTPFile">KTP</label>
+                <input type="file" class="form-control" id="customerKTPFile" accept="image/*,.pdf" onchange="customerKTPFileOnChange(event)">
+            </div>
+        </div>
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <label class="input-group-text" for="customerKTPFilePath"><i class="fas fa-file"></i> </label>
+                <input type="text" class="form-control" id="customerKTPFilePath" readonly disabled>
+                <button class="btn btn-primary" type="button" onclick="btnShowKTPFFile()"><i class="fas fa-eye"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <label class="input-group-text" for="customerNPWPFile">NPWP</label>
+                <input type="file" class="form-control" id="customerNPWPFile" accept="image/*,.pdf" onchange="customerNPWPFileOnChange(event)">
+            </div>
+        </div>
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <label class="input-group-text" for="customerNPWPFilePath"><i class="fas fa-file"></i> </label>
+                <input type="text" class="form-control" id="customerNPWPFilePath" readonly disabled>
+                <button class="btn btn-primary" type="button" onclick="btnShowNPWPFile()"><i class="fas fa-eye"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <label class="input-group-text" for="customerNIBFile">NIB</label>
+                <input type="file" class="form-control" id="customerNIBFile" accept="image/*,.pdf" onchange="customerNIBFileOnChange(event)">
+            </div>
+        </div>
+        <div class="col-md-6 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <label class="input-group-text" for="customerNIBFilePath"><i class="fas fa-file"></i> </label>
+                <input type="text" class="form-control" id="customerNIBFilePath" readonly disabled>
+                <button class="btn btn-primary" type="button" onclick="btnShowNIBFile()"><i class="fas fa-eye"></i></button>
             </div>
         </div>
     </div>
@@ -132,6 +226,8 @@
     }
 
     function btnSaveOnclick(pthis) {
+        const customerTypeValue = document.querySelector("input[type='radio'][name=customerType]:checked").value
+
         if (customerCode.value.trim().length <= 3) {
             customerCode.focus()
             alertify.warning(`Customer Code is required`)
@@ -142,25 +238,64 @@
             alertify.warning(`Customer Name is required`)
             return
         }
-        const data = {
-            MCUS_CUSCD: customerCode.value.trim(),
-            MCUS_CUSNM: customerName.value.trim(),
-            MCUS_CURCD: currency.value.trim(),
-            MCUS_TAXREG: customerTax.value.trim(),
-            MCUS_ADDR1: customerAddress.value.trim(),
-            MCUS_TELNO: customerTelephone.value.trim(),
-            MCUS_CGCON: companyGroup.value.trim(),
-            _token: '{{ csrf_token() }}',
-        }
+
         if (customerInputMode.value === '0') {
+            const formData = new FormData()
+            formData.append('MCUS_CUSCD', customerCode.value.trim())
+            formData.append('MCUS_CUSNM', customerName.value.trim())
+            formData.append('MCUS_CURCD', currency.value.trim())
+            formData.append('MCUS_TAXREG', customerTax.value.trim())
+            formData.append('MCUS_ADDR1', customerAddress.value.trim())
+            formData.append('MCUS_TELNO', customerTelephone.value.trim())
+            formData.append('MCUS_CGCON', companyGroup.value.trim())
+            formData.append('MCUS_TYPE', customerTypeValue)
+            formData.append('MCUS_GROUP', customerGroup.value.trim())
+            formData.append('MCUS_REFF_MKT', customerReference.value.trim())
+            formData.append('MCUS_PIC_NAME', customerPerson.value.trim())
+            formData.append('MCUS_PIC_TELNO', customerPersonPhone.value.trim())
+            formData.append('MCUS_EMAIL', customerEmail.value.trim())
+            formData.append('MCUS_KTP_FILE', customerKTPFile.files[0])
+            formData.append('MCUS_NPWP_FILE', customerNPWPFile.files[0])
+            formData.append('MCUS_NIB_FILE', customerNIBFile.files[0])
+            formData.append('_token', '{{ csrf_token() }}')
+            if (customerTypeValue === '1') {
+                if (customerKTPFile.files.length === 0) {
+                    customerKTPFile.focus()
+                    alertify.warning(`KTP file is required`)
+                    return
+                }
+                if (customerNPWPFile.files.length === 0) {
+                    customerNPWPFile.focus()
+                    alertify.warning(`NPWP file is required`)
+                    return
+                }
+            } else {
+                if (customerKTPFile.files.length === 0) {
+                    customerKTPFile.focus()
+                    alertify.warning(`KTP file is required`)
+                    return
+                }
+                if (customerNPWPFile.files.length === 0) {
+                    customerNPWPFile.focus()
+                    alertify.warning(`NPWP file is required`)
+                    return
+                }
+                if (customerNIBFile.files.length === 0) {
+                    customerNIBFile.focus()
+                    alertify.warning(`NIB file is required`)
+                    return
+                }
+            }
             if (confirm(`Are you sure ?`)) {
                 pthis.innerHTML = `Please wait...`
                 pthis.disabled = true
                 $.ajax({
                     type: "post",
                     url: "customer",
-                    data: data,
+                    data: formData,
                     dataType: "json",
+                    contentType: false,
+                    processData: false,
                     success: function(response) {
                         pthis.innerHTML = `<i class="fas fa-save"></i>`
                         alertify.success(response.msg)
@@ -193,6 +328,12 @@
                     MCUS_ADDR1: customerAddress.value.trim(),
                     MCUS_TELNO: customerTelephone.value.trim(),
                     MCUS_CGCON: companyGroup.value.trim(),
+                    MCUS_TYPE: customerTypeValue,
+                    MCUS_GROUP: customerGroup.value,
+                    MCUS_REFF_MKT: customerReference.value,
+                    MCUS_PIC_NAME: customerPerson.value,
+                    MCUS_PIC_TELNO: customerPersonPhone.value,
+                    MCUS_EMAIL: customerEmail.value,
                     _token: '{{ csrf_token() }}',
                 }
                 pthis.innerHTML = `Please wait...`
@@ -268,12 +409,28 @@
                             customerInputMode.value = 1
                             customerCode.value = arrayItem['MCUS_CUSCD']
                             customerName.value = arrayItem['MCUS_CUSNM']
+                            customerGroup.value = arrayItem['MCUS_GROUP']
                             currency.value = arrayItem['MCUS_CURCD']
                             customerTax.value = arrayItem['MCUS_TAXREG']
                             customerAddress.value = arrayItem['MCUS_ADDR1']
                             customerTelephone.value = arrayItem['MCUS_TELNO']
                             companyGroup.value = arrayItem['MCUS_CGCON']
+                            customerReference.value = arrayItem['MCUS_REFF_MKT']
+                            customerPerson.value = arrayItem['MCUS_PIC_NAME']
+                            customerPersonPhone.value = arrayItem['MCUS_PIC_TELNO']
+                            customerEmail.value = arrayItem['MCUS_EMAIL']
+                            customerKTPFilePath.value = arrayItem['MCUS_KTP_FILE']
+                            customerNPWPFilePath.value = arrayItem['MCUS_NPWP_FILE']
+                            customerNIBFilePath.value = arrayItem['MCUS_NIB_FILE']
                             customerCode.disabled = true
+                            switch (arrayItem['MCUS_TYPE']) {
+                                case '1':
+                                    radio1.checked = true;
+                                    break;
+                                case '2':
+                                    radio2.checked = true;
+                                    break;
+                            }
                         }
                         newcell = newrow.insertCell(1)
                         newcell.innerHTML = arrayItem['MCUS_CUSNM']
@@ -296,5 +453,17 @@
                 }
             });
         }
+    }
+
+    function customerKTPFileOnChange(e) {
+        customerKTPFilePath.value = e.target.files[0].name
+    }
+
+    function customerNPWPFileOnChange(e) {
+        customerNPWPFilePath.value = e.target.files[0].name
+    }
+
+    function customerNIBFileOnChange(e) {
+        customerNIBFilePath.value = e.target.files[0].name
     }
 </script>
