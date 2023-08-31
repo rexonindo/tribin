@@ -64,10 +64,15 @@ Route::post('item', [ItemController::class, 'simpan'])->middleware('auth');
 Route::put('item/{id}', [ItemController::class, 'update'])->middleware('auth');
 
 # Terkait Customer Master
-Route::get('customer/form', [CustomerController::class, 'index'])->middleware('auth');
-Route::get('customer', [CustomerController::class, 'search'])->middleware('auth');
-Route::post('customer', [CustomerController::class, 'simpan'])->middleware('auth');
-Route::put('customer/{id}', [CustomerController::class, 'update'])->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::prefix('customer')->group(function () {
+        Route::get('form', [CustomerController::class, 'index']);
+        Route::get('file/{id}', [CustomerController::class, 'showFile']);
+        Route::get('', [CustomerController::class, 'search']);
+        Route::post('', [CustomerController::class, 'simpan']);
+        Route::put('{id}', [CustomerController::class, 'update']);
+    });
+});
 
 # Terkait Supplier Master
 Route::get('supplier/form', [SupplierController::class, 'index'])->middleware('auth');

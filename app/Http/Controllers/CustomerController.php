@@ -131,4 +131,10 @@ class CustomerController extends Controller
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
+
+    function showFile(Request $request)
+    {
+        $doc = $request->id;
+        return response()->file(public_path('attachments/customer/' . $doc));
+    }
 }

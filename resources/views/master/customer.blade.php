@@ -466,4 +466,16 @@
     function customerNIBFileOnChange(e) {
         customerNIBFilePath.value = e.target.files[0].name
     }
+
+    function btnShowKTPFFile() {
+        window.open(`/customer/file/${customerKTPFilePath.value}`, '_blank')
+    }
+
+    function btnShowNPWPFile() {
+        window.open(`/customer/file/${customerNPWPFilePath.value}`, '_blank')
+    }
+
+    function btnShowNIBFile() {
+        window.open(`/customer/file/${customerNIBFilePath.value}`, '_blank')
+    }
 </script>
