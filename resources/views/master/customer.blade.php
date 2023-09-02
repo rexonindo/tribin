@@ -481,15 +481,27 @@
     }
 
     function btnShowKTPFFile() {
-        window.open(`/customer/file/${customerKTPFilePath.value}`, '_blank')
+        if (customerKTPFilePath.value.length > 5) {
+            window.open(`/customer/file/${customerKTPFilePath.value}`, '_blank')
+        } else {
+            alert('there is no file to view')
+        }
     }
 
     function btnShowNPWPFile() {
-        window.open(`/customer/file/${customerNPWPFilePath.value}`, '_blank')
+        if (customerNPWPFilePath.value.length > 5) {
+            window.open(`/customer/file/${customerNPWPFilePath.value}`, '_blank')
+        } else {
+            alert('there is no file to view')
+        }
     }
 
     function btnShowNIBFile() {
-        window.open(`/customer/file/${customerNIBFilePath.value}`, '_blank')
+        if (customerNIBFilePath.value.length > 5) {
+            window.open(`/customer/file/${customerNIBFilePath.value}`, '_blank')
+        } else {
+            alert('there is no file to view')
+        }
     }
 
     function btnChangeKTPFile(firstSenderObject) {
