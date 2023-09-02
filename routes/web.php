@@ -85,6 +85,20 @@ Route::middleware('auth')->group(function () {
         Route::get('form/purchase-request', [PurchaseController::class, 'formApproval']);
         Route::get('form/purchase-order', [PurchaseController::class, 'formApprovalPO']);
     });
+
+    # Terkait Quotation Transaction
+    Route::prefix('quotation')->group(function () {
+        Route::get('form', [QuotationController::class, 'index']);
+        Route::post('', [QuotationController::class, 'save']);
+        Route::get('', [QuotationController::class, 'search']);
+        Route::put('{id}', [QuotationController::class, 'update']);
+        Route::get('{id}', [QuotationController::class, 'loadById']);
+        Route::delete('conditions/{id}', [QuotationController::class, 'deleteConditionById']);
+        Route::delete('items/{id}', [QuotationController::class, 'deleteItemById']);
+        Route::put('items/{id}', [QuotationController::class, 'updateItem']);
+    });
+    Route::post('quotation-item', [QuotationController::class, 'saveItem']);
+    Route::post('quotation-condition', [QuotationController::class, 'saveCondition']);
 });
 
 # Terkait Supplier Master
@@ -99,21 +113,8 @@ Route::get('coa', [CoaController::class, 'search'])->middleware('auth');
 Route::post('coa', [CoaController::class, 'simpan'])->middleware('auth');
 Route::put('coa/{id}', [CoaController::class, 'update'])->middleware('auth');
 
-# Terkait Quotation Transaction
-Route::get('quotation/form', [QuotationController::class, 'index'])->middleware('auth');
-Route::post('quotation', [QuotationController::class, 'save'])->middleware('auth');
-Route::post('quotation-item', [QuotationController::class, 'saveItem'])->middleware('auth');
-Route::post('quotation-condition', [QuotationController::class, 'saveCondition'])->middleware('auth');
-Route::put('quotation/{id}', [QuotationController::class, 'update'])->middleware('auth');
-Route::get('quotation', [QuotationController::class, 'search'])->middleware('auth');
-Route::get('quotation/{id}', [QuotationController::class, 'loadById'])->middleware('auth');
-Route::delete('quotation/conditions/{id}', [QuotationController::class, 'deleteConditionById'])->middleware('auth');
-Route::delete('quotation/items/{id}', [QuotationController::class, 'deleteItemById'])->middleware('auth');
-
 # Terkait Quotation Condition
 Route::get('condition', [QuotationController::class, 'getAllCondition'])->middleware('auth');
-
-
 
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
 Route::put('approve/purchase-request/{id}', [PurchaseController::class, 'approve'])->middleware('auth');

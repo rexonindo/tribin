@@ -181,6 +181,23 @@ class QuotationController extends Controller
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
+    public function updateItem(Request $request)
+    {
+        # ubah data header
+        $affectedRow = T_QUODETA::on($this->dedicatedConnection)
+            ->where('id', $request->id)
+            ->where('TQUODETA_BRANCH', Auth::user()->branch)
+            ->update([
+                'TQUODETA_ITMCD' => $request->TQUODETA_ITMCD,
+                'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT,
+                'TQUODETA_USAGE' => $request->TQUODETA_USAGE,
+                'TQUODETA_PRC' => $request->TQUODETA_PRC,
+                'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC,
+                'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB,
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
+
     function search(Request $request)
     {
         $columnMap = [

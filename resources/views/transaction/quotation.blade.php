@@ -147,6 +147,7 @@
                                                         <div class="btn-group btn-group-sm">
                                                             <button type="button" class="btn btn-outline-secondary" id="btnSaveLine" onclick="btnSaveLineOnclick(this)">Save line</button>
                                                             <button type="button" class="btn btn-outline-secondary" id="btnRemoveLine" onclick="btnRemoveLineOnclick(this)">Remove line</button>
+                                                            <button type="button" class="btn btn-outline-secondary" id="btnUpdateLine" onclick="btnUpdateLineOnclick(this)">Update line</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -222,6 +223,7 @@
                                                         <div class="btn-group btn-group-sm">
                                                             <button type="button" class="btn btn-outline-secondary" id="btnSaveLineSale" onclick="btnSaveLineSaleOnclick(this)">Save line</button>
                                                             <button type="button" class="btn btn-outline-secondary" id="btnRemoveLineSale" onclick="btnRemoveLineSaleOnclick(this)">Remove line</button>
+                                                            <button type="button" class="btn btn-outline-secondary" id="btnUpdateLineSale" onclick="btnUpdateLineSaleOnclick(this)">Update line</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -789,7 +791,7 @@
         }
 
         if (iFounded > 0) {
-            if (confirm(`Are you sure ?`)) {
+            if (confirm(`Are you sure want to delete ?`)) {
                 if (idItem.length >= 1) {
                     pthis.disabled = true
                     pthis.innerHTML = `Please wait`
@@ -823,6 +825,86 @@
         } else {
             alertify.message('nothing selected item')
         }
+    }
+
+    function btnUpdateLineOnclick(pthis) {
+        const ttlrows = quotationTable.rows.length
+        let idItem = ''
+        let iFounded = 0
+        for (let i = 1; i < ttlrows; i++) {
+            if (quotationTable.rows[i].title === 'selected') {
+                idItem = quotationTable.rows[i].cells[0].innerText.trim()
+                iFounded = i
+                break
+            }
+        }
+
+        if (iFounded > 0) {
+            if (confirm(`Are you sure want to update ?`)) {
+                if (idItem.length >= 1) {
+                    pthis.disabled = true
+                    pthis.innerHTML = `Please wait`
+                    const data = {
+                        _token: '{{ csrf_token() }}',
+                        TQUODETA_ITMCD: quotationItemCode.value,
+                        TQUODETA_ITMQT: 1,
+                        TQUODETA_USAGE: quotationUsage.value,
+                        TQUODETA_PRC: quotationPrice.value,
+                        TQUODETA_OPRPRC: quotationOperator.value,
+                        TQUODETA_MOBDEMOB: quotationMOBDEMOB.value,
+                    }
+                    $.ajax({
+                        type: "PUT",
+                        url: `quotation/items/${idItem}`,
+                        data: data,
+                        dataType: "json",
+                        success: function(response) {
+                            pthis.innerHTML = `Update line`
+                            pthis.disabled = false
+                            if (response.msg === 'OK') {
+                                refreshTableRent(iFounded)
+                            }
+                            alertify.message(response.msg)
+                        },
+                        error: function(xhr, xopt, xthrow) {
+                            alertify.warning(xthrow);
+                            pthis.disabled = false
+                            pthis.innerHTML = `Update line`
+                        }
+                    });
+                } else {
+                    refreshTableRent(iFounded)
+                }
+            }
+        } else {
+            alertify.message('nothing selected item')
+        }
+    }
+
+    function refreshTableRent(selectedRow) {
+        const subTotal = numeral(quotationPrice.value).value() +
+            numeral(quotationOperator.value).value() +
+            numeral(quotationMOBDEMOB.value).value()
+        quotationTable.rows[selectedRow].cells[1].innerText = quotationItemCode.value
+        quotationTable.rows[selectedRow].cells[2].innerText = quotationItemName.value
+        quotationTable.rows[selectedRow].cells[3].innerText = quotationUsage.value
+        quotationTable.rows[selectedRow].cells[4].innerText = quotationPrice.value
+        quotationTable.rows[selectedRow].cells[5].innerText = quotationOperator.value
+        quotationTable.rows[selectedRow].cells[6].innerText = quotationMOBDEMOB.value
+        quotationTable.rows[selectedRow].cells[7].innerText = subTotal
+        recalculateGrandTotalRent()
+    }
+
+    function recalculateGrandTotalRent() {
+        const ttlrows = quotationTable.rows.length
+        let grandTotal = 0
+        for (let i = 1; i < ttlrows; i++) {
+            if (quotationTable.rows[i].title === 'selected') {
+                let subTotal = numeral(quotationTable.rows[i].cells[7].innerText.trim()).value()
+                grandTotal += subTotal
+            }
+        }
+        strongGrandTotal.innerText = numeral(grandTotal).format(',')
     }
 
     function btnRemoveLineSaleOnclick(pthis) {
@@ -1114,6 +1196,12 @@
                             if (selrow.title === 'selected') {
                                 selrow.title = 'not selected'
                                 selrow.classList.remove('table-info')
+                                quotationItemCode.value = ''
+                                quotationItemName.value = ''
+                                quotationUsage.value = ''
+                                quotationPrice.value = ''
+                                quotationOperator.value = ''
+                                quotationMOBDEMOB.value = ''
                             } else {
                                 const ttlrows = quotationTable.rows.length
                                 for (let i = 1; i < ttlrows; i++) {
@@ -1122,6 +1210,12 @@
                                 }
                                 selrow.title = 'selected'
                                 selrow.classList.add('table-info')
+                                quotationItemCode.value = arrayItem['TQUODETA_ITMCD']
+                                quotationItemName.value = arrayItem['MITM_ITMNM']
+                                quotationUsage.value = arrayItem['TQUODETA_USAGE']
+                                quotationPrice.value = arrayItem['TQUODETA_PRC']
+                                quotationOperator.value = arrayItem['TQUODETA_OPRPRC']
+                                quotationMOBDEMOB.value = arrayItem['TQUODETA_MOBDEMOB']
                             }
                         }
                         newcell = newrow.insertCell(0)
