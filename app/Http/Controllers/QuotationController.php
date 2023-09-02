@@ -168,13 +168,13 @@ class QuotationController extends Controller
         ];
     }
 
-
     public function update(Request $request)
     {
         # ubah data header
         $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
             ->where('TQUO_QUOCD', base64_decode($request->id))
             ->where('TQUO_BRANCH', Auth::user()->branch)
+            ->whereNull('TQUO_APPRVDT')
             ->update([
                 'TQUO_CUSCD' => $request->TQUO_CUSCD, 'TQUO_ATTN' => $request->TQUO_ATTN, 'TQUO_SBJCT' => $request->TQUO_SBJCT, 'TQUO_ISSUDT' => $request->TQUO_ISSUDT
             ]);
@@ -183,18 +183,27 @@ class QuotationController extends Controller
 
     public function updateItem(Request $request)
     {
-        # ubah data header
-        $affectedRow = T_QUODETA::on($this->dedicatedConnection)
-            ->where('id', $request->id)
-            ->where('TQUODETA_BRANCH', Auth::user()->branch)
-            ->update([
-                'TQUODETA_ITMCD' => $request->TQUODETA_ITMCD,
-                'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT,
-                'TQUODETA_USAGE' => $request->TQUODETA_USAGE,
-                'TQUODETA_PRC' => $request->TQUODETA_PRC,
-                'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC,
-                'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB,
-            ]);
+        $affectedRow = 0;
+        $UnApprovedQuotation = T_QUOHEAD::on($this->dedicatedConnection)
+            ->select('*')
+            ->whereNull('TQUO_APPRVDT')
+            ->where('TQUO_QUOCD', $request->TQUO_QUOCD)
+            ->where('TQUO_BRANCH', Auth::user()->branch)
+            ->first();
+        if ($UnApprovedQuotation) {
+            # ubah data detail
+            $affectedRow = T_QUODETA::on($this->dedicatedConnection)
+                ->where('id', $request->id)
+                ->where('TQUODETA_BRANCH', Auth::user()->branch)
+                ->update([
+                    'TQUODETA_ITMCD' => $request->TQUODETA_ITMCD,
+                    'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT,
+                    'TQUODETA_USAGE' => $request->TQUODETA_USAGE,
+                    'TQUODETA_PRC' => $request->TQUODETA_PRC,
+                    'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC ? $request->TQUODETA_OPRPRC : 0,
+                    'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB ? $request->TQUODETA_MOBDEMOB : 0,
+                ]);
+        }
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
@@ -577,6 +586,7 @@ class QuotationController extends Controller
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
                 ->where('TQUO_QUOCD', base64_decode($request->id))
                 ->where('TQUO_BRANCH', $request->TQUO_BRANCH)
+                ->whereNull('TQUO_APPRVBY')
                 ->update([
                     'TQUO_APPRVBY' => Auth::user()->nick_name, 'TQUO_APPRVDT' => date('Y-m-d H:i:s')
                 ]);

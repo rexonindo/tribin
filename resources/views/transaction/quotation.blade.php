@@ -842,6 +842,10 @@
         if (iFounded > 0) {
             if (confirm(`Are you sure want to update ?`)) {
                 if (idItem.length >= 1) {
+                    if (quotationCode.value.length === 0) {
+                        alertify.warning(`quotation code is required`)
+                        return
+                    }
                     pthis.disabled = true
                     pthis.innerHTML = `Please wait`
                     const data = {
@@ -852,6 +856,7 @@
                         TQUODETA_PRC: quotationPrice.value,
                         TQUODETA_OPRPRC: quotationOperator.value,
                         TQUODETA_MOBDEMOB: quotationMOBDEMOB.value,
+                        TQUO_QUOCD: quotationCode.value,
                     }
                     $.ajax({
                         type: "PUT",
@@ -895,16 +900,35 @@
         recalculateGrandTotalRent()
     }
 
+    function refreshTableSale(selectedRow) {
+        const subTotal = numeral(quotationQtySale.value).value() *
+            numeral(quotationPriceSale.value).value()
+        quotationSaleTable.rows[selectedRow].cells[1].innerText = quotationItemCodeSale.value
+        quotationSaleTable.rows[selectedRow].cells[2].innerText = quotationItemNameSale.value
+        quotationSaleTable.rows[selectedRow].cells[3].innerText = quotationQtySale.value
+        quotationSaleTable.rows[selectedRow].cells[4].innerText = quotationPriceSale.value
+        quotationSaleTable.rows[selectedRow].cells[5].innerText = numeral(subTotal).value()
+        recalculateGrandTotalSale()
+    }
+
     function recalculateGrandTotalRent() {
-        const ttlrows = quotationTable.rows.length
+        const ttlrows = quotationTable.rows.length - 1
         let grandTotal = 0
         for (let i = 1; i < ttlrows; i++) {
-            if (quotationTable.rows[i].title === 'selected') {
-                let subTotal = numeral(quotationTable.rows[i].cells[7].innerText.trim()).value()
-                grandTotal += subTotal
-            }
+            let subTotal = numeral(quotationTable.rows[i].cells[7].innerText.trim()).value()
+            grandTotal += subTotal
         }
         strongGrandTotal.innerText = numeral(grandTotal).format(',')
+    }
+
+    function recalculateGrandTotalSale() {
+        const ttlrows = quotationSaleTable.rows.length - 1
+        let grandTotal = 0
+        for (let i = 1; i < ttlrows; i++) {
+            let subTotal = numeral(quotationSaleTable.rows[i].cells[5].innerText.trim()).value()
+            grandTotal += subTotal
+        }
+        strongGrandTotalSale.innerText = numeral(grandTotal).format(',')
     }
 
     function btnRemoveLineSaleOnclick(pthis) {
@@ -1269,6 +1293,10 @@
                             if (selrow.title === 'selected') {
                                 selrow.title = 'not selected'
                                 selrow.classList.remove('table-info')
+                                quotationItemCodeSale.value = ''
+                                quotationItemNameSale.value = ''
+                                quotationQtySale.value = ''
+                                quotationPriceSale.value = ''
                             } else {
                                 const ttlrows = quotationSaleTable.rows.length
                                 for (let i = 1; i < ttlrows; i++) {
@@ -1277,6 +1305,10 @@
                                 }
                                 selrow.title = 'selected'
                                 selrow.classList.add('table-info')
+                                quotationItemCodeSale.value = arrayItem['TQUODETA_ITMCD']
+                                quotationItemNameSale.value = arrayItem['MITM_ITMNM']
+                                quotationQtySale.value = arrayItem['TQUODETA_ITMQT']
+                                quotationPriceSale.value = arrayItem['TQUODETA_PRC']
                             }
                         }
                         newcell = newrow.insertCell(0)
@@ -1471,5 +1503,62 @@
         liElement.appendChild(childLiElement2)
         quotationConditionContainer.appendChild(liElement)
         quotationCondition.value = ``
+    }
+
+    function btnUpdateLineSaleOnclick(pthis) {
+        const ttlrows = quotationSaleTable.rows.length
+        let idItem = ''
+        let iFounded = 0
+        for (let i = 1; i < ttlrows; i++) {
+            if (quotationSaleTable.rows[i].title === 'selected') {
+                idItem = quotationSaleTable.rows[i].cells[0].innerText.trim()
+                iFounded = i
+                break
+            }
+        }
+
+        if (iFounded > 0) {
+            if (confirm(`Are you sure want to update ?`)) {
+                if (idItem.length >= 1) {
+                    if (quotationCode.value.length === 0) {
+                        alertify.warning(`quotation code is required`)
+                        return
+                    }
+                    pthis.disabled = true
+                    pthis.innerHTML = `Please wait`
+                    const data = {
+                        _token: '{{ csrf_token() }}',
+                        TQUODETA_ITMCD: quotationItemCodeSale.value,
+                        TQUODETA_ITMQT: quotationQtySale.value,
+                        TQUODETA_USAGE: 1,
+                        TQUODETA_PRC: quotationPriceSale.value,
+                        TQUO_QUOCD: quotationCode.value,
+                    }
+                    $.ajax({
+                        type: "PUT",
+                        url: `quotation/items/${idItem}`,
+                        data: data,
+                        dataType: "json",
+                        success: function(response) {
+                            pthis.innerHTML = `Update line`
+                            pthis.disabled = false
+                            if (response.msg === 'OK') {
+                                refreshTableSale(iFounded)
+                            }
+                            alertify.message(response.msg)
+                        },
+                        error: function(xhr, xopt, xthrow) {
+                            alertify.warning(xthrow);
+                            pthis.disabled = false
+                            pthis.innerHTML = `Update line`
+                        }
+                    });
+                } else {
+                    refreshTableSale(iFounded)
+                }
+            }
+        } else {
+            alertify.message('nothing selected item')
+        }
     }
 </script>
