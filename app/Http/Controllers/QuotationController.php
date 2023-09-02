@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroup;
 use App\Models\M_Condition;
 use App\Models\T_QUOCOND;
 use App\Models\T_QUODETA;
@@ -324,6 +325,10 @@ class QuotationController extends Controller
 
     public function toPDF(Request $request)
     {
+        $RSCG = CompanyGroup::select('name', 'address', 'phone', 'fax')
+            ->where('connection', $this->dedicatedConnection)
+            ->first();
+
         $doc = base64_decode($request->id);
         $RSHeader = T_QUOHEAD::on($this->dedicatedConnection)->select(
             'MCUS_CUSNM',
@@ -379,14 +384,14 @@ class QuotationController extends Controller
         $this->fpdf->SetFont('Arial', 'BU', 24);
         $this->fpdf->AddPage("P", 'A4');
         $this->fpdf->SetXY(7, 5);
-        $this->fpdf->Cell(0, 8, 'JAYA ABADI TEKNIK', 0, 0, 'C');
+        $this->fpdf->Cell(0, 8, $RSCG->name, 0, 0, 'C');
         $this->fpdf->SetFont('Arial', 'B', 12);
         $this->fpdf->SetXY(7, 13);
         $this->fpdf->Cell(0, 5, 'SALES & RENTAL DIESEL GENSET - FORKLIF - TRAVOLAS - TRUK', 0, 0, 'C');
 
         $this->fpdf->SetFont('Arial', 'B', 10);
         $this->fpdf->SetXY(7, 18);
-        $this->fpdf->MultiCell(0, 5, 'Alamat Kantor : Jl. Tembusan Terminal No.19-20 Km. 12 Alang-alang Lebar,  Palembang - Indonesia Telp. (0711) 5645971 - 5645108  fax. (0711) 5645972', 0, 'C');
+        $this->fpdf->MultiCell(0, 5, $RSCG->address, 0, 'C');
         $this->fpdf->line(7, 29, 202, 29);
 
         $this->fpdf->SetFont('Arial', '', 9);
