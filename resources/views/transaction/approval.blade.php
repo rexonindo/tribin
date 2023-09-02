@@ -54,7 +54,7 @@
                                                 <input type="text" id="quotationSubject" class="form-control" placeholder="Penawaran ..." maxlength="100" disabled>
                                             </div>
                                         </div>
-                                        <div class="row border-top">
+                                        <div class="row border-top" id="quotationDetailRentContainer">
                                             <div class="col-md-12 mb-1">
                                                 <div class="table-responsive" id="quotationTableContainer">
                                                     <table id="quotationTable" class="table table-sm table-hover table-bordered caption-top">
@@ -76,7 +76,35 @@
                                                         <tfoot>
                                                             <tr>
                                                                 <td colspan="6" class="text-end"><strong>Grand Total</strong></td>
-                                                                <td class="text-end"><strong id="strongGrandTotal">a</strong></td>
+                                                                <td class="text-end"><strong id="strongGrandTotal"></strong></td>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row border-top" id="quotationDetailSalesContainer">
+                                            <div class="col-md-12 mb-1">
+                                                <div class="table-responsive" id="quotationSaleTableContainer">
+                                                    <table id="quotationSaleTable" class="table table-sm table-hover table-bordered caption-top">
+                                                        <caption>List of items</caption>
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th class="d-none">idLine</th>
+                                                                <th>Item Code</th>
+                                                                <th>Item Name</th>
+                                                                <th class="text-center">Qty</th>
+                                                                <th class="text-end">Price</th>
+                                                                <th class="text-end">Sub Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <td class="d-none"></td>
+                                                                <td colspan="4" class="text-end"><strong>Grand Total</strong></td>
+                                                                <td class="text-end"><strong id="strongSaleGrandTotal"></strong></td>
                                                             </tr>
                                                         </tfoot>
                                                     </table>
@@ -167,10 +195,18 @@
                         quotationAttn.value = arrayItem['TQUO_ATTN']
                         quotationSubject.value = arrayItem['TQUO_SBJCT']
                         branch.value = arrayItem['TQUO_BRANCH']
+                        if (arrayItem['TQUO_TYPE'] === '1') {
+                            quotationDetailRentContainer.classList.remove('d-none')
+                            quotationDetailSalesContainer.classList.add('d-none')
+                        } else {
+                            quotationDetailRentContainer.classList.add('d-none')
+                            quotationDetailSalesContainer.classList.remove('d-none')
+                        }
                         const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
                         myModal.show()
                         loadQuotationDetail({
-                            doc: arrayItem['TQUO_QUOCD']
+                            doc: arrayItem['TQUO_QUOCD'],
+                            docType: arrayItem['TQUO_TYPE']
                         })
                     }
 
@@ -274,63 +310,98 @@
             url: `quotation/${btoa(data.doc)}`,
             dataType: "json",
             success: function(response) {
-                let myContainer = document.getElementById("quotationTableContainer");
-                let myfrag = document.createDocumentFragment();
-                let cln = quotationTable.cloneNode(true);
-                myfrag.appendChild(cln);
-                let myTable = myfrag.getElementById("quotationTable");
-                let myTableBody = myTable.getElementsByTagName("tbody")[0];
-                let myStrong = myfrag.getElementById("strongGrandTotal");
-                myTableBody.innerHTML = ''
-                let grandTotal = 0
-                response.dataItem.forEach((arrayItem) => {
-                    const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() +
-                        numeral(arrayItem['TQUODETA_OPRPRC']).value() +
-                        numeral(arrayItem['TQUODETA_MOBDEMOB']).value()
-                    grandTotal += subTotal
-                    newrow = myTableBody.insertRow(-1)
-                    newrow.onclick = (event) => {
-                        const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
-                        if (selrow.title === 'selected') {
-                            selrow.title = 'not selected'
-                            selrow.classList.remove('table-info')
-                        } else {
-                            const ttlrows = quotationTable.rows.length
-                            for (let i = 1; i < ttlrows; i++) {
-                                quotationTable.rows[i].classList.remove('table-info')
-                                quotationTable.rows[i].title = 'not selected'
+                if (data.docType === '1') {
+                    let myContainer = document.getElementById("quotationTableContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = quotationTable.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("quotationTable");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    let myStrong = myfrag.getElementById("strongGrandTotal");
+                    myTableBody.innerHTML = ''
+                    let grandTotal = 0
+                    response.dataItem.forEach((arrayItem) => {
+                        const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() +
+                            numeral(arrayItem['TQUODETA_OPRPRC']).value() +
+                            numeral(arrayItem['TQUODETA_MOBDEMOB']).value()
+                        grandTotal += subTotal
+                        newrow = myTableBody.insertRow(-1)
+                        newrow.onclick = (event) => {
+                            const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
+                            if (selrow.title === 'selected') {
+                                selrow.title = 'not selected'
+                                selrow.classList.remove('table-info')
+                            } else {
+                                const ttlrows = quotationTable.rows.length
+                                for (let i = 1; i < ttlrows; i++) {
+                                    quotationTable.rows[i].classList.remove('table-info')
+                                    quotationTable.rows[i].title = 'not selected'
+                                }
+                                selrow.title = 'selected'
+                                selrow.classList.add('table-info')
                             }
-                            selrow.title = 'selected'
-                            selrow.classList.add('table-info')
                         }
-                    }
-                    newcell = newrow.insertCell(0)
-                    newcell.classList.add('d-none')
-                    newcell.innerHTML = arrayItem['id']
-                    newcell = newrow.insertCell(1)
-                    newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
-                    newcell = newrow.insertCell(2)
-                    newcell.innerHTML = arrayItem['MITM_ITMNM']
-                    newcell = newrow.insertCell(3)
-                    newcell.classList.add('text-center')
-                    newcell.innerHTML = arrayItem['TQUODETA_USAGE']
-                    newcell = newrow.insertCell(4)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
-                    newcell = newrow.insertCell(5)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
-                    newcell = newrow.insertCell(6)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
-                    newcell = newrow.insertCell(7)
-                    newcell.classList.add('text-end')
-                    newcell.innerHTML = numeral(subTotal).format(',')
-                })
-                myStrong.innerText = numeral(grandTotal).format(',')
+                        newcell = newrow.insertCell(0)
+                        newcell.classList.add('d-none')
+                        newcell.innerHTML = arrayItem['id']
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['MITM_ITMNM']
+                        newcell = newrow.insertCell(3)
+                        newcell.classList.add('text-center')
+                        newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                        newcell = newrow.insertCell(4)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
+                        newcell = newrow.insertCell(5)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
+                        newcell = newrow.insertCell(6)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
+                        newcell = newrow.insertCell(7)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(subTotal).format(',')
+                    })
+                    myStrong.innerText = numeral(grandTotal).format(',')
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                } else {
+                    let myContainer = document.getElementById("quotationSaleTableContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = quotationSaleTable.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("quotationSaleTable");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    grandTotal = 0
+                    response.dataItem.forEach((arrayItem) => {
+                        const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() * arrayItem['TQUODETA_ITMQT']
+                        newrow = myTableBody.insertRow(-1)
+                        newcell = newrow.insertCell(0)
+                        newcell.classList.add('d-none')
+                        newcell.innerHTML = arrayItem['id']
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['TQUODETA_ITMCD']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['MITM_ITMNM']
+                        newcell = newrow.insertCell(3)
+                        newcell.classList.add('text-center')
+                        newcell.innerHTML = arrayItem['TQUODETA_ITMQT']
+                        newcell = newrow.insertCell(4)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
+                        newcell = newrow.insertCell(5)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(subTotal).format(',')
+                        grandTotal += subTotal
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                    strongSaleGrandTotal.innerText = numeral(grandTotal).format(',')
+                }
 
-                myContainer.innerHTML = ''
-                myContainer.appendChild(myfrag)
                 quotationConditionContainer.innerHTML = ''
                 response.dataCondition.forEach((arrayItem) => {
                     const liElement = document.createElement('li')

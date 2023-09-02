@@ -254,7 +254,7 @@ class QuotationController extends Controller
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD,TQUODETA_BRANCH")
                 ->groupBy("TQUODETA_QUOCD", "TQUODETA_BRANCH")
                 ->whereNull('deleted_at');
-            $dataTobeApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN,TQUO_BRANCH"))
+            $dataTobeApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN,TQUO_BRANCH, TQUO_TYPE"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD")
                         ->on("TQUO_BRANCH", "=", "TQUODETA_BRANCH");
@@ -262,7 +262,7 @@ class QuotationController extends Controller
                 ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
                 ->whereNull("TQUO_APPRVDT")
                 ->whereNull("TQUO_REJCTDT")
-                ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH')->get();
+                ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH', 'TQUO_TYPE')->get();
         }
         if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
@@ -277,7 +277,7 @@ class QuotationController extends Controller
                 ->join('M_CUS', function ($join) {
                     $join->on('TQUO_CUSCD', '=', 'MCUS_CUSCD')->on('TQUO_BRANCH', '=', 'MCUS_BRANCH');
                 })
-                ->leftJoin('T_SLOHEAD', function($join){
+                ->leftJoin('T_SLOHEAD', function ($join) {
                     $join->on('TQUO_QUOCD', '=', 'TSLO_QUOCD')->on('TQUO_BRANCH', '=', 'TSLO_BRANCH');
                 })
                 ->whereNull("TSLO_QUOCD")

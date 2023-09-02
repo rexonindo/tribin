@@ -63,8 +63,8 @@ Route::get('item', [ItemController::class, 'search'])->middleware('auth');
 Route::post('item', [ItemController::class, 'simpan'])->middleware('auth');
 Route::put('item/{id}', [ItemController::class, 'update'])->middleware('auth');
 
-# Terkait Customer Master
 Route::middleware('auth')->group(function () {
+    # Terkait Customer Master
     Route::prefix('customer')->group(function () {
         Route::get('form', [CustomerController::class, 'index']);
         Route::get('file/{id}', [CustomerController::class, 'showFile']);
@@ -72,6 +72,18 @@ Route::middleware('auth')->group(function () {
         Route::post('', [CustomerController::class, 'simpan']);
         Route::post('file/{id}', [CustomerController::class, 'changeFile']);
         Route::put('{id}', [CustomerController::class, 'update']);
+    });
+
+    #Terkait Approval
+    Route::prefix('approval')->group(function () {
+        Route::get('notifications', [HomeController::class, 'notifications']);
+        Route::get('quotation', [QuotationController::class, 'notifications']);
+        Route::get('purchase-request', [PurchaseController::class, 'notifications']);
+        Route::get('purchase-order', [PurchaseController::class, 'notificationsPO']);
+        Route::get('sales-order-draft', [ReceiveOrderController::class, 'notificationsDraft']);
+        Route::get('form/quotation', [QuotationController::class, 'formApproval']);
+        Route::get('form/purchase-request', [PurchaseController::class, 'formApproval']);
+        Route::get('form/purchase-order', [PurchaseController::class, 'formApprovalPO']);
     });
 });
 
@@ -101,15 +113,7 @@ Route::delete('quotation/items/{id}', [QuotationController::class, 'deleteItemBy
 # Terkait Quotation Condition
 Route::get('condition', [QuotationController::class, 'getAllCondition'])->middleware('auth');
 
-#Terkait Approval
-Route::get('approval/notifications', [HomeController::class, 'notifications'])->middleware('auth');
-Route::get('approval/quotation', [QuotationController::class, 'notifications'])->middleware('auth');
-Route::get('approval/purchase-request', [PurchaseController::class, 'notifications'])->middleware('auth');
-Route::get('approval/purchase-order', [PurchaseController::class, 'notificationsPO'])->middleware('auth');
-Route::get('approval/sales-order-draft', [ReceiveOrderController::class, 'notificationsDraft'])->middleware('auth');
-Route::get('approval/form/quotation', [QuotationController::class, 'formApproval'])->middleware('auth');
-Route::get('approval/form/purchase-request', [PurchaseController::class, 'formApproval'])->middleware('auth');
-Route::get('approval/form/purchase-order', [PurchaseController::class, 'formApprovalPO'])->middleware('auth');
+
 
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
 Route::put('approve/purchase-request/{id}', [PurchaseController::class, 'approve'])->middleware('auth');
