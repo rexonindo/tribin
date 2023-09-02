@@ -469,6 +469,7 @@
     }
 
     var grandTotal = 0
+    var QuotationType = '2'
 
     function addCondition() {
         if (quotationCode.value.trim().length === 0) {
@@ -558,6 +559,7 @@
                             $('#customerModal').modal('hide')
                             quotationCustomerCode.value = arrayItem['MCUS_CUSCD']
                             quotationCustomer.value = arrayItem['MCUS_CUSNM']
+                            quotationAttn.value = arrayItem['MCUS_PIC_NAME']
                             quotationAttn.focus()
                         }
                         newcell = newrow.insertCell(1)
@@ -582,8 +584,6 @@
             });
         }
     }
-
-    var QuotationType = '2'
 
     function btnShowItemModal(paramString) {
         QuotationType = paramString
