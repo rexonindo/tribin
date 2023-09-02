@@ -517,6 +517,8 @@
         const formData = new FormData()
         formData.append(fieldName, fileToSent)
         formData.append('_token', '{{ csrf_token() }}')
+        senderObject.disabled = true
+        senderObject.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
         if (confirm('Are you sure ?')) {
             $.ajax({
                 type: "post",
