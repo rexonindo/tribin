@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
@@ -135,6 +136,54 @@ class CustomerController extends Controller
     function showFile(Request $request)
     {
         $doc = $request->id;
-        return response()->file(public_path('attachments/customer/' . $doc));
+        if (File::exists(public_path('attachments/customer/' . $doc))) {
+            return response()->file(public_path('attachments/customer/' . $doc));
+        } else {
+            return response()->json(['message' => 'not found'], 404);
+        }
+    }
+
+    function changeFile(Request $request)
+    {
+        $affectedRow = 0;
+        if ($request->file('MCUS_KTP_FILE')) {
+            $file = $request->file('MCUS_KTP_FILE');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $location = 'attachments/customer';
+            $file->move(public_path($location), $fileName);
+
+            $affectedRow = M_CUS::on($this->dedicatedConnection)
+                ->where('MCUS_CUSCD', base64_decode($request->id))
+                ->where('MCUS_BRANCH', Auth::user()->branch)
+                ->update([
+                    'MCUS_KTP_FILE' => $fileName
+                ]);
+        }
+        if ($request->file('MCUS_NPWP_FILE')) {
+            $file = $request->file('MCUS_NPWP_FILE');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $location = 'attachments/customer';
+            $file->move(public_path($location), $fileName);
+            $affectedRow = M_CUS::on($this->dedicatedConnection)
+                ->where('MCUS_CUSCD', base64_decode($request->id))
+                ->where('MCUS_BRANCH', Auth::user()->branch)
+                ->update([
+                    'MCUS_NPWP_FILE' => $fileName
+                ]);
+        }
+        if ($request->file('MCUS_NIB_FILE')) {
+            $file = $request->file('MCUS_NIB_FILE');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $location = 'attachments/customer';
+            $file->move(public_path($location), $fileName);
+
+            $affectedRow = M_CUS::on($this->dedicatedConnection)
+                ->where('MCUS_CUSCD', base64_decode($request->id))
+                ->where('MCUS_BRANCH', Auth::user()->branch)
+                ->update([
+                    'MCUS_NIB_FILE' => $fileName
+                ]);
+        }
+        return ['msg' => $affectedRow ? 'OK' : 'No changes', 'FixedFileName' => $fileName];
     }
 }

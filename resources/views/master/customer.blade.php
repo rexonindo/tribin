@@ -121,47 +121,50 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6 mb-1">
+        <div class="col-md-5 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <label class="input-group-text" for="customerKTPFile">KTP</label>
                 <input type="file" class="form-control" id="customerKTPFile" accept="image/*,.pdf" onchange="customerKTPFileOnChange(event)">
             </div>
         </div>
-        <div class="col-md-6 mb-1">
+        <div class="col-md-7 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <label class="input-group-text" for="customerKTPFilePath"><i class="fas fa-file"></i> </label>
                 <input type="text" class="form-control" id="customerKTPFilePath" readonly disabled>
                 <button class="btn btn-primary" type="button" onclick="btnShowKTPFFile()"><i class="fas fa-eye"></i></button>
+                <button class="btn btn-outline-primary btnChangeFile" type="button" onclick="btnChangeKTPFile(this)" title="Change file" disabled><i class="fas fa-pencil"></i></button>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6 mb-1">
+        <div class="col-md-5 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <label class="input-group-text" for="customerNPWPFile">NPWP</label>
                 <input type="file" class="form-control" id="customerNPWPFile" accept="image/*,.pdf" onchange="customerNPWPFileOnChange(event)">
             </div>
         </div>
-        <div class="col-md-6 mb-1">
+        <div class="col-md-7 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <label class="input-group-text" for="customerNPWPFilePath"><i class="fas fa-file"></i> </label>
                 <input type="text" class="form-control" id="customerNPWPFilePath" readonly disabled>
                 <button class="btn btn-primary" type="button" onclick="btnShowNPWPFile()"><i class="fas fa-eye"></i></button>
+                <button class="btn btn-outline-primary btnChangeFile" type="button" onclick="btnChangeNPWPFile(this)" title="Change file" disabled><i class="fas fa-pencil"></i></button>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6 mb-1">
+        <div class="col-md-5 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <label class="input-group-text" for="customerNIBFile">NIB</label>
                 <input type="file" class="form-control" id="customerNIBFile" accept="image/*,.pdf" onchange="customerNIBFileOnChange(event)">
             </div>
         </div>
-        <div class="col-md-6 mb-1">
+        <div class="col-md-7 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <label class="input-group-text" for="customerNIBFilePath"><i class="fas fa-file"></i> </label>
                 <input type="text" class="form-control" id="customerNIBFilePath" readonly disabled>
                 <button class="btn btn-primary" type="button" onclick="btnShowNIBFile()"><i class="fas fa-eye"></i></button>
+                <button class="btn btn-outline-primary btnChangeFile" type="button" onclick="btnChangeNIBFile(this)" title="Change file" disabled><i class="fas fa-pencil"></i></button>
             </div>
         </div>
     </div>
@@ -223,6 +226,14 @@
         tribinClearTextBox()
         customerInputMode.value = 0
         companyGroup.value = '-'
+    }
+
+    function setButtonDisabled(status, requiredClassName) {
+        let buttonList = document.getElementsByClassName(requiredClassName)
+        let buttonLength = buttonList.length
+        for (let i = 0; i < buttonLength; i++) {
+            buttonList[i].disabled = status
+        }
     }
 
     function btnSaveOnclick(pthis) {
@@ -301,6 +312,7 @@
                         alertify.success(response.msg)
                         pthis.disabled = false
                         document.getElementById('div-alert').innerHTML = ''
+                        setButtonDisabled(false, 'btnChangeFile')
                     },
                     error: function(xhr, xopt, xthrow) {
                         const respon = Object.keys(xhr.responseJSON)
@@ -431,6 +443,7 @@
                                     radio2.checked = true;
                                     break;
                             }
+                            setButtonDisabled(false, 'btnChangeFile')
                         }
                         newcell = newrow.insertCell(1)
                         newcell.innerHTML = arrayItem['MCUS_CUSNM']
@@ -477,5 +490,70 @@
 
     function btnShowNIBFile() {
         window.open(`/customer/file/${customerNIBFilePath.value}`, '_blank')
+    }
+
+    function btnChangeKTPFile(firstSenderObject) {
+        if (customerKTPFile.files.length === 0) {
+            customerKTPFile.focus()
+            alertify.warning(`KTP file is required`)
+            return
+        }
+        changeFile('MCUS_KTP_FILE', customerKTPFile.files[0], firstSenderObject, customerKTPFilePath)
+    }
+
+    function changeFile(fieldName, fileToSent, senderObject, fixedFileNameContainer) {
+        const formData = new FormData()
+        formData.append(fieldName, fileToSent)
+        formData.append('_token', '{{ csrf_token() }}')
+        if (confirm('Are you sure ?')) {
+            $.ajax({
+                type: "post",
+                url: `customer/file/${btoa(customerCode.value)}`,
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    senderObject.innerHTML = `<i class="fas fa-pencil"></i>`
+                    alertify.success(response.msg)
+                    senderObject.disabled = false
+                    document.getElementById('div-alert').innerHTML = ''
+                    fixedFileNameContainer.value = response.FixedFileName
+                },
+                error: function(xhr, xopt, xthrow) {
+                    const respon = Object.keys(xhr.responseJSON)
+                    const div_alert = document.getElementById('div-alert')
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+                    senderObject.innerHTML = `<i class="fas fa-pencil"></i>`
+                    alertify.warning(xthrow);
+                    senderObject.disabled = false
+                }
+            });
+        }
+    }
+
+    function btnChangeNPWPFile(firstSenderObject) {
+        if (customerNPWPFile.files.length === 0) {
+            customerNPWPFile.focus()
+            alertify.warning(`NPWP file is required`)
+            return
+        }
+        changeFile('MCUS_NPWP_FILE', customerNPWPFile.files[0], firstSenderObject, customerNPWPFilePath)
+    }
+
+    function btnChangeNIBFile(firstSenderObject) {
+        if (customerNIBFile.files.length === 0) {
+            customerNIBFile.focus()
+            alertify.warning(`NIB file is required`)
+            return
+        }
+        changeFile('MCUS_NIB_FILE', customerNIBFile.files[0], firstSenderObject, customerNIBFilePath)
     }
 </script>

@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('file/{id}', [CustomerController::class, 'showFile']);
         Route::get('', [CustomerController::class, 'search']);
         Route::post('', [CustomerController::class, 'simpan']);
+        Route::post('file/{id}', [CustomerController::class, 'changeFile']);
         Route::put('{id}', [CustomerController::class, 'update']);
     });
 });
