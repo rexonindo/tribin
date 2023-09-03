@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('MCUS_CURCD', 3);
             $table->string('MCUS_CUSNM', 50);
             $table->string('MCUS_TAXREG', 25);
-            $table->string('MCUS_ADDR1', 50);
+            $table->string('MCUS_ADDR1', 100);
             $table->string('MCUS_TELNO', 20);
             $table->string('created_by', 16);
             $table->timestamps();
