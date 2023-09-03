@@ -379,7 +379,7 @@ class QuotationController extends Controller
             ->whereNull("deleted_at")
             ->where('TQUOCOND_BRANCH', Auth::user()->branch)
             ->get()->toArray();
-        $User = User::where('nick_name', $RSHeader->created_by)->select('name')->first();
+        $User = User::where('nick_name', $RSHeader->created_by)->select('name', 'phone')->first();
 
         $this->fpdf->SetFont('Arial', 'BU', 24);
         $this->fpdf->AddPage("P", 'A4');
@@ -423,7 +423,7 @@ class QuotationController extends Controller
         $this->fpdf->Cell(5, 5, ': ' . $User->name, 0, 0, 'L');
         $this->fpdf->SetXY(140, 46);
         $this->fpdf->Cell(15, 5, 'Telp', 0, 0, 'L');
-        $this->fpdf->Cell(5, 5, ':', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $User->phone, 0, 0, 'L');
         $this->fpdf->SetXY(140, 51);
         $this->fpdf->Cell(15, 5, 'Fax', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ': (0711) 5645972', 0, 0, 'L');
