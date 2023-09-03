@@ -51,6 +51,7 @@ class UserController extends Controller
             'password' => 'required|min:8',
             'role' => 'required',
             'branch' => 'required',
+            'phone' => 'max:25',
         ]);
 
         if ($validator->fails()) {
@@ -81,6 +82,7 @@ class UserController extends Controller
             'active' => 1,
             'role' => $request->role,
             'branch' => $request->branch,
+            'phone' => $request->phone,
         ]);
 
         $remarks = [];
@@ -118,7 +120,7 @@ class UserController extends Controller
 
     function getPerCompanyGroup()
     {
-        $RS = User::select('users.id', 'users.name', 'email', 'users.created_at', 'role_name', 'description', 'active', 'description', 'users.nick_name', 'branch', 'MBRANCH_NM')
+        $RS = User::select('users.id', 'users.name', 'email', 'users.created_at', 'role_name', 'description', 'active', 'description', 'users.nick_name', 'branch', 'MBRANCH_NM', 'phone')
             ->leftJoin('COMPANY_GROUP_ACCESSES', 'users.nick_name', '=', 'COMPANY_GROUP_ACCESSES.nick_name')
             ->leftJoin('roles', 'role_name', '=', 'roles.name')
             ->leftJoin('M_BRANCH', 'MBRANCH_CD', '=', 'branch')
@@ -137,7 +139,11 @@ class UserController extends Controller
         }
         $affectedRow = User::where('id', $request->id)
             ->update([
-                'name' => $request->name, 'email' => $request->email, 'active' => $request->active, 'branch' => $request->branch
+                'name' => $request->name,
+                'email' => $request->email,
+                'active' => $request->active,
+                'branch' => $request->branch,
+                'phone' => $request->phone,
             ]);
 
         CompanyGroupAccess::where('connection', $this->dedicatedConnection)

@@ -44,7 +44,14 @@
                 </select>
             </div>
         </div>
-        
+    </div>
+    <div class="row">
+        <div class="col-md-12 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text" id="basic-addon1">Phone</span>
+                <input type="text" id="userPhone" class="form-control" maxlength="25">
+            </div>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-12 mb-1 text-center">
@@ -79,6 +86,7 @@
                         <th>Nick Name</th>
                         <th>BranchID</th>
                         <th>Branch</th>
+                        <th>Phone</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,6 +179,9 @@
                 {
                     "data": 'MBRANCH_NM'
                 },
+                {
+                    "data": 'phone'
+                },
             ],
             columnDefs: [{
                     "targets": [0],
@@ -204,6 +215,7 @@
             userName.value = "";
             userId.value = "";
             userNickName.value = "";
+            userPhone.value = "";
         });
     }
 
@@ -224,6 +236,7 @@
         $("#userEmail").val(row["email"]);
         user_cmb_active.checked = row["active"] === '1' ? true : false
         branch.value = row["branch"];
+        userPhone.value = row["phone"]
     })
 
     function btnSaveOnclick(pthis) {
@@ -240,6 +253,7 @@
                         role: role.value,
                         nick_name: userNickName.value,
                         branch: branch.value,
+                        phone: userPhone.value,
                         _token: '{{ csrf_token() }}',
                     },
                     dataType: "JSON",

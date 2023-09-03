@@ -68,6 +68,14 @@
         </div>
     </div>
     <div class="row">
+        <div class="col-md-12 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text" id="basic-addon1">Phone</span>
+                <input type="text" id="userPhone" class="form-control" maxlength="25">
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col mb-1">
             <button type="button" class="btn btn-sm btn-primary" onclick="btnSaveOnclick(this)">Save</button>
         </div>
@@ -111,6 +119,7 @@
             email: userEmail.value,
             password: passwordConfirmation.value,
             role: role.value,
+            phone: userPhone.value,
             branch: branch.value,
             _token: '{{ csrf_token() }}',
         }
@@ -133,6 +142,7 @@
                     passwordConfirmation.value = ''
                     password.value = ''
                     branch.value = ''
+                    userPhone.value = ''
                 },
                 error: function(xhr, xopt, xthrow) {
                     const respon = Object.keys(xhr.responseJSON)
