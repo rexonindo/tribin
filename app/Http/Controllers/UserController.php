@@ -120,14 +120,17 @@ class UserController extends Controller
 
     function getPerCompanyGroup()
     {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         $RS = User::select('users.id', 'users.name', 'email', 'users.created_at', 'role_name', 'description', 'active', 'description', 'users.nick_name', 'branch', 'MBRANCH_NM', 'phone')
             ->leftJoin('COMPANY_GROUP_ACCESSES', 'users.nick_name', '=', 'COMPANY_GROUP_ACCESSES.nick_name')
             ->leftJoin('roles', 'role_name', '=', 'roles.name')
             ->leftJoin('M_BRANCH', 'MBRANCH_CD', '=', 'branch')
             ->where('connection', $this->dedicatedConnection)
-            ->whereNull('deleted_at')
-            ->get();
-        return ['data' => $RS];
+            ->whereNull('deleted_at');
+        if ($activeRole['code'] !== 'root') {
+            $RS->where('role_name', '!=', 'root');
+        }
+        return ['data' => $RS->get()];
     }
 
     function update(Request $request)
