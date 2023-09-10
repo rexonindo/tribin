@@ -141,10 +141,10 @@ class DeliveryController extends Controller
         $newQuotationCode = '';
         if (!$LastLine) {
             $LastLine = 1;
-            $newQuotationCode = 'SP-0001';
+            $newQuotationCode = 'SP-' . date('y') . '-0001';
         } else {
             $LastLine++;
-            $newQuotationCode = 'SP-' . substr('000' . $LastLine, -4);
+            $newQuotationCode = 'SP-' . date('y') . '-' . substr('000' . $LastLine, -4);
         }
         $quotationHeader = [
             'TDLVORD_DLVCD' => $newQuotationCode,

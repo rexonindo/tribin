@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('T_DLVORDHEAD', function (Blueprint $table) {
-            $table->string('TDLVORD_DLVCD', 7);
+            $table->string('TDLVORD_DLVCD', 15);
             $table->string('TDLVORD_BRANCH', 3);
             $table->string('TDLVORD_CUSCD', 10);
             $table->integer('TDLVORD_LINE');

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('created_by', 16);
             $table->dateTime('deleted_at')->nullable();
             $table->string('deleted_by', 16)->nullable();
-            $table->string('TDLVORDDETA_DLVCD', 7);
+            $table->string('TDLVORDDETA_DLVCD', 15);
             $table->string('TDLVORDDETA_BRANCH', 3);
             $table->string('TDLVORDDETA_ITMCD', 25);
             $table->float('TDLVORDDETA_ITMQT');
