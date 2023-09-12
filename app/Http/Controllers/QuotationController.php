@@ -383,7 +383,7 @@ class QuotationController extends Controller
 
         $this->fpdf->SetFont('Arial', 'BU', 24);
         $this->fpdf->AddPage("P", 'A4');
-        $this->fpdf->SetXY(7, 5);
+        $this->fpdf->SetXY(7, 3);
         $this->fpdf->Cell(0, 8, $RSCG->name, 0, 0, 'C');
         $this->fpdf->SetFont('Arial', 'B', 12);
         $this->fpdf->SetXY(7, 13);
@@ -393,6 +393,7 @@ class QuotationController extends Controller
         $this->fpdf->SetXY(7, 18);
         $this->fpdf->MultiCell(0, 5, $RSCG->address, 0, 'C');
         $this->fpdf->line(7, 29, 202, 29);
+        $this->fpdf->line(7, 28, 202, 28);
 
         $this->fpdf->SetFont('Arial', '', 9);
         $this->fpdf->SetXY(7, 31);
@@ -436,6 +437,7 @@ class QuotationController extends Controller
             $this->fpdf->MultiCell(0, 5, 'Bersama ini kami sampaikan ' . $TQUO_SBJCT . ' dengan data sebagai berikut :', 0, 'J');
 
             $this->fpdf->SetXY(6, 72);
+            $this->fpdf->Cell(7, 5, 'NO', 1, 0, 'L');
             $this->fpdf->Cell(20, 5, 'MERK', 1, 0, 'L');
             $this->fpdf->Cell(45, 5, 'CAPACITY', 1, 0, 'L');
             $this->fpdf->Cell(35, 5, 'MODEL', 1, 0, 'C');
@@ -444,8 +446,10 @@ class QuotationController extends Controller
             $this->fpdf->Cell(25, 5, 'OPERATOR', 1, 0, 'C');
             $this->fpdf->Cell(20, 5, 'MOBDEMOB', 1, 0, 'C');
             $y = 77;
+            $NomorUrut = 1;
             foreach ($RSDetail as $r) {
                 $this->fpdf->SetXY(6, $y);
+                $this->fpdf->Cell(7, 5, $NomorUrut++, 1, 0, 'L');
                 $this->fpdf->Cell(20, 5, $r['MITM_BRAND'], 1, 0, 'L');
                 $this->fpdf->Cell(45, 5, $r['MITM_ITMNM'], 1, 0, 'L');
                 $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_MODEL']);
