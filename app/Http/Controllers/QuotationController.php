@@ -437,13 +437,14 @@ class QuotationController extends Controller
             $this->fpdf->MultiCell(0, 5, 'Bersama ini kami sampaikan ' . $TQUO_SBJCT . ' dengan data sebagai berikut :', 0, 'J');
 
             $this->fpdf->SetXY(6, 72);
-            $this->fpdf->Cell(7, 5, 'NO', 1, 0, 'L');
-            $this->fpdf->Cell(20, 5, 'MERK', 1, 0, 'L');
-            $this->fpdf->Cell(45, 5, 'CAPACITY', 1, 0, 'L');
-            $this->fpdf->Cell(35, 5, 'MODEL', 1, 0, 'C');
-            $this->fpdf->Cell(21, 5, 'PEMAKAIAN', 1, 0, 'C');
-            $this->fpdf->Cell(25, 5, 'HARGA SEWA', 1, 0, 'C');
-            $this->fpdf->Cell(25, 5, 'OPERATOR', 1, 0, 'C');
+            $this->fpdf->Cell(7, 5, 'No', 1, 0, 'L');
+            $this->fpdf->Cell(20, 5, 'Merk', 1, 0, 'L');
+            $this->fpdf->Cell(45, 5, 'Capacity', 1, 0, 'L');
+            $this->fpdf->Cell(35, 5, 'Model', 1, 0, 'C');
+            $this->fpdf->Cell(18, 5, 'Pemakaian', 1, 0, 'C');
+            $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
+            $this->fpdf->Cell(25, 5, 'Harga Sewa', 1, 0, 'C');
+            $this->fpdf->Cell(20, 5, 'Operator', 1, 0, 'C');
             $this->fpdf->Cell(20, 5, 'MOBDEMOB', 1, 0, 'C');
             $y = 77;
             $NomorUrut = 1;
@@ -463,9 +464,10 @@ class QuotationController extends Controller
                 }
                 $this->fpdf->Cell(35, 5, $r['MITM_MODEL'], 1, 0, 'C');
                 $this->fpdf->SetFont('Arial', '', 9);
-                $this->fpdf->Cell(21, 5, $r['TQUODETA_USAGE'] . ' Jam', 1, 0, 'C');
+                $this->fpdf->Cell(18, 5, $r['TQUODETA_USAGE'] . ' Jam', 1, 0, 'C');
+                $this->fpdf->Cell(10, 5, $r['TQUODETA_ITMQT'], 1, 0, 'C');
                 $this->fpdf->Cell(25, 5, number_format($r['TQUODETA_PRC']), 1, 0, 'C');
-                $this->fpdf->Cell(25, 5, number_format($r['TQUODETA_OPRPRC']), 1, 0, 'C');
+                $this->fpdf->Cell(20, 5, number_format($r['TQUODETA_OPRPRC']), 1, 0, 'C');
                 $this->fpdf->Cell(20, 5, number_format($r['TQUODETA_MOBDEMOB']), 1, 0, 'C');
                 $y += 5;
             }
