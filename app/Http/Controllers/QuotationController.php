@@ -172,39 +172,74 @@ class QuotationController extends Controller
     public function update(Request $request)
     {
         # ubah data header
-        $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
+        $affectedRow = 0;
+        $Quotation = T_QUOHEAD::on($this->dedicatedConnection)
+            ->select(DB::raw("IFNULL(TQUO_APPROVAL_HIS,'') TQUO_APPROVAL_HIS"), 'TQUO_APPRVDT', 'TQUO_APPRVBY')
             ->where('TQUO_QUOCD', base64_decode($request->id))
             ->where('TQUO_BRANCH', Auth::user()->branch)
-            ->whereNull('TQUO_APPRVDT')
-            ->update([
-                'TQUO_CUSCD' => $request->TQUO_CUSCD, 'TQUO_ATTN' => $request->TQUO_ATTN, 'TQUO_SBJCT' => $request->TQUO_SBJCT, 'TQUO_ISSUDT' => $request->TQUO_ISSUDT
-            ]);
-        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+            ->first();
+        if (!$Quotation->TQUO_APPRVDT) {
+            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
+                ->where('TQUO_QUOCD', base64_decode($request->id))
+                ->where('TQUO_BRANCH', Auth::user()->branch)
+                ->whereNull('TQUO_APPRVDT')
+                ->update([
+                    'TQUO_CUSCD' => $request->TQUO_CUSCD, 'TQUO_ATTN' => $request->TQUO_ATTN, 'TQUO_SBJCT' => $request->TQUO_SBJCT, 'TQUO_ISSUDT' => $request->TQUO_ISSUDT
+                ]);
+        } else {
+            $currentHistory = $Quotation->TQUO_APPROVAL_HIS;
+            $newHistory = ['APPROVED_BY' => $Quotation->TQUO_APPRVBY, 'APPROVED_AT' => $Quotation->TQUO_APPRVDT];
+            $finalHistory = $currentHistory . '#$' . json_encode($newHistory);
+            $newHistory = ['RESUBMIT_BY' => Auth::user()->nick_name, 'RESUBMIT_AT' => date('Y-m-d H:i:s')];
+            $finalHistory .= '#$' . json_encode($newHistory);
+            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
+                ->where('TQUO_QUOCD', base64_decode($request->id))
+                ->where('TQUO_BRANCH', Auth::user()->branch)
+                ->update([
+                    'TQUO_APPROVAL_HIS' => $finalHistory,
+                    'TQUO_APPRVBY' => NULL,
+                    'TQUO_APPRVDT' => NULL,
+                    'TQUO_CUSCD' => $request->TQUO_CUSCD, 'TQUO_ATTN' => $request->TQUO_ATTN, 'TQUO_SBJCT' => $request->TQUO_SBJCT, 'TQUO_ISSUDT' => $request->TQUO_ISSUDT
+                ]);
+        }
+        return ['msg' => $affectedRow ? 'OK' : 'No changes', 'data' =>  $Quotation];
     }
 
     public function updateItem(Request $request)
     {
         $affectedRow = 0;
-        $UnApprovedQuotation = T_QUOHEAD::on($this->dedicatedConnection)
-            ->select('*')
-            ->whereNull('TQUO_APPRVDT')
+        $Quotation = T_QUOHEAD::on($this->dedicatedConnection)
+            ->select(DB::raw("IFNULL(TQUO_APPROVAL_HIS,'') TQUO_APPROVAL_HIS"), 'TQUO_APPRVDT', 'TQUO_APPRVBY')
             ->where('TQUO_QUOCD', $request->TQUO_QUOCD)
             ->where('TQUO_BRANCH', Auth::user()->branch)
             ->first();
-        if ($UnApprovedQuotation) {
-            # ubah data detail
-            $affectedRow = T_QUODETA::on($this->dedicatedConnection)
-                ->where('id', $request->id)
-                ->where('TQUODETA_BRANCH', Auth::user()->branch)
+        if ($Quotation->TQUO_APPRVDT) {
+            $currentHistory = $Quotation->TQUO_APPROVAL_HIS;
+            $newHistory = ['APPROVED_BY' => $Quotation->TQUO_APPRVBY, 'APPROVED_AT' => $Quotation->TQUO_APPRVDT];
+            $finalHistory = $currentHistory . '#$' . json_encode($newHistory);
+            $newHistory = ['RESUBMIT_BY' => Auth::user()->nick_name, 'RESUBMIT_AT' => date('Y-m-d H:i:s')];
+            $finalHistory .= '#$' . json_encode($newHistory);
+            $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
+                ->where('TQUO_QUOCD', $request->TQUO_QUOCD)
+                ->where('TQUO_BRANCH', Auth::user()->branch)
                 ->update([
-                    'TQUODETA_ITMCD' => $request->TQUODETA_ITMCD,
-                    'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT,
-                    'TQUODETA_USAGE' => $request->TQUODETA_USAGE,
-                    'TQUODETA_PRC' => $request->TQUODETA_PRC,
-                    'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC ? $request->TQUODETA_OPRPRC : 0,
-                    'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB ? $request->TQUODETA_MOBDEMOB : 0,
+                    'TQUO_APPROVAL_HIS' => $finalHistory,
+                    'TQUO_APPRVBY' => NULL,
+                    'TQUO_APPRVDT' => NULL,
                 ]);
         }
+        # ubah data detail
+        $affectedRow = T_QUODETA::on($this->dedicatedConnection)
+            ->where('id', $request->id)
+            ->where('TQUODETA_BRANCH', Auth::user()->branch)
+            ->update([
+                'TQUODETA_ITMCD' => $request->TQUODETA_ITMCD,
+                'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT,
+                'TQUODETA_USAGE' => $request->TQUODETA_USAGE,
+                'TQUODETA_PRC' => $request->TQUODETA_PRC,
+                'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC ? $request->TQUODETA_OPRPRC : 0,
+                'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB ? $request->TQUODETA_MOBDEMOB : 0,
+            ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
