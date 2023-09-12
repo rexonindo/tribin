@@ -34,7 +34,7 @@
         <div class="col-md-4 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Customer Code</span>
-                <input type="text" id="customerCode" class="form-control" placeholder="Customer Code" aria-label="Customer Code" maxlength="10">
+                <input type="text" id="customerCode" class="form-control" placeholder="Customer Code" aria-label="Customer Code" maxlength="10" readonly disabled>
                 <button class="btn btn-primary" type="button" onclick="btnShowCustomerModal()"><i class="fas fa-search"></i></button>
             </div>
         </div>
@@ -52,7 +52,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6 mb-1">
+        <div class="col-md-3 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Currency</span>
                 <select class="form-select" id="currency">
@@ -61,10 +61,16 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-6 mb-1">
+        <div class="col-md-5 mb-1">
             <div class="input-group input-group-sm mb-1">
                 <span class="input-group-text">Tax Registration Number</span>
-                <input type="text" id="customerTax" class="form-control" placeholder="" maxlength="45">
+                <input type="text" id="customerTax" class="form-control" placeholder="" maxlength="45" title="NPWP">
+            </div>
+        </div>
+        <div class="col-md-4 mb-1">
+            <div class="input-group input-group-sm mb-1">
+                <label class="input-group-text" for="customerKTPNumber">ID Card</label>
+                <input type="text" class="form-control" id="customerKTPNumber" maxlength="25" title="KTP">
             </div>
         </div>
     </div>
@@ -221,7 +227,6 @@
 <script>
     function btnNewOnclick() {
         customerCode.value = ''
-        customerCode.disabled = false
         customerCode.focus()
         tribinClearTextBox()
         customerInputMode.value = 0
@@ -239,11 +244,6 @@
     function btnSaveOnclick(pthis) {
         const customerTypeValue = document.querySelector("input[type='radio'][name=customerType]:checked").value
 
-        if (customerCode.value.trim().length <= 3) {
-            customerCode.focus()
-            alertify.warning(`Customer Code is required`)
-            return
-        }
         if (customerName.value.trim().length <= 3) {
             customerName.focus()
             alertify.warning(`Customer Name is required`)
@@ -252,7 +252,6 @@
 
         if (customerInputMode.value === '0') {
             const formData = new FormData()
-            formData.append('MCUS_CUSCD', customerCode.value.trim())
             formData.append('MCUS_CUSNM', customerName.value.trim())
             formData.append('MCUS_CURCD', currency.value.trim())
             formData.append('MCUS_TAXREG', customerTax.value.trim())
@@ -268,6 +267,7 @@
             formData.append('MCUS_KTP_FILE', customerKTPFile.files[0])
             formData.append('MCUS_NPWP_FILE', customerNPWPFile.files[0])
             formData.append('MCUS_NIB_FILE', customerNIBFile.files[0])
+            formData.append('MCUS_IDCARD', customerKTPNumber.value)
             formData.append('_token', '{{ csrf_token() }}')
             if (customerTypeValue === '1') {
                 if (customerKTPFile.files.length === 0) {
@@ -313,6 +313,11 @@
                         pthis.disabled = false
                         document.getElementById('div-alert').innerHTML = ''
                         setButtonDisabled(false, 'btnChangeFile')
+                        customerCode.value = response.MCUS_CUSCD
+                        customerKTPFilePath.value = response.MCUS_KTP_FILE
+                        customerNPWPFilePath.value = response.MCUS_NPWP_FILE
+                        customerNIBFilePath.value = response.MCUS_NIB_FILE
+                        customerInputMode.value = 1
                     },
                     error: function(xhr, xopt, xthrow) {
                         const respon = Object.keys(xhr.responseJSON)

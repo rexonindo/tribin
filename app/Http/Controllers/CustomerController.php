@@ -80,8 +80,12 @@ class CustomerController extends Controller
             $location = 'attachments/customer';
             $file->move(public_path($location), $fileName);
         }
+        $LastGENID = M_CUS::on($this->dedicatedConnection)->max('MCUS_GENID');
+        $NEW_MCUS_CUSCD = NULL;
+        $NewGENID = $LastGENID + 1;
+        $NEW_MCUS_CUSCD = 'CUST-' . substr('0000' . $NewGENID, -4);
         M_CUS::on($this->dedicatedConnection)->create([
-            'MCUS_CUSCD' => $request->MCUS_CUSCD,
+            'MCUS_CUSCD' => $NEW_MCUS_CUSCD,
             'MCUS_CUSNM' => $request->MCUS_CUSNM,
             'MCUS_CURCD' => $request->MCUS_CURCD,
             'MCUS_TAXREG' => $request->MCUS_TAXREG,
@@ -99,8 +103,15 @@ class CustomerController extends Controller
             'MCUS_KTP_FILE' => $KTPfileName,
             'MCUS_NPWP_FILE' => $NPWPfileName,
             'MCUS_NIB_FILE' => $NIBfileName,
+            'MCUS_IDCARD' => $request->MCUS_IDCARD,
+            'MCUS_GENID' => $NewGENID,
         ]);
-        return ['msg' => 'OK'];
+        return [
+            'msg' => 'OK', 'MCUS_CUSCD' => $NEW_MCUS_CUSCD,
+            'MCUS_KTP_FILE' => $KTPfileName,
+            'MCUS_NPWP_FILE' => $NPWPfileName,
+            'MCUS_NIB_FILE' => $NIBfileName,
+        ];
     }
 
     function search(Request $request)
