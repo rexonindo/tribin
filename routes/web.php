@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     # Terkait Customer Master
     Route::prefix('customer')->group(function () {
         Route::get('form', [CustomerController::class, 'index']);
+        Route::post('import', [CustomerController::class, 'importFromAnotherCompany']);
         Route::get('file/{id}', [CustomerController::class, 'showFile']);
         Route::get('', [CustomerController::class, 'search']);
         Route::post('', [CustomerController::class, 'simpan']);

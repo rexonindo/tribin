@@ -4,6 +4,7 @@
         <div class="btn-group btn-group-sm">
             <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
             <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
+            <button type="button" class="btn btn-outline-primary" id="btnImport" onclick="btnShowImportDataModal()" title="Import"><i class="fas fa-file-import"></i></button>
         </div>
     </div>
 </div>
@@ -224,6 +225,59 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="customerImportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Import</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col mb-1">
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                This process will import data to current Company
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-1" id="div-alert-import">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <span class="input-group-text">Current Company</span>
+                                <select class="form-select" disabled>
+                                    @foreach ($CurrentCompanies as $r)
+                                    <option value="{{$r->connection}}">{{$r->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <span class="input-group-text">From Company</span>
+                                <select id="fromConnection" class="form-select">
+                                    @foreach ($companies as $r)
+                                    <option value="{{$r->connection}}">{{$r->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="importDatasCompany(this)">Import</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function btnNewOnclick() {
         customerCode.value = ''
@@ -386,8 +440,53 @@
         }
     }
 
+    function importDatasCompany(pthis) {
+        if (!confirm('Are you sure ?')) {
+            return
+        }
+        pthis.disabled = true
+        pthis.innerHTML = `Please wait...`
+        $.ajax({
+            type: "POST",
+            url: "customer/import",
+            data: {
+                fromConnection: fromConnection.value,
+                _token: '{{ csrf_token() }}',
+            },
+            dataType: "json",
+            success: function(response) {
+                pthis.disabled = false
+                pthis.innerHTML = `Import`
+                alert(response.message)
+            },
+            error: function(xhr, xopt, xthrow) {
+                const respon = Object.keys(xhr.responseJSON)
+                const div_alert = document.getElementById('div-alert-import')
+                let msg = ''
+                for (const item of respon) {
+                    msg += `<p>${xhr.responseJSON[item]}</p>`
+                }
+                div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                ${msg}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`
+                pthis.innerHTML = `<i class="fas fa-save"></i>`
+                alertify.warning(xthrow);
+                pthis.disabled = false
+            }
+        });
+    }
+
     function btnShowCustomerModal() {
         const myModal = new bootstrap.Modal(document.getElementById('customerModal'), {})
+        customerModal.addEventListener('shown.bs.modal', () => {
+            customerSearch.focus()
+        })
+        myModal.show()
+    }
+
+    function btnShowImportDataModal() {
+        const myModal = new bootstrap.Modal(document.getElementById('customerImportModal'), {})
         customerModal.addEventListener('shown.bs.modal', () => {
             customerSearch.focus()
         })

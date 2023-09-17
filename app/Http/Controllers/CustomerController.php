@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +23,27 @@ class CustomerController extends Controller
 
     public function index()
     {
-        return view('master.customer', ['companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get()]);
+        return view('master.customer', [
+            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
+            'CurrentCompanies' => CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->get()
+        ]);
+    }
+
+    public function importFromAnotherCompany(Request $request)
+    {
+        $currentDBName = DB::connection($this->dedicatedConnection)->getDatabaseName();
+        $RS = DB::connection($request->fromConnection)->table('M_CUS AS A')
+            ->select('A.*')
+            ->leftJoin($currentDBName . '.M_CUS AS B', 'A.MCUS_CUSCD', '=', 'B.MCUS_CUSCD')
+            ->where('A.MCUS_BRANCH',  Auth::user()->branch)
+            ->whereNull('B.MCUS_CUSCD');
+        $RSTosave = json_decode(json_encode($RS->get()), true);
+        if (!empty($RSTosave)) {
+            M_CUS::on($this->dedicatedConnection)->insert($RSTosave);
+            return ['message' => 'Done'];
+        } else {
+            return ['message' => 'no new data'];
+        }
     }
 
     public function simpan(Request $request)
