@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroup;
 use App\Models\M_COA;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class CoaController extends Controller
@@ -20,7 +22,27 @@ class CoaController extends Controller
 
     public function index()
     {
-        return view('master.coa');
+        return view('master.coa', [
+            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
+            'CurrentCompanies' => CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->get()
+        ]);
+    }
+
+    public function importFromAnotherCompany(Request $request)
+    {
+        $currentDBName = DB::connection($this->dedicatedConnection)->getDatabaseName();
+        $RS = DB::connection($request->fromConnection)->table('M_COA AS A')
+            ->select('A.*')
+            ->leftJoin($currentDBName . '.M_COA AS B', 'A.MCOA_COACD', '=', 'B.MCOA_COACD')
+            ->where('A.MCOA_BRANCH',  Auth::user()->branch)
+            ->whereNull('B.MCOA_COACD');
+        $RSTosave = json_decode(json_encode($RS->get()), true);
+        if (!empty($RSTosave)) {
+            M_COA::on($this->dedicatedConnection)->insert($RSTosave);
+            return ['message' => 'Done, ' . count($RSTosave) . ' imported'];
+        } else {
+            return ['message' => 'no new data'];
+        }
     }
 
     public function simpan(Request $request)

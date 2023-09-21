@@ -41,8 +41,7 @@ class SupplierController extends Controller
     public function index()
     {
         return view('master.supplier', [
-            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
-            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
+            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),            
             'CurrentCompanies' => CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->get()
         ]);
     }

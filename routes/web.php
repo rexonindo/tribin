@@ -67,6 +67,15 @@ Route::middleware('auth')->group(function () {
         Route::put('{id}', [SupplierController::class, 'update']);
     });
 
+    # Terkait Chart of Account Master
+    Route::prefix('coa')->group(function () {
+        Route::get('form', [CoaController::class, 'index']);
+        Route::post('import', [CoaController::class, 'importFromAnotherCompany']);
+        Route::get('', [CoaController::class, 'search']);
+        Route::post('', [CoaController::class, 'simpan']);
+        Route::put('{id}', [CoaController::class, 'update']);
+    });
+
     # Terkait Item Master
     Route::prefix('item')->group(function () {
         Route::get('form', [ItemController::class, 'index']);
@@ -113,14 +122,6 @@ Route::middleware('auth')->group(function () {
     Route::post('quotation-item', [QuotationController::class, 'saveItem']);
     Route::post('quotation-condition', [QuotationController::class, 'saveCondition']);
 });
-
-
-
-# Terkait Chart of Account Master
-Route::get('coa/form', [CoaController::class, 'index'])->middleware('auth');
-Route::get('coa', [CoaController::class, 'search'])->middleware('auth');
-Route::post('coa', [CoaController::class, 'simpan'])->middleware('auth');
-Route::put('coa/{id}', [CoaController::class, 'update'])->middleware('auth');
 
 # Terkait Quotation Condition
 Route::get('condition', [QuotationController::class, 'getAllCondition'])->middleware('auth');
