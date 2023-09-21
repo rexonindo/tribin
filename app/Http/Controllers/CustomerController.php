@@ -40,7 +40,7 @@ class CustomerController extends Controller
         $RSTosave = json_decode(json_encode($RS->get()), true);
         if (!empty($RSTosave)) {
             M_CUS::on($this->dedicatedConnection)->insert($RSTosave);
-            return ['message' => 'Done'];
+            return ['message' => 'Done, ' . count($RSTosave) . ' imported'];
         } else {
             return ['message' => 'no new data'];
         }

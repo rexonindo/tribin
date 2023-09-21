@@ -229,19 +229,11 @@
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Import</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Import Data Master</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col mb-1">
-                            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                                This process will import data to current Company
-
-                            </div>
-                        </div>
-                    </div>
+                <div class="container-fluid">                    
                     <div class="row">
                         <div class="col mb-1" id="div-alert-import">
                         </div>
@@ -249,21 +241,22 @@
                     <div class="row">
                         <div class="col mb-1">
                             <div class="input-group input-group-sm mb-1">
-                                <span class="input-group-text">Current Company</span>
-                                <select class="form-select" disabled>
-                                    @foreach ($CurrentCompanies as $r)
+                                <span class="input-group-text">Source</span>
+                                <select id="fromConnection" class="form-select">
+                                    @foreach ($companies as $r)
                                     <option value="{{$r->connection}}">{{$r->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
+
                         </div>
                     </div>
                     <div class="row">
                         <div class="col mb-1">
                             <div class="input-group input-group-sm mb-1">
-                                <span class="input-group-text">From Company</span>
-                                <select id="fromConnection" class="form-select">
-                                    @foreach ($companies as $r)
+                                <span class="input-group-text">Destination</span>
+                                <select class="form-select" disabled>
+                                    @foreach ($CurrentCompanies as $r)
                                     <option value="{{$r->connection}}">{{$r->name}}</option>
                                     @endforeach
                                 </select>
@@ -486,10 +479,7 @@
     }
 
     function btnShowImportDataModal() {
-        const myModal = new bootstrap.Modal(document.getElementById('customerImportModal'), {})
-        customerModal.addEventListener('shown.bs.modal', () => {
-            customerSearch.focus()
-        })
+        const myModal = new bootstrap.Modal(document.getElementById('customerImportModal'), {})        
         myModal.show()
     }
 

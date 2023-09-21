@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
 use App\Models\M_COA;
 use App\Models\M_ITM;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -23,13 +25,34 @@ class ItemController extends Controller
     }
     public function index()
     {
-        return view('master.item', ['coas' => M_COA::on($this->dedicatedConnection)->select('*')->get(), 'branches' => M_BRANCH::on($this->dedicatedConnection)->get()]);
+        return view('master.item', [
+            'coas' => M_COA::on($this->dedicatedConnection)->select('*')->get(),
+            'branches' => M_BRANCH::on($this->dedicatedConnection)->get(),
+            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
+            'CurrentCompanies' => CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->get()
+        ]);
     }
 
     public function formReport()
     {
-
         return view('report.item');
+    }
+
+    public function importFromAnotherCompany(Request $request)
+    {
+        $currentDBName = DB::connection($this->dedicatedConnection)->getDatabaseName();
+        $RS = DB::connection($request->fromConnection)->table('M_ITM AS A')
+            ->select('A.*')
+            ->leftJoin($currentDBName . '.M_ITM AS B', 'A.MITM_ITMCD', '=', 'B.MITM_ITMCD')
+            ->where('A.MITM_BRANCH',  Auth::user()->branch)
+            ->whereNull('B.MITM_ITMCD');
+        $RSTosave = json_decode(json_encode($RS->get()), true);
+        if (!empty($RSTosave)) {
+            M_ITM::on($this->dedicatedConnection)->insert($RSTosave);
+            return ['message' => 'Done, ' . count($RSTosave) . ' imported'];
+        } else {
+            return ['message' => 'no new data'];
+        }
     }
 
     public function simpan(Request $request)

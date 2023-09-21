@@ -57,13 +57,16 @@ Route::get('/version', function () {
     return app()->version();
 });
 
-# Terkait Item Master
-Route::get('item/form', [ItemController::class, 'index'])->middleware('auth');
-Route::get('item', [ItemController::class, 'search'])->middleware('auth');
-Route::post('item', [ItemController::class, 'simpan'])->middleware('auth');
-Route::put('item/{id}', [ItemController::class, 'update'])->middleware('auth');
-
 Route::middleware('auth')->group(function () {
+    # Terkait Item Master
+    Route::prefix('item')->group(function () {
+        Route::get('form', [ItemController::class, 'index']);
+        Route::post('import', [ItemController::class, 'importFromAnotherCompany']);
+        Route::get('', [ItemController::class, 'search']);
+        Route::post('', [ItemController::class, 'simpan']);
+        Route::put('{id}', [ItemController::class, 'update']);
+    });
+
     # Terkait Customer Master
     Route::prefix('customer')->group(function () {
         Route::get('form', [CustomerController::class, 'index']);
