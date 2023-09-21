@@ -58,6 +58,15 @@ Route::get('/version', function () {
 });
 
 Route::middleware('auth')->group(function () {
+    # Terkait Supplier Master
+    Route::prefix('supplier')->group(function () {
+        Route::get('form', [SupplierController::class, 'index']);
+        Route::post('import', [SupplierController::class, 'importFromAnotherCompany']);
+        Route::get('', [SupplierController::class, 'search']);
+        Route::post('', [SupplierController::class, 'simpan']);
+        Route::put('{id}', [SupplierController::class, 'update']);
+    });
+
     # Terkait Item Master
     Route::prefix('item')->group(function () {
         Route::get('form', [ItemController::class, 'index']);
@@ -105,11 +114,7 @@ Route::middleware('auth')->group(function () {
     Route::post('quotation-condition', [QuotationController::class, 'saveCondition']);
 });
 
-# Terkait Supplier Master
-Route::get('supplier/form', [SupplierController::class, 'index'])->middleware('auth');
-Route::get('supplier', [SupplierController::class, 'search'])->middleware('auth');
-Route::post('supplier', [SupplierController::class, 'simpan'])->middleware('auth');
-Route::put('supplier/{id}', [SupplierController::class, 'update'])->middleware('auth');
+
 
 # Terkait Chart of Account Master
 Route::get('coa/form', [CoaController::class, 'index'])->middleware('auth');

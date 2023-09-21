@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
@@ -20,9 +21,30 @@ class SupplierController extends Controller
         $this->dedicatedConnection = Crypt::decryptString($_COOKIE['CGID']);
     }
 
+    public function importFromAnotherCompany(Request $request)
+    {
+        $currentDBName = DB::connection($this->dedicatedConnection)->getDatabaseName();
+        $RS = DB::connection($request->fromConnection)->table('M_SUP AS A')
+            ->select('A.*')
+            ->leftJoin($currentDBName . '.M_SUP AS B', 'A.MSUP_SUPCD', '=', 'B.MSUP_SUPCD')
+            ->where('A.MSUP_BRANCH',  Auth::user()->branch)
+            ->whereNull('B.MSUP_SUPCD');
+        $RSTosave = json_decode(json_encode($RS->get()), true);
+        if (!empty($RSTosave)) {
+            M_SUP::on($this->dedicatedConnection)->insert($RSTosave);
+            return ['message' => 'Done, ' . count($RSTosave) . ' imported'];
+        } else {
+            return ['message' => 'no new data'];
+        }
+    }
+
     public function index()
     {
-        return view('master.supplier', ['companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get()]);
+        return view('master.supplier', [
+            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
+            'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
+            'CurrentCompanies' => CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->get()
+        ]);
     }
     public function simpan(Request $request)
     {
