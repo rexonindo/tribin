@@ -30,6 +30,7 @@
                             <nav>
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab">Item</button>
+                                    <button class="nav-link" id="nav-cost-tab" data-bs-toggle="tab" data-bs-target="#nav-cost" type="button" role="tab">Costs</button>
                                 </div>
                             </nav>
                             <div class="tab-content" id="nav-tabContent">
@@ -61,7 +62,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm mb-1">
+                                                <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Mechanic</span>
                                                     <input type="text" id="quotationMechanic" class="form-control" maxlength="45">
                                                 </div>
@@ -77,7 +78,7 @@
                                             <div class="col-md-6 mb-1">
                                                 <label for="quotationCustomer" class="form-label"><i>Uang Jalan</i></label>
                                                 <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationUangJalan" class="form-control" maxlength="15">
+                                                    <input type="text" id="quotationUangJalan" class="form-control" maxlength="15" readonly>
                                                 </div>
                                             </div>
                                         </div>
@@ -103,6 +104,136 @@
                                         <div class="row">
                                             <div class="col">
                                                 <input type="hidden" id="branch" value="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="nav-cost" role="tabpanel" aria-labelledby="nav-cost-tab" tabindex="1">
+                                    <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                                        <div class="row">
+                                            <div class="col mb-1 text-end">
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)" title="Save"><i class="fas fa-save"></i></button>
+                                                    <button type="button" class="btn btn-outline-primary" id="btnPrint" onclick="btnPrintOnclick(this)" title="Print"><i class="fas fa-print"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">PIC As</span>
+                                                    <select class="form-select" id="PICAs" onchange="PICAsOnChange(event)">
+                                                        <option value="DRIVER">DRIVER</option>
+                                                        <option value="MECHANIC">MECHANIC</option>
+                                                        <option value="OPERATOR">OPERATOR</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">PIC Name</span>
+                                                    <input type="text" id="PICName" class="form-control" maxlength="45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">KM</span>
+                                                    <input type="number" id="KM" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Wheels</span>
+                                                    <select class="form-select" id="Wheels">
+                                                        <option value="4">4</option>
+                                                        <option value="6">6</option>
+                                                        <option value="10">10</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Solar Supplier</span>
+                                                    <select class="form-select" id="Wheels">
+                                                        <option value="SPBU">SPBU</option>
+                                                        <option value="JAT">JAT</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Liters</span>
+                                                    <input type="number" id="liters" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Uang Makan</span>
+                                                    <input type="number" id="uangMakan" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Uang Penginapan</span>
+                                                    <input type="number" id="uangPenginapan" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Uang Pengawalan</span>
+                                                    <input type="number" id="uangPengawalan" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Uang Lain<sup>2</sup></span>
+                                                    <input type="number" id="uangLain" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col text-center mb-1">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-outline-secondary" id="btnSaveLineSale" onclick="btnSaveLineSaleOnclick(this)">Save line</button>
+                                                    <button type="button" class="btn btn-outline-secondary" id="btnRemoveLineSale" onclick="btnRemoveLineSaleOnclick(this)">Remove line</button>
+                                                    <button type="button" class="btn btn-outline-secondary" id="btnUpdateLineSale" onclick="btnUpdateLineSaleOnclick(this)">Update line</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-1">
+                                                <div class="table-responsive" id="costTableContainer">
+                                                    <table id="costTable" class="table table-sm table-hover table-bordered caption-top">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th class="d-none">idLine</th>
+                                                                <th>PIC As</th>
+                                                                <th>PIC Name</th>
+                                                                <th>KM</th>
+                                                                <th>Wheels</th>
+                                                                <th>Uang Jalan</th>
+                                                                <th>Solar Supplier</th>
+                                                                <th>Liters</th>
+                                                                <th>Uang Solar</th>
+                                                                <th>Uang Makan</th>
+                                                                <th>Uang Mandah</th>
+                                                                <th>Penginapan</th>
+                                                                <th>Pengawalan</th>
+                                                                <th>Biaya Lain<sup>2</sup></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
