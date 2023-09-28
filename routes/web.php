@@ -6,6 +6,7 @@ use App\Http\Controllers\CoaController;
 use App\Http\Controllers\CompanyGroupController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\DistancePriceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
@@ -58,6 +59,15 @@ Route::get('/version', function () {
 });
 
 Route::middleware('auth')->group(function () {
+    # Terkait Harga Jarak
+    Route::prefix('distance-price')->group(function () {
+        Route::get('form', [DistancePriceController::class, 'index']);
+        Route::post('import', [DistancePriceController::class, 'importFromAnotherCompany']);
+        Route::get('', [DistancePriceController::class, 'search']);
+        Route::post('', [DistancePriceController::class, 'simpan']);
+        Route::put('{id}', [DistancePriceController::class, 'update']);
+    });
+
     # Terkait Supplier Master
     Route::prefix('supplier')->group(function () {
         Route::get('form', [SupplierController::class, 'index']);
