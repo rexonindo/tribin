@@ -694,7 +694,7 @@ class PurchaseController extends Controller
         $dataPurchaseRequestTobeUpproved = [];
         $dataPurchaseRequestApproved = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
             # Query untuk data Purchase Request dengan tipe "Normal" 
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_PCHREQDETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD,TPCHREQDETA_BRANCH")
