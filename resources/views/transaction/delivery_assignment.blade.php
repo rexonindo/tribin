@@ -579,7 +579,7 @@
                 alertify.warning(xthrow);
             }
         });
-    }    
+    }
 
     function btnUpdateLineOnclick(pthis) {
         const data = {
@@ -612,7 +612,7 @@
                     pthis.innerHTML = `Update line`
                     alertify.success(response.msg)
                     pthis.disabled = false
-                    div_alert.innerHTML = ''                    
+                    div_alert.innerHTML = ''
                     loadQuotationDetail({
                         doc: labelQuotationInModal.innerText,
                         branch: branch.value
@@ -629,6 +629,48 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>`
                     pthis.innerHTML = `Update line`
+                    alertify.warning(xthrow);
+                    pthis.disabled = false
+                }
+            });
+        }
+    }
+
+    function btnRemoveLineSaleOnclick(pthis) {
+        const idRow = costTable.rows[selectedRowAtOrderTable.value].cells[0].innerText
+        if (confirm('Are you sure ?')) {
+            const div_alert = document.getElementById('div-alert-cost')
+            pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+            pthis.disabled = true
+            $.ajax({
+                type: "DELETE",
+                url: `SPK/${btoa(idRow)}`,
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                dataType: "json",
+                success: function(response) {
+                    pthis.disabled = false
+                    pthis.innerHTML = `Remove line`
+                    alertify.success(response.message)
+                    pthis.disabled = false
+                    div_alert.innerHTML = ''
+                    loadQuotationDetail({
+                        doc: labelQuotationInModal.innerText,
+                        branch: branch.value
+                    })
+                },
+                error: function(xhr, xopt, xthrow) {
+                    const respon = Object.keys(xhr.responseJSON)
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${msg}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+                    pthis.innerHTML = `Remove line`
                     alertify.warning(xthrow);
                     pthis.disabled = false
                 }

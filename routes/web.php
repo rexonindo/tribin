@@ -71,8 +71,9 @@ Route::middleware('auth')->group(function () {
     # Terkait SPK , Surat Perintah Kerja
     Route::prefix('SPK')->group(function () {
         Route::post('', [DeliveryController::class, 'saveSPK']);
-        Route::put('{id}', [DeliveryController::class, 'updateSPK']);        
-        Route::put('delivery-order/{id}', [DeliveryController::class, 'getSPKByDO']);        
+        Route::put('{id}', [DeliveryController::class, 'updateSPK']);
+        Route::delete('{id}', [DeliveryController::class, 'deleteSPK']);
+        Route::put('delivery-order/{id}', [DeliveryController::class, 'getSPKByDO']);
     });
 
     # Terkait Supplier Master

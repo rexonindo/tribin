@@ -253,6 +253,7 @@ class DeliveryController extends Controller
                 ->leftJoin('users', 'CSPK_PIC_NAME', '=', 'nick_name')
                 ->where('CSPK_REFF_DOC', $DONUM)
                 ->where('CSPK_BRANCH', Auth::user()->branch)
+                ->whereNull('deleted_at')
                 ->select(
                     'C_SPK.id',
                     'CSPK_PIC_NAME',
@@ -609,6 +610,7 @@ class DeliveryController extends Controller
         $message = $affectedRow ? 'Assigned' : 'Something wrong please contact admin';
         return ['message' => $message];
     }
+
     function confirmDelivery(Request $request)
     {
         $affectedRow = T_DLVORDHEAD::on($this->dedicatedConnection)
@@ -619,6 +621,19 @@ class DeliveryController extends Controller
                 'TDLVORD_DELIVERED_AT' => date('Y-m-d H:i:s')
             ]);
         $message = $affectedRow ? 'Assigned' : 'Something wrong please contact admin';
+        return ['message' => $message];
+    }
+
+    function deleteSPK(Request $request)
+    {
+        $affectedRow = C_SPK::on($this->dedicatedConnection)
+            ->where('id', base64_decode($request->id))
+            ->whereNull('deleted_at')
+            ->update([
+                'deleted_at' => date('Y-m-d H:i:s'),
+                'deleted_by' => Auth::user()->nick_name
+            ]);
+        $message = $affectedRow ? 'Deleted' : 'Something wrong please contact admin';
         return ['message' => $message];
     }
 
