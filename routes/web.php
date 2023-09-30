@@ -181,6 +181,7 @@ Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middlew
 Route::get('PDF/purchase-request/{id}', [PurchaseController::class, 'toPDF'])->middleware('auth');
 Route::get('PDF/purchase-order/{id}', [PurchaseController::class, 'POtoPDF'])->middleware('auth');
 Route::get('PDF/delivery-order/{id}', [DeliveryController::class, 'toPDF'])->middleware('auth');
+Route::get('PDF/SPK/{id}', [DeliveryController::class, 'SPKtoPDF'])->middleware('auth');
 
 # Terkait Company Group
 Route::get('company/form', [CompanyGroupController::class, 'index'])->middleware('auth');

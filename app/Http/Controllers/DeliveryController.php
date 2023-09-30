@@ -122,6 +122,35 @@ class DeliveryController extends Controller
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
+    public function updateSPK(Request $request)
+    {
+        $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
+            ->where('RANGE2', '>=', $request->CSPK_KM)
+            ->where('BRANCH', Auth::user()->branch)
+            ->orderBy('RANGE1', 'ASC')
+            ->first();
+        # ubah data header
+        $affectedRow = C_SPK::on($this->dedicatedConnection)
+            ->where('id', base64_decode($request->id))
+            ->update([
+                'CSPK_PIC_AS' => $request->CSPK_PIC_AS,
+                'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
+                'CSPK_KM' => $request->CSPK_KM,
+                'CSPK_WHEELS' => $request->CSPK_WHEELS,
+                'CSPK_UANG_JALAN' => $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6,
+                'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
+                'CSPK_LITER' => $request->CSPK_LITER,
+                'CSPK_UANG_SOLAR' => $request->CSPK_SUPPLIER == 'SPBU' ? 6800 * $request->CSPK_LITER : 10000 * $request->CSPK_LITER,
+                'CSPK_UANG_MAKAN' => $request->CSPK_UANG_MAKAN,
+                'CSPK_UANG_MANDAH' => $request->CSPK_UANG_MANDAH,
+                'CSPK_UANG_PENGINAPAN' => $request->CSPK_UANG_PENGINAPAN,
+                'CSPK_UANG_PENGAWALAN' => $request->CSPK_UANG_PENGAWALAN,
+                'CSPK_UANG_LAIN2' => $request->CSPK_UANG_LAIN2,
+                'updated_by' => Auth::user()->nick_name
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
+
     public function save(Request $request)
     {
         # data quotation header
@@ -495,7 +524,6 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(0, 5, ucwords(rtrim($this->numberToSentence($PPNAmount + $HargaSewa))), 0, 0, 'C');
         }
 
-
         $this->fpdf->Output('delivery order ' . $doc . '.pdf', 'I');
         exit;
     }
@@ -695,5 +723,34 @@ class DeliveryController extends Controller
     {
         $SPKs = C_SPK::on($this->dedicatedConnection)->where('CSPK_REFF_DOC', base64_decode($request->id))->get();
         return ['data' => $SPKs];
+    }
+
+    function SPKtoPDF(Request $request)
+    {
+        $doc = base64_decode($request->id);
+        $Data = C_SPK::on($this->dedicatedConnection)->where('id', $doc)->first();
+
+        $this->fpdf->AddPage("P", 'A5');
+        $this->fpdf->SetAutoPageBreak(true, 0);
+        $this->fpdf->SetFont('Arial', 'B', 12);
+        $this->fpdf->SetXY(3, 5);
+        $this->fpdf->Cell(45, 5, 'SPK DELIVERY BARANG', 0, 0, 'L');
+        $this->fpdf->SetFont('Arial', '', 10);
+        $this->fpdf->SetXY(3, 20);
+        $this->fpdf->Cell(45, 5, 'ID SPK', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': SPK-' . $doc, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 25);
+        $this->fpdf->Cell(45, 5, 'Tanggal', 1, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ', 1, 0, 'L');
+        $this->fpdf->SetXY(3, 30);
+        $this->fpdf->Cell(45, 5, 'PIC Yang Menugaskan', 1, 0, 'L');
+        $this->fpdf->SetXY(3, 35);
+        $this->fpdf->Cell(45, 5, 'PIC Yang Ditugaskan', 1, 0, 'L');
+        $this->fpdf->SetXY(3, 45);
+        $this->fpdf->Cell(45, 5, 'Nomor Referensi', 1, 0, 'L');
+        $this->fpdf->SetXY(3, 50);
+        $this->fpdf->Cell(45, 5, 'Tugas', 1, 0, 'L');
+        $this->fpdf->Output('SPK ' . $doc . '.pdf', 'I');
+        exit;
     }
 }

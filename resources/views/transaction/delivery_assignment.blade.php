@@ -195,7 +195,7 @@
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" class="btn btn-outline-secondary" id="btnSaveLineSale" onclick="btnSaveLineSaleOnclick(this)">Save line</button>
                                                     <button type="button" class="btn btn-outline-secondary" id="btnRemoveLineSale" onclick="btnRemoveLineSaleOnclick(this)">Remove line</button>
-                                                    <button type="button" class="btn btn-outline-secondary" id="btnUpdateLineSale" onclick="btnUpdateLineSaleOnclick(this)">Update line</button>
+                                                    <button type="button" class="btn btn-outline-secondary" id="btnUpdateLineSale" onclick="btnUpdateLineOnclick(this)">Update line</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -253,6 +253,7 @@
         </div>
     </div>
 </div>
+<input type="hidden" id="selectedRowAtOrderTable">
 <script>
     function PICAsOnChange(e) {
         if (e.target.value !== '-') {
@@ -490,12 +491,16 @@
                     let elem = document.createElement('button')
                     elem.classList.add('btn', 'btn-sm', 'btn-primary', 'btn-icon')
                     elem.innerHTML = '<i class="fas fa-print"></i>'
+                    elem.onclick = function() {
+                        window.open(`PDF/SPK/${btoa(arrayItem['id'])}`, '_blank');
+                    }
                     newrow = myTableBody.insertRow(-1)
                     newrow.onclick = (event) => {
                         const selrow = costTable.rows[event.target.parentElement.rowIndex]
                         if (selrow.title === 'selected') {
                             selrow.title = 'not selected'
                             selrow.classList.remove('table-info')
+                            selectedRowAtOrderTable.value = -1
                         } else {
                             const ttlrows = costTable.rows.length
                             for (let i = 1; i < ttlrows; i++) {
@@ -504,6 +509,18 @@
                             }
                             selrow.title = 'selected'
                             selrow.classList.add('table-info')
+                            selectedRowAtOrderTable.value = event.target.parentElement.rowIndex
+                            PICAs.value = arrayItem['CSPK_PIC_AS']
+                            PICName.value = arrayItem['CSPK_PIC_NAME']
+                            KM.value = arrayItem['CSPK_KM']
+                            Wheels.value = arrayItem['CSPK_WHEELS']
+                            Supplier.value = arrayItem['CSPK_SUPPLIER']
+                            liters.value = arrayItem['CSPK_LITER']
+                            uangMakan.value = arrayItem['CSPK_UANG_MAKAN']
+                            uangMandah.value = arrayItem['CSPK_UANG_MANDAH']
+                            uangPengawalan.value = arrayItem['CSPK_UANG_PENGAWALAN']
+                            uangPenginapan.value = arrayItem['CSPK_UANG_PENGINAPAN']
+                            uangLain.value = arrayItem['CSPK_UANG_LAIN2']
                         }
                     }
                     newcell = newrow.insertCell(-1)
@@ -562,5 +579,60 @@
                 alertify.warning(xthrow);
             }
         });
+    }    
+
+    function btnUpdateLineOnclick(pthis) {
+        const data = {
+            CSPK_REFF_DOC: labelQuotationInModal.innerText,
+            CSPK_PIC_AS: PICAs.value,
+            CSPK_PIC_NAME: PICName.value,
+            CSPK_KM: KM.value,
+            CSPK_WHEELS: Wheels.value,
+            CSPK_SUPPLIER: Supplier.value,
+            CSPK_LITER: liters.value,
+            CSPK_UANG_MAKAN: uangMakan.value,
+            CSPK_UANG_MANDAH: uangMandah.value,
+            CSPK_UANG_PENGINAPAN: uangPenginapan.value,
+            CSPK_UANG_PENGAWALAN: uangPengawalan.value,
+            CSPK_UANG_LAIN2: uangLain.value,
+            _token: '{{ csrf_token() }}'
+        }
+        const idRow = costTable.rows[selectedRowAtOrderTable.value].cells[0].innerText
+        if (confirm('Are you sure ?')) {
+            const div_alert = document.getElementById('div-alert-cost')
+            pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+            pthis.disabled = true
+            $.ajax({
+                type: "PUT",
+                url: `SPK/${btoa(idRow)}`,
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    pthis.disabled = false
+                    pthis.innerHTML = `Update line`
+                    alertify.success(response.msg)
+                    pthis.disabled = false
+                    div_alert.innerHTML = ''                    
+                    loadQuotationDetail({
+                        doc: labelQuotationInModal.innerText,
+                        branch: branch.value
+                    })
+                },
+                error: function(xhr, xopt, xthrow) {
+                    const respon = Object.keys(xhr.responseJSON)
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${msg}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+                    pthis.innerHTML = `Update line`
+                    alertify.warning(xthrow);
+                    pthis.disabled = false
+                }
+            });
+        }
     }
 </script>
