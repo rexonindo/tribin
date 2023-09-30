@@ -29,6 +29,7 @@ return new class extends Migration
             $table->float('CSPK_LITER', 18, 2);
             $table->float('CSPK_UANG_SOLAR', 18, 2);
             $table->float('CSPK_UANG_MAKAN', 18, 2);
+            $table->float('CSPK_UANG_MANDAH', 18, 2);
             $table->float('CSPK_UANG_PENGINAPAN', 18, 2);
             $table->float('CSPK_UANG_PENGAWALAN', 18, 2);
             $table->float('CSPK_UANG_LAIN2', 18, 2);
@@ -40,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('c__s_p_k_s');
+        Schema::dropIfExists('C_SPK');
     }
 };
