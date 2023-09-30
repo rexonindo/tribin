@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\C_ITRN;
+use App\Models\C_SPK;
 use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
+use App\Models\M_DISTANCE_PRICE;
 use App\Models\T_DLVORDDETA;
 use App\Models\T_DLVORDHEAD;
 use App\Models\T_QUOHEAD;
@@ -209,14 +211,36 @@ class DeliveryController extends Controller
 
     function loadByDocument(Request $request)
     {
+        $DONUM =  base64_decode($request->id);
         return [
             'data' => T_DLVORDDETA::on($this->dedicatedConnection)->select('T_DLVORDDETA.id', 'TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT', 'MITM_ITMNM')
                 ->leftJoin("M_ITM", function ($join) {
                     $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'MITM_BRANCH');
                 })
-                ->where('TDLVORDDETA_DLVCD', base64_decode($request->id))
+                ->where('TDLVORDDETA_DLVCD', $DONUM)
                 ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get(),
-            'input' => base64_decode($request->id)
+            'input' => base64_decode($request->id),
+            'SPK' => C_SPK::on($this->dedicatedConnection)
+                ->leftJoin('users', 'CSPK_PIC_NAME', '=', 'nick_name')
+                ->where('CSPK_REFF_DOC', $DONUM)
+                ->where('CSPK_BRANCH', Auth::user()->branch)
+                ->select(
+                    'C_SPK.id',
+                    'CSPK_PIC_NAME',
+                    'CSPK_PIC_AS',
+                    'CSPK_PIC_NAME',
+                    'CSPK_KM',
+                    'CSPK_WHEELS',
+                    'CSPK_UANG_JALAN',
+                    'CSPK_SUPPLIER',
+                    'CSPK_LITER',
+                    'CSPK_UANG_SOLAR',
+                    'CSPK_UANG_MAKAN',
+                    'CSPK_UANG_PENGINAPAN',
+                    'CSPK_UANG_PENGAWALAN',
+                    'CSPK_UANG_LAIN2',
+                )
+                ->get()
         ];
     }
 
@@ -508,9 +532,9 @@ class DeliveryController extends Controller
     {
         return view(
             'transaction.delivery_assignment',
-            ['Drivers' => User::select('nick_name', 'name')
+            ['PICs' => User::select('nick_name', 'name')
                 ->where('branch', Auth::user()->branch)
-                ->where('role', 'driver')
+                ->whereIn('role', ['driver', 'mechanic', 'operator'])
                 ->get()]
         );
     }
@@ -610,5 +634,58 @@ class DeliveryController extends Controller
             ->whereRaw('IFNULL(TTLROW,0)>0')
             ->whereNull('CITRN_DOCNO');
         return ['data' => $RSDelivery->get()];
+    }
+
+    public function saveSPK(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'CSPK_REFF_DOC' => 'required',
+            'CSPK_PIC_AS' => 'required',
+            'CSPK_PIC_NAME' => 'required',
+            'CSPK_KM' => 'required|numeric',
+            'CSPK_WHEELS' => 'required|numeric',
+            'CSPK_SUPPLIER' => 'required',
+            'CSPK_LITER' => 'required|numeric',
+            'CSPK_UANG_MAKAN' => 'required|numeric',
+            'CSPK_UANG_PENGINAPAN' => 'required|numeric',
+            'CSPK_UANG_PENGAWALAN' => 'required|numeric',
+            'CSPK_UANG_LAIN2' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
+            ->where('RANGE2', '>=', $request->CSPK_KM)
+            ->where('BRANCH', Auth::user()->branch)
+            ->orderBy('RANGE1', 'ASC')
+            ->first();
+        $PreparedData = [
+            'CSPK_REFF_DOC' => $request->CSPK_REFF_DOC,
+            'CSPK_PIC_AS' => $request->CSPK_PIC_AS,
+            'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
+            'CSPK_KM' => $request->CSPK_KM,
+            'CSPK_WHEELS' => $request->CSPK_WHEELS,
+            'CSPK_UANG_JALAN' => $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6,
+            'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
+            'CSPK_LITER' => $request->CSPK_LITER,
+            'CSPK_UANG_SOLAR' => $request->CSPK_SUPPLIER == 'SPBU' ? 6800 * $request->CSPK_LITER : 10000 * $request->CSPK_LITER,
+            'CSPK_UANG_MAKAN' => $request->CSPK_UANG_MAKAN,
+            'CSPK_UANG_MANDAH' => 0,
+            'CSPK_UANG_PENGINAPAN' => $request->CSPK_UANG_PENGINAPAN,
+            'CSPK_UANG_PENGAWALAN' => $request->CSPK_UANG_PENGAWALAN,
+            'CSPK_UANG_LAIN2' => $request->CSPK_UANG_LAIN2,
+            'CSPK_BRANCH' => Auth::user()->branch,
+            'created_by' => Auth::user()->nick_name,
+        ];
+        $responseOfCreate = C_SPK::on($this->dedicatedConnection)->create($PreparedData);
+        return ['message' => 'OK', 'data' => $RangePrice];
+    }
+
+    public function getSPKByDO(Request $request)
+    {
+        $SPKs = C_SPK::on($this->dedicatedConnection)->where('CSPK_REFF_DOC', base64_decode($request->id))->get();
+        return ['data' => $SPKs];
     }
 }

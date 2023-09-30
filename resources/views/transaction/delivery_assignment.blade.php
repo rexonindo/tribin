@@ -52,24 +52,6 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm mb-1">
-                                                    <span class="input-group-text">Driver</span>
-                                                    <select class="form-select" id="driver">
-                                                        @foreach($Drivers as $r)
-                                                        <option value="{{ $r->nick_name }}">{{ $r->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Mechanic</span>
-                                                    <input type="text" id="quotationMechanic" class="form-control" maxlength="45">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
                                                 <label for="quotationCustomer" class="form-label">Vehicle Reg. Number</label>
                                                 <div class="input-group input-group-sm mb-1">
                                                     <input type="text" id="quotationVehicleRegistrationNumber" class="form-control" maxlength="45">
@@ -111,18 +93,15 @@
                                 <div class="tab-pane fade" id="nav-cost" role="tabpanel" aria-labelledby="nav-cost-tab" tabindex="1">
                                     <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                                         <div class="row">
-                                            <div class="col mb-1 text-end">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)" title="Save"><i class="fas fa-save"></i></button>
-                                                    <button type="button" class="btn btn-outline-primary" id="btnPrint" onclick="btnPrintOnclick(this)" title="Print"><i class="fas fa-print"></i></button>
-                                                </div>
+                                            <div class="col mb-1" id="div-alert-cost">
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">PIC As</span>
                                                     <select class="form-select" id="PICAs" onchange="PICAsOnChange(event)">
+                                                        <option value="-">-</option>
                                                         <option value="DRIVER">DRIVER</option>
                                                         <option value="MECHANIC">MECHANIC</option>
                                                         <option value="OPERATOR">OPERATOR</option>
@@ -132,7 +111,11 @@
                                             <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">PIC Name</span>
-                                                    <input type="text" id="PICName" class="form-control" maxlength="45">
+                                                    <select class="form-select" id="PICName">
+                                                        @foreach($PICs as $r)
+                                                        <option value="{{ $r->nick_name }}">{{ $r->name }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -158,7 +141,7 @@
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Solar Supplier</span>
-                                                    <select class="form-select" id="Wheels">
+                                                    <select class="form-select" id="Supplier">
                                                         <option value="SPBU">SPBU</option>
                                                         <option value="JAT">JAT</option>
                                                     </select>
@@ -215,6 +198,8 @@
                                                         <thead class="table-light">
                                                             <tr>
                                                                 <th class="d-none">idLine</th>
+                                                                <th class="d-none">PIC Id</th>
+                                                                <th>...</th>
                                                                 <th>PIC As</th>
                                                                 <th>PIC Name</th>
                                                                 <th>KM</th>
@@ -261,6 +246,61 @@
     </div>
 </div>
 <script>
+    function btnSaveLineSaleOnclick(p) {
+        if (PICAs.value === '-') {
+            alertify.message('PIC As is required')
+            return
+        }
+        p.disabled = true
+        const data = {
+            CSPK_REFF_DOC: labelQuotationInModal.innerText,
+            CSPK_PIC_AS: PICAs.value,
+            CSPK_PIC_NAME: PICName.value,
+            CSPK_KM: KM.value,
+            CSPK_WHEELS: Wheels.value,
+            CSPK_SUPPLIER: Supplier.value,
+            CSPK_LITER: liters.value,
+            CSPK_UANG_MAKAN: uangMakan.value,
+            CSPK_UANG_PENGINAPAN: uangPenginapan.value,
+            CSPK_UANG_PENGAWALAN: uangPengawalan.value,
+            CSPK_UANG_LAIN2: uangLain.value,
+            _token: '{{ csrf_token() }}',
+        }
+        const div_alert = document.getElementById('div-alert-cost')
+        div_alert.innerHTML = `<div class="alert alert-info alert-dismissible fade show" role="alert">
+                    Please wait
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+        $.ajax({
+            type: "POST",
+            url: "SPK",
+            data: data,
+            dataType: "json",
+            success: function(response) {
+                p.disabled = false
+                div_alert.innerHTML = `<div class="alert alert-info alert-dismissible fade show" role="alert">
+                        Done
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+            },
+            error: function(xhr, xopt, xthrow) {
+                p.disabled = false
+                const respon = Object.keys(xhr.responseJSON)
+
+                let msg = ''
+                for (const item of respon) {
+                    msg += `<p>${xhr.responseJSON[item]}</p>`
+                }
+                div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${msg}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+
+                alertify.warning(xthrow);
+            }
+        });
+    }
+
     function loadApprovalList() {
         approvalContainer.innerHTML = 'Please wait'
         $.ajax({
@@ -418,7 +458,65 @@
                     newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['TDLVORDDETA_ITMQT']
                 })
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
 
+                myContainer = document.getElementById("costTableContainer");
+                myfrag = document.createDocumentFragment();
+                cln = costTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                myTable = myfrag.getElementById("costTable");
+                myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+
+                response.SPK.forEach((arrayItem) => {
+                    let elem = document.createElement('button')
+                    elem.classList.add('btn', 'btn-sm', 'btn-light-primary', 'btn-icon')
+                    elem.innerHTML = '<i class="fas fa-search"></i>'
+                    newrow = myTableBody.insertRow(-1)
+                    newrow.onclick = (event) => {
+                        const selrow = costTable.rows[event.target.parentElement.rowIndex]
+                        if (selrow.title === 'selected') {
+                            selrow.title = 'not selected'
+                            selrow.classList.remove('table-info')
+                        } else {
+                            const ttlrows = costTable.rows.length
+                            for (let i = 1; i < ttlrows; i++) {
+                                costTable.rows[i].classList.remove('table-info')
+                                costTable.rows[i].title = 'not selected'
+                            }
+                            selrow.title = 'selected'
+                            selrow.classList.add('table-info')
+                        }
+                    }
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('d-none')
+                    newcell.innerHTML = arrayItem['id']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('d-none')
+                    newcell.innerHTML = arrayItem['CSPK_PIC_NAME']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-center')
+                    newcell.appendChild(elem)
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_PIC_AS']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_PIC_NAME']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_KM']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_WHEELS']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_UANG_JALAN']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_SUPPLIER']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_LITER']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_UANG_SOLAR']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CSPK_UANG_MAKAN']
+                })
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
             },

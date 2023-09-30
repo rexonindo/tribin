@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\C_SPK;
 use App\Models\CompanyGroup;
 use App\Models\M_DISTANCE_PRICE;
 use Illuminate\Http\Request;
@@ -36,6 +37,7 @@ class DistancePriceController extends Controller
         $RS = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
             ->where($columnMap[$request->searchBy], '>=',  $request->searchValue ? $request->searchValue : 0)
             ->where('BRANCH', Auth::user()->branch)
+            ->orderBy('RANGE1', 'ASC')
             ->get();
         return ['data' => $RS];
     }

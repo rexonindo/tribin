@@ -68,6 +68,13 @@ Route::middleware('auth')->group(function () {
         Route::put('{id}', [DistancePriceController::class, 'update']);
     });
 
+    # Terkait SPK , Surat Perintah Kerja
+    Route::prefix('SPK')->group(function () {
+        Route::post('', [DeliveryController::class, 'saveSPK']);
+        Route::put('{id}', [DeliveryController::class, 'updateSPK']);        
+        Route::put('delivery-order/{id}', [DeliveryController::class, 'getSPKByDO']);        
+    });
+
     # Terkait Supplier Master
     Route::prefix('supplier')->group(function () {
         Route::get('form', [SupplierController::class, 'index']);
