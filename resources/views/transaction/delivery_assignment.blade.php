@@ -163,8 +163,8 @@
                                             </div>
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Uang Penginapan</span>
-                                                    <input type="number" id="uangPenginapan" class="form-control">
+                                                    <span class="input-group-text">Uang Mandah</span>
+                                                    <input type="number" id="uangMandah" class="form-control">
                                                 </div>
                                             </div>
                                         </div>
@@ -175,6 +175,14 @@
                                                     <input type="number" id="uangPengawalan" class="form-control">
                                                 </div>
                                             </div>
+                                            <div class="col mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Uang Penginapan</span>
+                                                    <input type="number" id="uangPenginapan" class="form-control">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Lain<sup>2</sup></span>
@@ -199,7 +207,7 @@
                                                             <tr>
                                                                 <th class="d-none">idLine</th>
                                                                 <th class="d-none">PIC Id</th>
-                                                                <th>...</th>
+                                                                <th class="text-center"></th>
                                                                 <th>PIC As</th>
                                                                 <th>PIC Name</th>
                                                                 <th>KM</th>
@@ -246,6 +254,12 @@
     </div>
 </div>
 <script>
+    function PICAsOnChange(e) {
+        if (e.target.value !== '-') {
+            PICName.focus()
+        }
+    }
+
     function btnSaveLineSaleOnclick(p) {
         if (PICAs.value === '-') {
             alertify.message('PIC As is required')
@@ -261,6 +275,7 @@
             CSPK_SUPPLIER: Supplier.value,
             CSPK_LITER: liters.value,
             CSPK_UANG_MAKAN: uangMakan.value,
+            CSPK_UANG_MANDAH: uangMandah.value,
             CSPK_UANG_PENGINAPAN: uangPenginapan.value,
             CSPK_UANG_PENGAWALAN: uangPengawalan.value,
             CSPK_UANG_LAIN2: uangLain.value,
@@ -282,6 +297,10 @@
                         Done
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>`
+                loadQuotationDetail({
+                    doc: labelQuotationInModal.innerText,
+                    branch: branch.value
+                })
             },
             error: function(xhr, xopt, xthrow) {
                 p.disabled = false
@@ -471,8 +490,8 @@
 
                 response.SPK.forEach((arrayItem) => {
                     let elem = document.createElement('button')
-                    elem.classList.add('btn', 'btn-sm', 'btn-light-primary', 'btn-icon')
-                    elem.innerHTML = '<i class="fas fa-search"></i>'
+                    elem.classList.add('btn', 'btn-sm', 'btn-primary', 'btn-icon')
+                    elem.innerHTML = '<i class="fas fa-print"></i>'
                     newrow = myTableBody.insertRow(-1)
                     newrow.onclick = (event) => {
                         const selrow = costTable.rows[event.target.parentElement.rowIndex]
@@ -499,23 +518,44 @@
                     newcell.classList.add('text-center')
                     newcell.appendChild(elem)
                     newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_PIC_AS']
                     newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_PIC_NAME']
                     newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_KM']
                     newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_WHEELS']
                     newcell = newrow.insertCell(-1)
-                    newcell.innerHTML = arrayItem['CSPK_UANG_JALAN']
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['CSPK_UANG_JALAN']).format(',')
                     newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_SUPPLIER']
                     newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_LITER']
                     newcell = newrow.insertCell(-1)
-                    newcell.innerHTML = arrayItem['CSPK_UANG_SOLAR']
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['CSPK_UANG_SOLAR']).format(',')
                     newcell = newrow.insertCell(-1)
-                    newcell.innerHTML = arrayItem['CSPK_UANG_MAKAN']
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['CSPK_UANG_MAKAN']).format(',')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['CSPK_UANG_MANDAH']).format(',')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['CSPK_UANG_PENGINAPAN']).format(',')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['CSPK_UANG_PENGAWALAN']).format(',')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['CSPK_UANG_LAIN2']).format(',')
                 })
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
