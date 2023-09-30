@@ -554,6 +554,7 @@ class DeliveryController extends Controller
 
     function assignDriver(Request $request)
     {
+        $DOCNUM = base64_decode($request->id);
         # data quotation header
         $validator = Validator::make($request->all(), [
             'TDLVORD_JALAN_COST' => 'numeric'
@@ -563,11 +564,16 @@ class DeliveryController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
+        $SPK = C_SPK::on($this->dedicatedConnection)->select('CSPK_PIC_NAME')
+            ->where('CSPK_REFF_DOC', $DOCNUM)
+            ->where('CSPK_PIC_AS', 'DRIVER')
+            ->first();
+
         $affectedRow = T_DLVORDHEAD::on($this->dedicatedConnection)
-            ->where('TDLVORD_DLVCD', base64_decode($request->id))
+            ->where('TDLVORD_DLVCD', $DOCNUM)
             ->where('TDLVORD_BRANCH', $request->TDLVORD_BRANCH)
             ->update([
-                'TDLVORD_DELIVERED_BY' => $request->TDLVORD_DELIVERED_BY,
+                'TDLVORD_DELIVERED_BY' => $SPK ? $SPK->CSPK_PIC_NAME : NULL,
                 'TDLVORD_MEKANIK' => $request->TDLVORD_MEKANIK,
                 'TDLVORD_JALAN_COST' => $request->TDLVORD_JALAN_COST,
                 'TDLVORD_VEHICLE_REGNUM' => $request->TDLVORD_VEHICLE_REGNUM,

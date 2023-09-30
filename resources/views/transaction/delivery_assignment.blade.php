@@ -57,10 +57,10 @@
                                                     <input type="text" id="quotationVehicleRegistrationNumber" class="form-control" maxlength="45">
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-1">
+                                            <div class="col-md-6 mb-1 d-none">
                                                 <label for="quotationCustomer" class="form-label"><i>Uang Jalan</i></label>
                                                 <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationUangJalan" class="form-control" maxlength="15" readonly>
+                                                    <input type="text" id="quotationUangJalan" class="form-control" maxlength="15" readonly value="0">
                                                 </div>
                                             </div>
                                         </div>
@@ -401,8 +401,6 @@
                 data: {
                     _token: '{{ csrf_token() }}',
                     TDLVORD_BRANCH: branch.value,
-                    TDLVORD_DELIVERED_BY: driver.value,
-                    TDLVORD_MEKANIK: quotationMechanic.value,
                     TDLVORD_JALAN_COST: quotationUangJalan.value,
                     TDLVORD_VEHICLE_REGNUM: quotationVehicleRegistrationNumber.value,
                 },
