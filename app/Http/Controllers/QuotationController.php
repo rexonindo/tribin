@@ -310,7 +310,7 @@ class QuotationController extends Controller
         $dataTobeApproved = [];
         $dataApproved = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD,TQUODETA_BRANCH")
