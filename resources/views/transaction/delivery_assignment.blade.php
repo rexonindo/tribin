@@ -43,10 +43,21 @@
                                                     <input type="text" id="quotationCustomer" class="form-control" maxlength="50" disabled>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-1">
-                                                <label for="quotationCustomer" class="form-label">Address</label>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-1">
+                                                <label for="quotationCustomer" class="form-label">Address Name</label>
                                                 <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationCustomerAddress" class="form-control" disabled>
+                                                    <input type="text" id="quotationAddressName" class="form-control" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mb-1">
+                                                <label for="quotationCustomer" class="form-label">Address Description</label>
+                                                <div class="input-group input-group-sm mb-1">
+                                                    <textarea id="quotationAddressDescription" class="form-control" disabled>
+                                                    </textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -139,19 +150,19 @@
                                         </div>
                                         <div class="row">
                                             <div class="col mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Solar Supplier</span>
-                                                    <select class="form-select" id="Supplier">
-                                                        <option value="SPBU">SPBU</option>
-                                                        <option value="JAT">JAT</option>
-                                                    </select>
-                                                </div>
+                                                <label class="form-label">Solar Supplier</label>
+                                                <select class="form-select form-select-sm" id="Supplier">
+                                                    <option value="SPBU">SPBU</option>
+                                                    <option value="JAT">JAT</option>
+                                                </select>
                                             </div>
                                             <div class="col mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Liters</span>
-                                                    <input type="number" id="liters" class="form-control">
-                                                </div>
+                                                <label class="form-label">Liters (Existing)</label>
+                                                <input type="number" id="litersExisting" class="form-control form-control-sm">
+                                            </div>
+                                            <div class="col mb-1">
+                                                <label class="form-label">Liters</label>
+                                                <input type="number" id="liters" class="form-control form-control-sm">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -191,6 +202,30 @@
                                             </div>
                                         </div>
                                         <div class="row">
+                                            <div class="col-md-6 mb-1">
+                                                <label for="tanggalBerangkat" class="form-label">Tanggal Berangkat</label>
+                                                <input type="text" id="tanggalBerangkat" class="form-control" maxlength="20" readonly>
+                                            </div>
+                                            <div class="col-md-6 mb-1">
+                                                <label for="tanggalKembali" class="form-label">Tanggal Kembali</label>
+                                                <input type="text" id="tanggalKembali" class="form-control" maxlength="20" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-3 mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Jenis Kenadaraan</span>
+                                                    <input type="text" id="jenisKendaraan" class="form-control" maxlength="35">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9 mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Tugas</span>
+                                                    <input type="text" id="tugas" class="form-control" maxlength="70">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col text-center mb-1">
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" class="btn btn-outline-secondary" id="btnSaveLineSale" onclick="btnSaveLineSaleOnclick(this)">Save line</button>
@@ -214,6 +249,7 @@
                                                                 <th>Wheels</th>
                                                                 <th>Uang Jalan</th>
                                                                 <th>Solar Supplier</th>
+                                                                <th>Liters (Existing)</th>
                                                                 <th>Liters</th>
                                                                 <th>Uang Solar</th>
                                                                 <th>Uang Makan</th>
@@ -255,6 +291,19 @@
 </div>
 <input type="hidden" id="selectedRowAtOrderTable">
 <script>
+    $("#tanggalBerangkat").datetimepicker({
+        format: 'yyyy-mm-dd HH:MM:00',
+        autoclose: true,
+        uiLibrary: 'bootstrap5',
+        footer: true
+    })
+    $("#tanggalKembali").datetimepicker({
+        format: 'yyyy-mm-dd HH:MM:00',
+        autoclose: true,
+        uiLibrary: 'bootstrap5',
+        footer: true
+    })
+
     function PICAsOnChange(e) {
         if (e.target.value !== '-') {
             PICName.focus()
@@ -275,11 +324,16 @@
             CSPK_WHEELS: Wheels.value,
             CSPK_SUPPLIER: Supplier.value,
             CSPK_LITER: liters.value,
+            CSPK_LITER_EXISTING: litersExisting.value,
             CSPK_UANG_MAKAN: uangMakan.value,
             CSPK_UANG_MANDAH: uangMandah.value,
             CSPK_UANG_PENGINAPAN: uangPenginapan.value,
             CSPK_UANG_PENGAWALAN: uangPengawalan.value,
             CSPK_UANG_LAIN2: uangLain.value,
+            CSPK_LEAVEDT: tanggalBerangkat.value,
+            CSPK_BACKDT: tanggalKembali.value,
+            CSPK_VEHICLE_TYPE: jenisKendaraan.value,
+            CSPK_JOBDESK: tugas.value,
             _token: '{{ csrf_token() }}',
         }
         const div_alert = document.getElementById('div-alert-cost')
@@ -360,7 +414,7 @@
                     elButton2.onclick = () => {
                         event.preventDefault()
                         quotationCustomer.value = arrayItem['MCUS_CUSNM']
-                        quotationCustomerAddress.value = arrayItem['MCUS_ADDR1']
+
                         labelQuotationInModal.innerHTML = arrayItem['TDLVORD_DLVCD']
                         branch.value = arrayItem['TDLVORD_BRANCH']
                         const myModal = new bootstrap.Modal(document.getElementById('quotationModal'), {})
@@ -432,6 +486,8 @@
     }
 
     function loadQuotationDetail(data) {
+        quotationAddressName.value = 'Please wait'
+        quotationAddressDescription.value = 'Please wait'
         $.ajax({
             type: "GET",
             url: `delivery/document/${btoa(data.doc)}`,
@@ -440,6 +496,8 @@
             },
             dataType: "json",
             success: function(response) {
+                quotationAddressName.value = response.SalesOrder[0].TSLO_ADDRESS_NAME
+                quotationAddressDescription.value = response.SalesOrder[0].TSLO_ADDRESS_DESCRIPTION
                 let myContainer = document.getElementById("quotationTableContainer");
                 let myfrag = document.createDocumentFragment();
                 let cln = quotationTable.cloneNode(true);
@@ -516,11 +574,16 @@
                             Wheels.value = arrayItem['CSPK_WHEELS']
                             Supplier.value = arrayItem['CSPK_SUPPLIER']
                             liters.value = arrayItem['CSPK_LITER']
+                            litersExisting.value = arrayItem['CSPK_LITER_EXISTING']
                             uangMakan.value = arrayItem['CSPK_UANG_MAKAN']
                             uangMandah.value = arrayItem['CSPK_UANG_MANDAH']
                             uangPengawalan.value = arrayItem['CSPK_UANG_PENGAWALAN']
                             uangPenginapan.value = arrayItem['CSPK_UANG_PENGINAPAN']
                             uangLain.value = arrayItem['CSPK_UANG_LAIN2']
+                            tanggalBerangkat.value = arrayItem['CSPK_LEAVEDT']
+                            tanggalKembali.value = arrayItem['CSPK_BACKDT']
+                            jenisKendaraan.value = arrayItem['CSPK_VEHICLE_TYPE']
+                            tugas.value = arrayItem['CSPK_JOBDESK']
                         }
                     }
                     newcell = newrow.insertCell(-1)
@@ -577,6 +640,8 @@
             },
             error: function(xhr, xopt, xthrow) {
                 alertify.warning(xthrow);
+                quotationAddressName.value = ''
+                quotationAddressDescription.value = ''
             }
         });
     }
@@ -590,11 +655,16 @@
             CSPK_WHEELS: Wheels.value,
             CSPK_SUPPLIER: Supplier.value,
             CSPK_LITER: liters.value,
+            CSPK_LITER_EXISTING: litersExisting.value,
             CSPK_UANG_MAKAN: uangMakan.value,
             CSPK_UANG_MANDAH: uangMandah.value,
             CSPK_UANG_PENGINAPAN: uangPenginapan.value,
             CSPK_UANG_PENGAWALAN: uangPengawalan.value,
             CSPK_UANG_LAIN2: uangLain.value,
+            CSPK_LEAVEDT: tanggalBerangkat.value,
+            CSPK_BACKDT: tanggalKembali.value,
+            CSPK_VEHICLE_TYPE: jenisKendaraan.value,
+            CSPK_JOBDESK: tugas.value,
             _token: '{{ csrf_token() }}'
         }
         const idRow = costTable.rows[selectedRowAtOrderTable.value].cells[0].innerText

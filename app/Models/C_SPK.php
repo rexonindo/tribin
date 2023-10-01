@@ -11,8 +11,9 @@ class C_SPK extends Model
     protected $table = 'C_SPK';
     protected $fillable = [
         'CSPK_BRANCH', 'CSPK_PIC_AS', 'CSPK_PIC_NAME', 'CSPK_REFF_DOC', 'CSPK_KM', 'CSPK_WHEELS', 'CSPK_UANG_JALAN', 'CSPK_SUPPLIER',
-        'CSPK_LITER', 'CSPK_UANG_SOLAR', 'CSPK_UANG_MAKAN', 'CSPK_UANG_MANDAH',
+        'CSPK_LITER', 'CSPK_LITER_EXISTING', 'CSPK_UANG_SOLAR', 'CSPK_UANG_MAKAN', 'CSPK_UANG_MANDAH',
         'CSPK_UANG_PENGINAPAN', 'CSPK_UANG_PENGAWALAN', 'CSPK_UANG_LAIN2',
+        'CSPK_DOCNO', 'CSPK_DOCNO_ORDER', 'CSPK_LEAVEDT', 'CSPK_BACKDT', 'CSPK_VEHICLE_TYPE', 'CSPK_JOBDESK',
         'created_by', 'updated_by', 'deleted_at', 'deleted_by'
     ];
 }

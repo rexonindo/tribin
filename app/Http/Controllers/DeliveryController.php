@@ -139,6 +139,7 @@ class DeliveryController extends Controller
                 'CSPK_WHEELS' => $request->CSPK_WHEELS,
                 'CSPK_UANG_JALAN' => $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6,
                 'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
+                'CSPK_LITER_EXISTING' => $request->CSPK_LITER_EXISTING,
                 'CSPK_LITER' => $request->CSPK_LITER,
                 'CSPK_UANG_SOLAR' => $request->CSPK_SUPPLIER == 'SPBU' ? 6800 * $request->CSPK_LITER : 10000 * $request->CSPK_LITER,
                 'CSPK_UANG_MAKAN' => $request->CSPK_UANG_MAKAN,
@@ -146,6 +147,10 @@ class DeliveryController extends Controller
                 'CSPK_UANG_PENGINAPAN' => $request->CSPK_UANG_PENGINAPAN,
                 'CSPK_UANG_PENGAWALAN' => $request->CSPK_UANG_PENGAWALAN,
                 'CSPK_UANG_LAIN2' => $request->CSPK_UANG_LAIN2,
+                'CSPK_LEAVEDT' => $request->CSPK_LEAVEDT,
+                'CSPK_BACKDT' => $request->CSPK_BACKDT,
+                'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE,
+                'CSPK_JOBDESK' => $request->CSPK_JOBDESK,
                 'updated_by' => Auth::user()->nick_name
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
@@ -241,14 +246,25 @@ class DeliveryController extends Controller
     function loadByDocument(Request $request)
     {
         $DONUM =  base64_decode($request->id);
+        $OrderDetail = T_DLVORDDETA::on($this->dedicatedConnection)->select('T_DLVORDDETA.id', 'TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT', 'MITM_ITMNM', 'TDLVORDDETA_SLOCD')
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'MITM_BRANCH');
+            })
+            ->where('TDLVORDDETA_DLVCD', $DONUM)
+            ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get();
+        $SalesOrderNumber = NULL;
+        foreach ($OrderDetail as $r) {
+            $SalesOrderNumber = $r->TDLVORDDETA_SLOCD;
+            break;
+        }
+        $SalesOrder = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_ADDRESS_NAME', 'TSLO_ADDRESS_DESCRIPTION')
+            ->where('TSLO_SLOCD', $SalesOrderNumber)
+            ->where('TSLO_BRANCH', Auth::user()->branch)
+            ->get();
         return [
-            'data' => T_DLVORDDETA::on($this->dedicatedConnection)->select('T_DLVORDDETA.id', 'TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT', 'MITM_ITMNM')
-                ->leftJoin("M_ITM", function ($join) {
-                    $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'MITM_BRANCH');
-                })
-                ->where('TDLVORDDETA_DLVCD', $DONUM)
-                ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get(),
+            'data' => $OrderDetail,
             'input' => base64_decode($request->id),
+            'SalesOrder' => $SalesOrder,
             'SPK' => C_SPK::on($this->dedicatedConnection)
                 ->leftJoin('users', 'CSPK_PIC_NAME', '=', 'nick_name')
                 ->where('CSPK_REFF_DOC', $DONUM)
@@ -263,6 +279,7 @@ class DeliveryController extends Controller
                     'CSPK_WHEELS',
                     'CSPK_UANG_JALAN',
                     'CSPK_SUPPLIER',
+                    'CSPK_LITER_EXISTING',
                     'CSPK_LITER',
                     'CSPK_UANG_SOLAR',
                     'CSPK_UANG_MAKAN',
@@ -270,6 +287,10 @@ class DeliveryController extends Controller
                     'CSPK_UANG_PENGINAPAN',
                     'CSPK_UANG_PENGAWALAN',
                     'CSPK_UANG_LAIN2',
+                    'CSPK_LEAVEDT',
+                    'CSPK_BACKDT',
+                    'CSPK_VEHICLE_TYPE',
+                    'CSPK_JOBDESK',
                 )
                 ->get()
         ];
@@ -578,6 +599,7 @@ class DeliveryController extends Controller
             ->whereNull('TDLVORD_DELIVERED_BY')
             ->where('TDLVORD_BRANCH', Auth::user()->branch)
             ->get();
+
         return ['data' => $data];
     }
 
@@ -692,10 +714,15 @@ class DeliveryController extends Controller
             'CSPK_REFF_DOC' => 'required',
             'CSPK_PIC_AS' => 'required',
             'CSPK_PIC_NAME' => 'required',
+            'CSPK_JOBDESK' => 'required',
+            'CSPK_VEHICLE_TYPE' => 'required',
+            'CSPK_BACKDT' => 'required',
+            'CSPK_LEAVEDT' => 'required',
             'CSPK_KM' => 'required|numeric',
             'CSPK_WHEELS' => 'required|numeric',
             'CSPK_SUPPLIER' => 'required',
             'CSPK_LITER' => 'required|numeric',
+            'CSPK_LITER_EXISTING' => 'required|numeric',
             'CSPK_UANG_MAKAN' => 'required|numeric',
             'CSPK_UANG_MANDAH' => 'required|numeric',
             'CSPK_UANG_PENGINAPAN' => 'required|numeric',
@@ -712,6 +739,19 @@ class DeliveryController extends Controller
             ->where('BRANCH', Auth::user()->branch)
             ->orderBy('RANGE1', 'ASC')
             ->first();
+
+        $LastLine = DB::connection($this->dedicatedConnection)->table('C_SPK')
+            ->whereYear('created_at', '=', date('Y'))
+            ->where('CSPK_BRANCH', Auth::user()->branch)
+            ->max('CSPK_DOCNO_ORDER');
+        $newDocCode = '';
+        if (!$LastLine) {
+            $LastLine = 1;
+            $newDocCode = date('Y') . '-00001';
+        } else {
+            $LastLine++;
+            $newDocCode = date('Y') . '-' . substr('0000' . $LastLine, -5);
+        }
         $PreparedData = [
             'CSPK_REFF_DOC' => $request->CSPK_REFF_DOC,
             'CSPK_PIC_AS' => $request->CSPK_PIC_AS,
@@ -720,6 +760,7 @@ class DeliveryController extends Controller
             'CSPK_WHEELS' => $request->CSPK_WHEELS,
             'CSPK_UANG_JALAN' => $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6,
             'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
+            'CSPK_LITER_EXISTING' => $request->CSPK_LITER_EXISTING,
             'CSPK_LITER' => $request->CSPK_LITER,
             'CSPK_UANG_SOLAR' => $request->CSPK_SUPPLIER == 'SPBU' ? 6800 * $request->CSPK_LITER : 10000 * $request->CSPK_LITER,
             'CSPK_UANG_MAKAN' => $request->CSPK_UANG_MAKAN,
@@ -729,6 +770,12 @@ class DeliveryController extends Controller
             'CSPK_UANG_LAIN2' => $request->CSPK_UANG_LAIN2,
             'CSPK_BRANCH' => Auth::user()->branch,
             'created_by' => Auth::user()->nick_name,
+            'CSPK_LEAVEDT' => $request->CSPK_LEAVEDT,
+            'CSPK_BACKDT' => $request->CSPK_BACKDT,
+            'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE,
+            'CSPK_JOBDESK' => $request->CSPK_JOBDESK,
+            'CSPK_DOCNO' => $newDocCode,
+            'CSPK_DOCNO_ORDER' => $LastLine,
         ];
         $responseOfCreate = C_SPK::on($this->dedicatedConnection)->create($PreparedData);
         return ['message' => 'OK', 'data' => $RangePrice];
@@ -753,18 +800,24 @@ class DeliveryController extends Controller
         $this->fpdf->SetFont('Arial', '', 10);
         $this->fpdf->SetXY(3, 20);
         $this->fpdf->Cell(45, 5, 'ID SPK', 0, 0, 'L');
-        $this->fpdf->Cell(45, 5, ': SPK-' . $doc, 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_DOCNO, 0, 0, 'L');
         $this->fpdf->SetXY(3, 25);
-        $this->fpdf->Cell(45, 5, 'Tanggal', 1, 0, 'L');
-        $this->fpdf->Cell(45, 5, ': ', 1, 0, 'L');
+        $this->fpdf->Cell(45, 5, 'Tanggal', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . date('Y-m-d'), 0, 0, 'L');
         $this->fpdf->SetXY(3, 30);
-        $this->fpdf->Cell(45, 5, 'PIC Yang Menugaskan', 1, 0, 'L');
+        $this->fpdf->Cell(45, 5, 'PIC Yang Menugaskan', 0, 0, 'L');
         $this->fpdf->SetXY(3, 35);
-        $this->fpdf->Cell(45, 5, 'PIC Yang Ditugaskan', 1, 0, 'L');
+        $this->fpdf->Cell(45, 5, 'PIC Yang Ditugaskan', 0, 0, 'L');
         $this->fpdf->SetXY(3, 45);
-        $this->fpdf->Cell(45, 5, 'Nomor Referensi', 1, 0, 'L');
+        $this->fpdf->Cell(45, 5, 'Nomor Referensi', 0, 0, 'L');
         $this->fpdf->SetXY(3, 50);
-        $this->fpdf->Cell(45, 5, 'Tugas', 1, 0, 'L');
+        $this->fpdf->Cell(45, 5, 'Tugas', 0, 0, 'L');
+
+        $this->fpdf->AddPage("P", 'A5');
+        $this->fpdf->SetAutoPageBreak(true, 0);
+        $this->fpdf->SetFont('Arial', 'B', 12);
+        $this->fpdf->SetXY(3, 5);
+        $this->fpdf->Cell(45, 5, 'REALISASI DELIVERY BARANG', 0, 0, 'L');
         $this->fpdf->Output('SPK ' . $doc . '.pdf', 'I');
         exit;
     }
