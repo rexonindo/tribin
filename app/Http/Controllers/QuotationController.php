@@ -250,7 +250,7 @@ class QuotationController extends Controller
             'MCUS_CUSNM',
         ];
 
-        $RS = $request->approval == '1' ? T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST'])
+        $RS = $request->approval == '1' ? T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST', 'MCUS_ADDR1'])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')

@@ -37,6 +37,8 @@ class ReceiveOrderController extends Controller
             'TSLO_QUOCD' => 'required',
             'TSLO_ISSUDT' => 'required|date',
             'TSLO_PLAN_DLVDT' => 'required',
+            'TSLO_ADDRESS_NAME' => 'required',
+            'TSLO_ADDRESS_DESCRIPTION' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -87,6 +89,8 @@ class ReceiveOrderController extends Controller
             'TSLO_POLINE' => $POLastLine,
             'TSLO_ISSUDT' => $request->TSLO_ISSUDT,
             'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
+            'TSLO_ADDRESS_NAME' => $request->TSLO_ADDRESS_NAME,
+            'TSLO_ADDRESS_DESCRIPTION' => $request->TSLO_ADDRESS_DESCRIPTION,
             'created_by' => Auth::user()->nick_name,
             'TSLO_BRANCH' => Auth::user()->branch
         ];
@@ -145,7 +149,10 @@ class ReceiveOrderController extends Controller
             'TSLO_POCD',
         ];
 
-        $RS = T_SLOHEAD::on($this->dedicatedConnection)->select(["TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD", "TSLO_ATTN", "TSLO_PLAN_DLVDT"])
+        $RS = T_SLOHEAD::on($this->dedicatedConnection)->select([
+            "TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD",
+            "TSLO_ATTN", "TSLO_PLAN_DLVDT", "TSLO_ADDRESS_NAME", "TSLO_ADDRESS_DESCRIPTION"
+        ])
             ->leftJoin("M_CUS", function ($join) {
                 $join->on("TSLO_CUSCD", "=", "MCUS_CUSCD")
                     ->on('TSLO_BRANCH', '=', 'MCUS_BRANCH');
@@ -164,7 +171,7 @@ class ReceiveOrderController extends Controller
             'TSLODRAFT_POCD',
         ];
 
-        $RS = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(["TSLODRAFT_SLOCD", "TSLODRAFT_CUSCD", "MCUS_CUSNM", "TSLODRAFT_ISSUDT", "TSLODRAFT_POCD", "TSLODRAFT_ATTN"])
+        $RS = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(["TSLODRAFT_SLOCD", "TSLODRAFT_CUSCD", "MCUS_CUSNM", "TSLODRAFT_ISSUDT", "TSLODRAFT_POCD", "TSLODRAFT_ATTN", "MCUS_ADDR1"])
             ->leftJoin("M_CUS", function ($join) {
                 $join->on("TSLODRAFT_CUSCD", "=", "MCUS_CUSCD")
                     ->on('TSLODRAFT_BRANCH', '=', 'MCUS_BRANCH');
@@ -224,7 +231,11 @@ class ReceiveOrderController extends Controller
             ->where('TSLO_SLOCD', base64_decode($request->id))
             ->where('TSLO_BRANCH', Auth::user()->branch)
             ->update([
-                'TSLO_CUSCD' => $request->TSLO_CUSCD, 'TSLO_ATTN' => $request->TSLO_ATTN, 'TSLO_POCD' => $request->TSLO_POCD, 'TSLO_ISSUDT' => $request->TSLO_ISSUDT, 'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT
+                'TSLO_CUSCD' => $request->TSLO_CUSCD, 'TSLO_ATTN' => $request->TSLO_ATTN,
+                'TSLO_POCD' => $request->TSLO_POCD, 'TSLO_ISSUDT' => $request->TSLO_ISSUDT,
+                'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
+                'TSLO_ADDRESS_NAME' => $request->TSLO_ADDRESS_NAME,
+                'TSLO_ADDRESS_DESCRIPTION' => $request->TSLO_ADDRESS_DESCRIPTION,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }

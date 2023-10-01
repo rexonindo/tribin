@@ -156,6 +156,23 @@
                                     <input type="text" id="orderAttn" class="form-control" maxlength="50">
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-1">
+                                    <label for="orderCustomer" class="form-label">Address Name</label>
+                                    <div class="input-group mb-1">
+                                        <input type="text" id="orderAddressName" class="form-control" maxlength="45">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-1">
+                                    <label for="orderCustomer" class="form-label">Address</label>
+                                    <div class="input-group mb-1">
+                                        <textarea id="orderAddress" class="form-control" maxlength="90">
+                                        </textarea>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -688,6 +705,8 @@
                 TSLO_POCD: orderPONumber.value.trim(),
                 TSLO_ISSUDT: orderIssueDate.value.trim(),
                 TSLO_PLAN_DLVDT: orderPlanDeliveryDate.value.trim(),
+                TSLO_ADDRESS_NAME: orderAddressName.value.trim(),
+                TSLO_ADDRESS_DESCRIPTION: orderAddress.value.trim(),
                 TSLODETA_ITMCD: itemCode,
                 TSLODETA_ITMQT: itemQty,
                 TSLODETA_USAGE: itemUsage,
@@ -739,6 +758,8 @@
                 TSLO_POCD: orderPONumber.value.trim(),
                 TSLO_ISSUDT: orderIssueDate.value.trim(),
                 TSLO_PLAN_DLVDT: orderPlanDeliveryDate.value.trim(),
+                TSLO_ADDRESS_NAME: orderAddressName.value.trim(),
+                TSLO_ADDRESS_DESCRIPTION: orderAddress.value.trim(),
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -820,6 +841,8 @@
                             orderCustomerCode.value = arrayItem['TSLO_CUSCD']
                             orderAttn.value = arrayItem['TSLO_ATTN']
                             orderPlanDeliveryDate.value = arrayItem['TSLO_PLAN_DLVDT']
+                            orderAddressName.value = arrayItem['TSLO_ADDRESS_NAME']
+                            orderAddress.value = arrayItem['TSLO_ADDRESS_DESCRIPTION']
                             loadReceiveDetail({
                                 doc: arrayItem['TSLO_SLOCD']
                             })
@@ -990,6 +1013,8 @@
                     loadSalesDraftDetail({
                         doc: arrayItem['TSLODRAFT_SLOCD']
                     })
+                    orderAddressName.value = arrayItem['MCUS_CUSNM']
+                    orderAddress.value = arrayItem['MCUS_ADDR1']
                 }
                 newcell = newrow.insertCell(1)
                 newcell.innerHTML = arrayItem['MCUS_CUSNM']
@@ -1015,6 +1040,8 @@
                     loadQuotationDetail({
                         doc: arrayItem['TQUO_QUOCD']
                     })
+                    orderAddressName.value = arrayItem['MCUS_CUSNM']
+                    orderAddress.value = arrayItem['MCUS_ADDR1']
                 }
                 newcell = newrow.insertCell(1)
                 newcell.innerHTML = arrayItem['MCUS_CUSNM']
