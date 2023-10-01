@@ -126,6 +126,24 @@ Route::middleware('auth')->group(function () {
         Route::get('form/purchase-order', [PurchaseController::class, 'formApprovalPO']);
     });
 
+    # Terkait Delivery
+    Route::prefix('delivery')->group(function () {
+        Route::get('form', [DeliveryController::class, 'index'])->middleware('auth');
+        Route::get('outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse'])->middleware('auth');
+        Route::get('outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument'])->middleware('auth');
+        Route::put('items/{id}', [DeliveryController::class, 'updateDODetail'])->middleware('auth');
+        Route::post('', [DeliveryController::class, 'save'])->middleware('auth');
+        Route::get('', [DeliveryController::class, 'search'])->middleware('auth');
+        Route::put('{id}', [DeliveryController::class, 'update'])->middleware('auth');
+        Route::get('document/{id}', [DeliveryController::class, 'loadByDocument'])->middleware('auth');
+    });
+
+    Route::prefix('assignment-driver')->group(function () {
+        Route::get('form/delivery', [DeliveryController::class, 'formDriverAssignment'])->middleware('auth');
+        Route::get('data/delivery', [DeliveryController::class, 'emptyDriver'])->middleware('auth');
+        Route::put('form/delivery/{id}', [DeliveryController::class, 'assignDriver'])->middleware('auth');
+    });
+
     # Terkait Quotation Transaction
     Route::prefix('quotation')->group(function () {
         Route::get('form', [QuotationController::class, 'index']);
@@ -234,20 +252,6 @@ Route::get('receive/form', [ReceiveController::class, 'index'])->middleware('aut
 Route::get('branch/form', [BranchController::class, 'index'])->middleware('auth');
 Route::post('branch', [BranchController::class, 'save'])->middleware('auth');
 Route::get('branch', [BranchController::class, 'search'])->middleware('auth');
-
-# Terkait Delivery
-Route::get('delivery/form', [DeliveryController::class, 'index'])->middleware('auth');
-Route::get('delivery/outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse'])->middleware('auth');
-Route::get('delivery/outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument'])->middleware('auth');
-Route::put('delivery/items/{id}', [DeliveryController::class, 'updateDODetail'])->middleware('auth');
-Route::post('delivery', [DeliveryController::class, 'save'])->middleware('auth');
-Route::get('delivery', [DeliveryController::class, 'search'])->middleware('auth');
-Route::put('delivery/{id}', [DeliveryController::class, 'update'])->middleware('auth');
-Route::get('delivery/document/{id}', [DeliveryController::class, 'loadByDocument'])->middleware('auth');
-
-Route::get('assignment-driver/form/delivery', [DeliveryController::class, 'formDriverAssignment'])->middleware('auth');
-Route::get('assignment-driver/data/delivery', [DeliveryController::class, 'emptyDriver'])->middleware('auth');
-Route::put('assignment-driver/form/delivery/{id}', [DeliveryController::class, 'assignDriver'])->middleware('auth');
 
 Route::get('confirmation/form/delivery', [DeliveryController::class, 'formDeliveryConfirmation'])->middleware('auth');
 Route::get('confirmation/data/delivery', [DeliveryController::class, 'emptyDeliveryDateTime'])->middleware('auth');
