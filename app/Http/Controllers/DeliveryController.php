@@ -792,6 +792,16 @@ class DeliveryController extends Controller
         $doc = base64_decode($request->id);
         $Data = C_SPK::on($this->dedicatedConnection)->where('id', $doc)->first();
 
+        $PICMenugaskan = User::where('nick_name', $Data->created_by)->first();
+        $PICDitugaskan = User::where('nick_name', $Data->CSPK_PIC_NAME)->first();
+
+        $Tujuan = T_DLVORDDETA::on($this->dedicatedConnection)
+            ->leftJoin('T_SLOHEAD', function ($join) {
+                $join->on('TDLVORDDETA_SLOCD', '=', 'TSLO_SLOCD')->on('TDLVORDDETA_BRANCH', '=', 'TSLO_BRANCH');
+            })->where('TDLVORDDETA_DLVCD', $Data->CSPK_REFF_DOC)
+            ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
+            ->select('TSLO_ADDRESS_NAME', 'TSLO_ADDRESS_DESCRIPTION')->first();
+
         $this->fpdf->AddPage("P", 'A5');
         $this->fpdf->SetAutoPageBreak(true, 0);
         $this->fpdf->SetFont('Arial', 'B', 12);
@@ -806,18 +816,65 @@ class DeliveryController extends Controller
         $this->fpdf->Cell(45, 5, ': ' . date('Y-m-d'), 0, 0, 'L');
         $this->fpdf->SetXY(3, 30);
         $this->fpdf->Cell(45, 5, 'PIC Yang Menugaskan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $PICMenugaskan->name, 0, 0, 'L');
         $this->fpdf->SetXY(3, 35);
         $this->fpdf->Cell(45, 5, 'PIC Yang Ditugaskan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $PICDitugaskan->name, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 40);
+        $this->fpdf->Cell(45, 5, 'Posisi', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_PIC_AS, 0, 0, 'L');
         $this->fpdf->SetXY(3, 45);
-        $this->fpdf->Cell(45, 5, 'Nomor Referensi', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, 'Tujuan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Tujuan->TSLO_ADDRESS_NAME, 0, 0, 'L');
         $this->fpdf->SetXY(3, 50);
+        $this->fpdf->Cell(45, 5, '', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Tujuan->TSLO_ADDRESS_DESCRIPTION, 0, 0, 'L');
+
+
+        $this->fpdf->SetXY(3, 60);
+        $this->fpdf->Cell(45, 5, 'Tanggal Berangkat', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_LEAVEDT . ' s/d ' . $Data->CSPK_BACKDT, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 70);
+        $this->fpdf->Cell(45, 5, 'Nomor Referensi', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_REFF_DOC, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 75);
         $this->fpdf->Cell(45, 5, 'Tugas', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_JOBDESK, 0, 0, 'L');
 
         $this->fpdf->AddPage("P", 'A5');
         $this->fpdf->SetAutoPageBreak(true, 0);
         $this->fpdf->SetFont('Arial', 'B', 12);
         $this->fpdf->SetXY(3, 5);
         $this->fpdf->Cell(45, 5, 'REALISASI DELIVERY BARANG', 0, 0, 'L');
+        $this->fpdf->SetFont('Arial', '', 10);
+        $this->fpdf->SetXY(3, 20);
+        $this->fpdf->Cell(45, 5, 'ID SPK', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_DOCNO, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 25);
+        $this->fpdf->Cell(45, 5, 'Tanggal', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . date('Y-m-d'), 0, 0, 'L');
+        $this->fpdf->SetXY(3, 30);
+        $this->fpdf->Cell(45, 5, 'PIC Yang Menugaskan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $PICMenugaskan->name, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 35);
+        $this->fpdf->Cell(45, 5, 'PIC Yang Ditugaskan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $PICDitugaskan->name, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 40);
+        $this->fpdf->Cell(45, 5, 'Posisi', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_PIC_AS, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 45);
+        $this->fpdf->Cell(45, 5, 'Tujuan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Tujuan->TSLO_ADDRESS_NAME, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 50);
+        $this->fpdf->Cell(45, 5, '', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Tujuan->TSLO_ADDRESS_DESCRIPTION, 0, 0, 'L');
+
+
+        $this->fpdf->SetXY(3, 60);
+        $this->fpdf->Cell(45, 5, 'Nomor Referensi', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_REFF_DOC, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 65);
+        $this->fpdf->Cell(45, 5, 'Tugas', 0, 0, 'L');
         $this->fpdf->Output('SPK ' . $doc . '.pdf', 'I');
         exit;
     }
