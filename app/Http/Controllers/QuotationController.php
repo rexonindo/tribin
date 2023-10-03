@@ -523,7 +523,7 @@ class QuotationController extends Controller
 
             $y += 5;
             $this->fpdf->SetXY(7, $y);
-            $this->fpdf->MultiCell(0, 5, 'Besar harapan kami penawaran ini dapat menjadi pertimbangan prioritas untuk pengadaan kebutuhan Diesel Genset di Perusahaan Bapak / Ibu
+            $this->fpdf->MultiCell(0, 5, 'Besar harapan kami penawaran ini dapat menjadi pertimbangan prioritas untuk pengadaan kebutuhan di Perusahaan Bapak / Ibu
                     Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, atas perhatian dan kerjasama yang baik kami ucapkan banyak terima kasih.', 0, 'J');
         } else {
             $this->fpdf->SetXY(7, 66);
