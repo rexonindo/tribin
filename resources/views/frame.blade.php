@@ -9,6 +9,7 @@
     <meta name="generator" content="Hugo 0.111.3">
     <title>Home · JOS</title>
 
+    <link rel="icon" href="{{ url('assets/fiximgs/favicon.png') }}">
     <link href="{{ url('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url('assets/alertify/css/alertify.min.css') }}" rel="stylesheet">
     <link href="{{ url('assets/alertify/css/themes/semantic.min.css') }}" rel="stylesheet">
