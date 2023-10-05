@@ -710,19 +710,14 @@ class DeliveryController extends Controller
 
     public function saveSPK(Request $request)
     {
+        # Validasi General
         $validator = Validator::make($request->all(), [
             'CSPK_REFF_DOC' => 'required',
             'CSPK_PIC_AS' => 'required',
             'CSPK_PIC_NAME' => 'required',
             'CSPK_JOBDESK' => 'required',
-            'CSPK_VEHICLE_TYPE' => 'required',
             'CSPK_BACKDT' => 'required',
             'CSPK_LEAVEDT' => 'required',
-            'CSPK_KM' => 'required|numeric',
-            'CSPK_WHEELS' => 'required|numeric',
-            'CSPK_SUPPLIER' => 'required',
-            'CSPK_LITER' => 'required|numeric',
-            'CSPK_LITER_EXISTING' => 'required|numeric',
             'CSPK_UANG_MAKAN' => 'required|numeric',
             'CSPK_UANG_MANDAH' => 'required|numeric',
             'CSPK_UANG_PENGINAPAN' => 'required|numeric',
@@ -733,6 +728,24 @@ class DeliveryController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 406);
         }
+
+        # Validasi Driver
+        if ($request->CSPK_PIC_AS === 'DRIVER') {
+            $validator = Validator::make($request->all(), [
+                'CSPK_VEHICLE_TYPE' => 'required',
+                'CSPK_KM' => 'required|numeric',
+                'CSPK_WHEELS' => 'required|numeric',
+                'CSPK_SUPPLIER' => 'required',
+                'CSPK_LITER' => 'required|numeric',
+                'CSPK_LITER_EXISTING' => 'required|numeric',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 406);
+            }
+        }
+
+
 
         $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
             ->where('RANGE2', '>=', $request->CSPK_KM)
@@ -760,9 +773,9 @@ class DeliveryController extends Controller
             'CSPK_WHEELS' => $request->CSPK_WHEELS,
             'CSPK_UANG_JALAN' => $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6,
             'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
-            'CSPK_LITER_EXISTING' => $request->CSPK_LITER_EXISTING,
-            'CSPK_LITER' => $request->CSPK_LITER,
-            'CSPK_UANG_SOLAR' => $request->CSPK_SUPPLIER == 'SPBU' ? 6800 * $request->CSPK_LITER : 10000 * $request->CSPK_LITER,
+            'CSPK_LITER_EXISTING' => $request->CSPK_LITER_EXISTING ? $request->CSPK_LITER_EXISTING : 0,
+            'CSPK_LITER' => $request->CSPK_LITER ? $request->CSPK_LITER : 0,
+            'CSPK_UANG_SOLAR' => $request->CSPK_SUPPLIER == 'SPBU' ? 6800 * $request->CSPK_LITER : 0 * $request->CSPK_LITER,
             'CSPK_UANG_MAKAN' => $request->CSPK_UANG_MAKAN,
             'CSPK_UANG_MANDAH' => $request->CSPK_UANG_MANDAH,
             'CSPK_UANG_PENGINAPAN' => $request->CSPK_UANG_PENGINAPAN,
@@ -772,7 +785,7 @@ class DeliveryController extends Controller
             'created_by' => Auth::user()->nick_name,
             'CSPK_LEAVEDT' => $request->CSPK_LEAVEDT,
             'CSPK_BACKDT' => $request->CSPK_BACKDT,
-            'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE,
+            'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE ? $request->CSPK_VEHICLE_TYPE : '',
             'CSPK_JOBDESK' => $request->CSPK_JOBDESK,
             'CSPK_DOCNO' => $newDocCode,
             'CSPK_DOCNO_ORDER' => $LastLine,
@@ -834,12 +847,90 @@ class DeliveryController extends Controller
         $this->fpdf->SetXY(3, 60);
         $this->fpdf->Cell(45, 5, 'Tanggal Berangkat', 0, 0, 'L');
         $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_LEAVEDT . ' s/d ' . $Data->CSPK_BACKDT, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 65);
+        $this->fpdf->Cell(45, 5, 'Jenis Kendaraan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_VEHICLE_TYPE, 0, 0, 'L');
         $this->fpdf->SetXY(3, 70);
         $this->fpdf->Cell(45, 5, 'Nomor Referensi', 0, 0, 'L');
         $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_REFF_DOC, 0, 0, 'L');
         $this->fpdf->SetXY(3, 75);
         $this->fpdf->Cell(45, 5, 'Tugas', 0, 0, 'L');
         $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_JOBDESK, 0, 0, 'L');
+        $this->fpdf->SetFont('Arial', '', 10);
+        $this->fpdf->SetXY(3, 85);
+        $this->fpdf->Cell(45, 5, 'Biaya', 0, 0, 'L');
+        $this->fpdf->SetFont('Arial', 'B', 10);
+        $this->fpdf->SetXY(3, 90);
+        $this->fpdf->Cell(10, 5, 'No', 1, 0, 'C');
+        $this->fpdf->Cell(75, 5, 'Item', 1, 0, 'C');
+        $this->fpdf->Cell(50, 5, 'Jumlah', 1, 0, 'C');
+        $this->fpdf->SetFont('Arial', '', 10);
+        $TotalPrice = $Data->CSPK_UANG_JALAN + $Data->CSPK_UANG_SOLAR + $Data->CSPK_UANG_MAKAN
+            + $Data->CSPK_UANG_MANDAH + $Data->CSPK_UANG_PENGINAPAN + $Data->CSPK_UANG_PENGAWALAN
+            + $Data->CSPK_UANG_LAIN2;
+        if ($Data->CSPK_PIC_AS === 'DRIVER') {
+            $this->fpdf->SetXY(3, 95);
+            $this->fpdf->Cell(10, 5, '1', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Total', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($TotalPrice), 1, 0, 'C');
+            $this->fpdf->SetXY(3, 105);
+            $this->fpdf->Cell(10, 5, 'Terbilang', 0, 0, 'L');
+            $this->fpdf->SetXY(3, 110);
+            $this->fpdf->MultiCell(140, 5, ucwords(trim($this->numberToSentence($TotalPrice))), 1, 'C');
+            $this->fpdf->SetXY(3, 120);
+            $this->fpdf->Cell(10, 5, 'PIC yang ditugaskan', 0, 0, 'L');
+            $this->fpdf->SetXY(100, 120);
+            $this->fpdf->Cell(10, 5, 'PIC yang menugaskan', 0, 0, 'L');
+        } else {
+            $this->fpdf->SetXY(3, 95);
+            $this->fpdf->Cell(10, 5, '1', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Uang Jalan', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($Data->CSPK_UANG_JALAN), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 100);
+            $this->fpdf->Cell(10, 5, '2', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Uang Solar', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($Data->CSPK_UANG_SOLAR), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 105);
+            $this->fpdf->Cell(10, 5, '3', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Uang Makan', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($Data->CSPK_UANG_MAKAN), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 110);
+            $this->fpdf->Cell(10, 5, '4', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Uang Mandah', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($Data->CSPK_UANG_MANDAH), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 115);
+            $this->fpdf->Cell(10, 5, '5', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Uang Penginapan', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($Data->CSPK_UANG_PENGINAPAN), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 120);
+            $this->fpdf->Cell(10, 5, '6', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Uang Pengawalan', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($Data->CSPK_UANG_PENGAWALAN), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 125);
+            $this->fpdf->Cell(10, 5, '7', 1, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Uang lain - lain', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, number_format($Data->CSPK_UANG_LAIN2), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 130);
+            $this->fpdf->Cell(10, 5, '', 0, 0, 'C');
+            $this->fpdf->Cell(75, 5, 'Total', 0, 0, 'R');
+            $this->fpdf->Cell(50, 5, number_format($TotalPrice), 1, 0, 'R');
+            $this->fpdf->SetXY(3, 140);
+            $this->fpdf->Cell(10, 5, 'Terbilang', 0, 0, 'L');
+            $this->fpdf->SetXY(3, 145);
+            $this->fpdf->MultiCell(140, 5, ucwords(trim($this->numberToSentence($TotalPrice))), 1, 'C');
+
+            $this->fpdf->SetXY(3, 155);
+            $this->fpdf->Cell(10, 5, 'PIC yang ditugaskan', 0, 0, 'L');
+            $this->fpdf->SetXY(100, 155);
+            $this->fpdf->Cell(10, 5, 'PIC yang menugaskan', 0, 0, 'L');
+
+            $this->fpdf->SetXY(3, 185);
+            $this->fpdf->Cell(10, 5, ucwords($PICDitugaskan->name) . ' - ' . $Data->CSPK_PIC_AS, 0, 0, 'L');
+            $this->fpdf->SetXY(100, 185);
+            $this->fpdf->Cell(10, 5, ucwords($PICMenugaskan->name), 0, 0, 'L');
+        }
+
+
 
         $this->fpdf->AddPage("P", 'A5');
         $this->fpdf->SetAutoPageBreak(true, 0);
@@ -871,10 +962,94 @@ class DeliveryController extends Controller
 
 
         $this->fpdf->SetXY(3, 60);
+        $this->fpdf->Cell(45, 5, 'Tanggal Berangkat', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_LEAVEDT . ' s/d ' . $Data->CSPK_BACKDT, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 65);
+        $this->fpdf->Cell(45, 5, 'Jenis Kendaraan', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_VEHICLE_TYPE, 0, 0, 'L');
+        $this->fpdf->SetXY(3, 70);
         $this->fpdf->Cell(45, 5, 'Nomor Referensi', 0, 0, 'L');
         $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_REFF_DOC, 0, 0, 'L');
-        $this->fpdf->SetXY(3, 65);
+        $this->fpdf->SetXY(3, 75);
         $this->fpdf->Cell(45, 5, 'Tugas', 0, 0, 'L');
+        $this->fpdf->Cell(45, 5, ': ' . $Data->CSPK_JOBDESK, 0, 0, 'L');
+
+        $this->fpdf->SetFont('Arial', '', 10);
+        $this->fpdf->SetXY(3, 85);
+        $this->fpdf->Cell(45, 5, 'Biaya', 0, 0, 'L');
+        $this->fpdf->SetFont('Arial', 'B', 10);
+        $this->fpdf->SetXY(3, 90);
+        $this->fpdf->Cell(10, 5, 'No', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, 'Item', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, 'Jumlah Diserahkan', 1, 0, 'C');
+        $this->fpdf->Cell(30, 5, 'Jumlah Aktual', 1, 0, 'C');
+        $this->fpdf->SetFont('Arial', '', 10);
+
+        $this->fpdf->SetXY(3, 95);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 100);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 105);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 110);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 115);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 120);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 125);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 130);
+        $this->fpdf->Cell(10, 5, '', 1, 0, 'C');
+        $this->fpdf->Cell(58, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 135);
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'C');
+        $this->fpdf->Cell(58, 5, 'Total', 0, 0, 'R');
+        $this->fpdf->Cell(40, 5, '', 1, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 140);
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'C');
+        $this->fpdf->Cell(58, 5, 'Selisih', 0, 0, 'R');
+        $this->fpdf->Cell(40, 5, '', 0, 0, 'R');
+        $this->fpdf->Cell(30, 5, '', 1, 0, 'R');
+        $this->fpdf->SetXY(3, 150);
+        $this->fpdf->Cell(10, 5, 'Terbilang selisih', 0, 0, 'L');
+        $this->fpdf->SetXY(3, 155);
+        $this->fpdf->MultiCell(140, 5, '', 1, 'C');
+
+        $this->fpdf->SetXY(3, 165);
+        $this->fpdf->Cell(10, 5, 'PIC yang ditugaskan', 0, 0, 'L');
+        $this->fpdf->SetXY(100, 165);
+        $this->fpdf->Cell(10, 5, 'PIC yang menugaskan', 0, 0, 'L');
+
+        $this->fpdf->SetXY(3, 190);
+        $this->fpdf->Cell(10, 5, ucwords($PICDitugaskan->name) . ' - ' . $Data->CSPK_PIC_AS, 0, 0, 'L');
+        $this->fpdf->SetXY(100, 190);
+        $this->fpdf->Cell(10, 5, ucwords($PICMenugaskan->name), 0, 0, 'L');
+
         $this->fpdf->Output('SPK ' . $doc . '.pdf', 'I');
         exit;
     }
