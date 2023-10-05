@@ -134,7 +134,7 @@
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">KM</span>
-                                                    <input type="number" id="KM" class="form-control">
+                                                    <input type="number" id="KM" class="form-control orderInputItem">
                                                 </div>
                                             </div>
                                             <div class="col mb-1">
@@ -158,24 +158,24 @@
                                             </div>
                                             <div class="col mb-1">
                                                 <label class="form-label">Liters (Existing)</label>
-                                                <input type="number" id="litersExisting" class="form-control form-control-sm">
+                                                <input type="number" id="litersExisting" class="form-control form-control-sm orderInputItem">
                                             </div>
                                             <div class="col mb-1">
                                                 <label class="form-label">Liters</label>
-                                                <input type="number" id="liters" class="form-control form-control-sm">
+                                                <input type="number" id="liters" class="form-control form-control-sm orderInputItem">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Makan</span>
-                                                    <input type="number" id="uangMakan" class="form-control">
+                                                    <input type="number" id="uangMakan" class="form-control orderInputItem">
                                                 </div>
                                             </div>
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Mandah</span>
-                                                    <input type="number" id="uangMandah" class="form-control">
+                                                    <input type="number" id="uangMandah" class="form-control orderInputItem">
                                                 </div>
                                             </div>
                                         </div>
@@ -183,13 +183,13 @@
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Pengawalan</span>
-                                                    <input type="number" id="uangPengawalan" class="form-control">
+                                                    <input type="number" id="uangPengawalan" class="form-control orderInputItem">
                                                 </div>
                                             </div>
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Penginapan</span>
-                                                    <input type="number" id="uangPenginapan" class="form-control">
+                                                    <input type="number" id="uangPenginapan" class="form-control orderInputItem">
                                                 </div>
                                             </div>
                                         </div>
@@ -197,31 +197,31 @@
                                             <div class="col mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Lain<sup>2</sup></span>
-                                                    <input type="number" id="uangLain" class="form-control">
+                                                    <input type="number" id="uangLain" class="form-control orderInputItem">
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6 mb-1">
                                                 <label for="tanggalBerangkat" class="form-label">Tanggal Berangkat</label>
-                                                <input type="text" id="tanggalBerangkat" class="form-control" maxlength="20" readonly>
+                                                <input type="text" id="tanggalBerangkat" class="form-control orderInputItem" maxlength="20" readonly>
                                             </div>
                                             <div class="col-md-6 mb-1">
                                                 <label for="tanggalKembali" class="form-label">Tanggal Kembali</label>
-                                                <input type="text" id="tanggalKembali" class="form-control" maxlength="20" readonly>
+                                                <input type="text" id="tanggalKembali" class="form-control orderInputItem" maxlength="20" readonly>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-3 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Jenis Kenadaraan</span>
-                                                    <input type="text" id="jenisKendaraan" class="form-control" maxlength="35">
+                                                    <input type="text" id="jenisKendaraan" class="form-control orderInputItem" maxlength="35">
                                                 </div>
                                             </div>
                                             <div class="col-md-9 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Tugas</span>
-                                                    <input type="text" id="tugas" class="form-control" maxlength="70">
+                                                    <input type="text" id="tugas" class="form-control orderInputItem" maxlength="70">
                                                 </div>
                                             </div>
                                         </div>
@@ -347,6 +347,8 @@
             data: data,
             dataType: "json",
             success: function(response) {
+                PICAs.value = '-'
+                tribinClearTextBoxByClassName('orderInputItem')
                 p.disabled = false
                 div_alert.innerHTML = `<div class="alert alert-info alert-dismissible fade show" role="alert">
                         Done
