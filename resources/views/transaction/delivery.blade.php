@@ -229,6 +229,10 @@
                                         <input class="form-check-input" type="checkbox" value="1" id="txfg_ckINV">
                                         <label class="form-check-label" for="txfg_ckINV">Invoice</label>
                                     </li>
+                                    <li class="list-group-item">
+                                        <input class="form-check-input" type="checkbox" value="1" id="txfg_ckKwitansi">
+                                        <label class="form-check-label" for="txfg_ckKwitansi">Receipt</label>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -682,12 +686,13 @@
     function btnPrintOnclick(pthis) {
         let mckdo = txfg_ckDO.checked ? '1' : '0';
         let mckinv = txfg_ckINV.checked ? '1' : '0';
+        let mckKwitansi = txfg_ckKwitansi.checked ? '1' : '0';
         if (orderCode.value.trim().length === 0) {
             alertify.message('Delivery Document is required')
             orderCode.focus()
             return
         }
-        Cookies.set('JOS_PRINT_FORM', (mckdo + mckinv), {
+        Cookies.set('JOS_PRINT_FORM', (mckdo + mckinv + mckKwitansi), {
             expires: 365
         });
         window.open(`PDF/delivery-order/${btoa(orderCode.value)}`, '_blank');

@@ -546,7 +546,20 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(0, 5, ucwords(rtrim($this->numberToSentence($PPNAmount + $HargaSewa))), 0, 0, 'C');
         }
 
-        $this->fpdf->Output('delivery order ' . $doc . '.pdf', 'I');
+        if (substr($_COOKIE['JOS_PRINT_FORM'], 2, 1) == '1') {
+            $this->fpdf->AddPage("L", 'A5');
+            $this->fpdf->SetFont('Arial', 'B', 10);
+            $this->fpdf->SetXY(7, 5);
+            $this->fpdf->Cell(0, 8, $Company->name, 0, 0, 'L');
+            $this->fpdf->SetFont('Arial', '', 10);
+            $this->fpdf->SetXY(7, 12);
+            $this->fpdf->MultiCell(85, 4, $Company->address,  0, 'L');
+            $this->fpdf->SetFont('Arial', 'B', 12);
+            $this->fpdf->SetXY(7, 20);
+            $this->fpdf->Cell(0, 8, 'KWITANSI', 0, 0, 'C');
+        }
+
+        $this->fpdf->Output('delivery documents ' . $doc . '.pdf', 'I');
         exit;
     }
 
