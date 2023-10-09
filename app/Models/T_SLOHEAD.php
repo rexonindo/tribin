@@ -12,6 +12,6 @@ class T_SLOHEAD extends Model
     protected $fillable = [
         'TSLO_SLOCD', 'TSLO_CUSCD', 'TSLO_LINE', 'TSLO_ATTN', 'TSLO_QUOCD',
         'TSLO_POCD', 'TSLO_ISSUDT', 'TSLO_PLAN_DLVDT', 'TSLO_APPRVBY', 'TSLO_APPRVDT', 'TSLO_ADDRESS_NAME', 'TSLO_ADDRESS_DESCRIPTION',
-        'created_by', 'updated_by', 'TSLO_BRANCH'
+        'created_by', 'updated_by', 'TSLO_BRANCH', 'TSLO_TYPE', 'TSLO_SERVTRANS_COST'
     ];
 }

@@ -138,6 +138,17 @@ Route::middleware('auth')->group(function () {
         Route::get('document/{id}', [DeliveryController::class, 'loadByDocument'])->middleware('auth');
     });
 
+    #Terkait Receive Order
+    Route::prefix('receive-order')->group(function () {
+        Route::get('form', [ReceiveOrderController::class, 'index'])->middleware('auth');
+        Route::post('', [ReceiveOrderController::class, 'save'])->middleware('auth');
+        Route::get('', [ReceiveOrderController::class, 'search'])->middleware('auth');
+        Route::put('{id}', [ReceiveOrderController::class, 'update'])->middleware('auth');
+        Route::get('{id}', [ReceiveOrderController::class, 'loadById'])->middleware('auth');
+        Route::delete('items/{id}', [ReceiveOrderController::class, 'deleteItemById'])->middleware('auth');
+        Route::put('items/{id}', [ReceiveOrderController::class, 'updateItem']);
+    });
+
     Route::prefix('assignment-driver')->group(function () {
         Route::get('form/delivery', [DeliveryController::class, 'formDriverAssignment'])->middleware('auth');
         Route::get('data/delivery', [DeliveryController::class, 'emptyDriver'])->middleware('auth');
@@ -174,14 +185,6 @@ Route::get('approved/form/sales-order-draft', [ReceiveOrderController::class, 'f
 Route::put('reject/quotations/{id}', [QuotationController::class, 'reject'])->middleware('auth');
 Route::put('reject/purchase-request/{id}', [PurchaseController::class, 'reject'])->middleware('auth');
 Route::put('reject/purchase-order/{id}', [PurchaseController::class, 'rejectPO'])->middleware('auth');
-
-#Terkait Receive Order
-Route::get('receive-order/form', [ReceiveOrderController::class, 'index'])->middleware('auth');
-Route::post('receive-order', [ReceiveOrderController::class, 'save'])->middleware('auth');
-Route::get('receive-order', [ReceiveOrderController::class, 'search'])->middleware('auth');
-Route::put('receive-order/{id}', [ReceiveOrderController::class, 'update'])->middleware('auth');
-Route::get('receive-order/{id}', [ReceiveOrderController::class, 'loadById'])->middleware('auth');
-Route::delete('receive-order/items/{id}', [ReceiveOrderController::class, 'deleteItemById'])->middleware('auth');
 
 #Terkait Dasbor
 Route::get('dashboard-resource', [HomeController::class, 'supportDashboard'])->middleware('auth');

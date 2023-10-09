@@ -39,6 +39,7 @@ class ReceiveOrderController extends Controller
             'TSLO_PLAN_DLVDT' => 'required',
             'TSLO_ADDRESS_NAME' => 'required',
             'TSLO_ADDRESS_DESCRIPTION' => 'required',
+            'TSLO_TYPE' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -91,6 +92,8 @@ class ReceiveOrderController extends Controller
             'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
             'TSLO_ADDRESS_NAME' => $request->TSLO_ADDRESS_NAME,
             'TSLO_ADDRESS_DESCRIPTION' => $request->TSLO_ADDRESS_DESCRIPTION,
+            'TSLO_TYPE' => $request->TSLO_TYPE,
+            'TSLO_SERVTRANS_COST' => $request->TSLO_SERVTRANS_COST,
             'created_by' => Auth::user()->nick_name,
             'TSLO_BRANCH' => Auth::user()->branch
         ];
@@ -151,7 +154,7 @@ class ReceiveOrderController extends Controller
 
         $RS = T_SLOHEAD::on($this->dedicatedConnection)->select([
             "TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD",
-            "TSLO_ATTN", "TSLO_PLAN_DLVDT", "TSLO_ADDRESS_NAME", "TSLO_ADDRESS_DESCRIPTION"
+            "TSLO_ATTN", "TSLO_PLAN_DLVDT", "TSLO_ADDRESS_NAME", "TSLO_ADDRESS_DESCRIPTION", "TSLO_TYPE", "TSLO_SERVTRANS_COST"
         ])
             ->leftJoin("M_CUS", function ($join) {
                 $join->on("TSLO_CUSCD", "=", "MCUS_CUSCD")
@@ -197,7 +200,11 @@ class ReceiveOrderController extends Controller
             ->where('TSLODETA_SLOCD', base64_decode($request->id))
             ->where('TSLODETA_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
-        return ['dataItem' => $RS];
+        $RSHeader = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_TYPE', 'TSLO_SERVTRANS_COST')
+            ->where('TSLO_SLOCD', base64_decode($request->id))
+            ->where('TSLO_BRANCH', Auth::user()->branch)
+            ->get();
+        return ['dataItem' => $RS, 'dataHeader' => $RSHeader];
     }
 
     function loadDraftById(Request $request)
@@ -312,5 +319,23 @@ class ReceiveOrderController extends Controller
     public function formApprovalDraft()
     {
         return view('transaction.sales_order_draft_status');
+    }
+
+    public function updateItem(Request $request)
+    {
+        $affectedRow = 0;
+        # ubah data detail
+        $affectedRow = T_SLODETA::on($this->dedicatedConnection)
+            ->where('id', $request->id)
+            ->where('TSLODETA_BRANCH', Auth::user()->branch)
+            ->update([
+                'TSLODETA_ITMCD' => $request->TSLODETA_ITMCD,
+                'TSLODETA_ITMQT' => $request->TSLODETA_ITMQT,
+                'TSLODETA_USAGE' => $request->TSLODETA_USAGE,
+                'TSLODETA_PRC' => $request->TSLODETA_PRC,
+                'TSLODETA_OPRPRC' => $request->TSLODETA_OPRPRC ? $request->TSLODETA_OPRPRC : 0,
+                'TSLODETA_MOBDEMOB' => $request->TSLODETA_MOBDEMOB ? $request->TSLODETA_MOBDEMOB : 0,
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 }
