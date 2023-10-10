@@ -68,6 +68,16 @@
                                         <div class="tab-pane fade show active" id="nav-rental" role="tabpanel" tabindex="0">
                                             <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                                                 <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="orderIssueDate" class="form-label">Period from</label>
+                                                        <input type="text" id="orderPeriodFrom" class="form-control form-control-sm" maxlength="10" readonly>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="orderIssueDate" class="form-label">Period to</label>
+                                                        <input type="text" id="orderPeriodTo" class="form-control form-control-sm" maxlength="10" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
                                                     <div class="col-md-12 mb-1">
                                                         <div class="table-responsive" id="orderTableContainer">
                                                             <table id="orderTable" class="table table-sm table-hover table-bordered caption-top">
@@ -485,6 +495,16 @@
         uiLibrary: 'bootstrap5'
     })
     $("#orderPlanDeliveryDate").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        uiLibrary: 'bootstrap5'
+    })
+    $("#orderPeriodFrom").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        uiLibrary: 'bootstrap5'
+    })
+    $("#orderPeriodTo").datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
         uiLibrary: 'bootstrap5'
@@ -1096,7 +1116,7 @@
                                 quotationItemNameSale.value = arrayItem['MITM_ITMNM']
                                 quotationQtySale.value = arrayItem['TSLODETA_ITMQT']
                                 quotationPriceSale.value = arrayItem['TSLODETA_PRC']
-                                
+
                             }
                         }
                         newcell = newrow.insertCell(0)
