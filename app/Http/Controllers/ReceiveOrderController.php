@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\M_USAGE;
 use App\Models\T_SLO_DRAFT_DETAIL;
 use App\Models\T_SLO_DRAFT_HEAD;
 use App\Models\T_SLODETA;
@@ -248,7 +249,8 @@ class ReceiveOrderController extends Controller
     }
     public function formReport()
     {
-        return view('report.receive_order');
+        $Usages = M_USAGE::on($this->dedicatedConnection)->select('MUSAGE_DESCRIPTION')->get();
+        return view('report.receive_order', ['Usages' => $Usages]);
     }
     function report(Request $request)
     {

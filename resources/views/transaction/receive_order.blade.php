@@ -66,17 +66,7 @@
                                     </nav>
                                     <div class="tab-content" id="quotation-type-nav-tabContent">
                                         <div class="tab-pane fade show active" id="nav-rental" role="tabpanel" tabindex="0">
-                                            <div class="container-fluid mt-2 border-start border-bottom rounded-start">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <label for="orderIssueDate" class="form-label">Period from</label>
-                                                        <input type="text" id="orderPeriodFrom" class="form-control form-control-sm" maxlength="10" readonly>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label for="orderIssueDate" class="form-label">Period to</label>
-                                                        <input type="text" id="orderPeriodTo" class="form-control form-control-sm" maxlength="10" readonly>
-                                                    </div>
-                                                </div>
+                                            <div class="container-fluid mt-2 border-start border-bottom rounded-start">                                                
                                                 <div class="row">
                                                     <div class="col-md-12 mb-1">
                                                         <div class="table-responsive" id="orderTableContainer">
@@ -98,6 +88,16 @@
                                                                 </tbody>
                                                             </table>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="orderIssueDate" class="form-label">Period from</label>
+                                                        <input type="text" id="orderPeriodFrom" class="form-control form-control-sm" maxlength="10" readonly>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="orderIssueDate" class="form-label">Period to</label>
+                                                        <input type="text" id="orderPeriodTo" class="form-control form-control-sm" maxlength="10" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -499,15 +499,17 @@
         autoclose: true,
         uiLibrary: 'bootstrap5'
     })
-    $("#orderPeriodFrom").datepicker({
-        format: 'yyyy-mm-dd',
+    $("#orderPeriodFrom").datetimepicker({
+        format: 'yyyy-mm-dd HH:MM:00',
         autoclose: true,
-        uiLibrary: 'bootstrap5'
+        uiLibrary: 'bootstrap5',
+        footer: true
     })
-    $("#orderPeriodTo").datepicker({
-        format: 'yyyy-mm-dd',
+    $("#orderPeriodTo").datetimepicker({
+        format: 'yyyy-mm-dd HH:MM:00',
         autoclose: true,
-        uiLibrary: 'bootstrap5'
+        uiLibrary: 'bootstrap5',
+        footer: true
     })
 
     function btnShowReceiveCustomerModal() {
