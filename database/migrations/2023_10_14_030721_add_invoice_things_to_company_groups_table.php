@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('company_groups', function (Blueprint $table) {
+        Schema::table('COMPANY_GROUPS', function (Blueprint $table) {
             $table->string('invoice_number_patter', 15);
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('company_groups', function (Blueprint $table) {
+        Schema::table('COMPANY_GROUPS', function (Blueprint $table) {
             //
         });
     }
