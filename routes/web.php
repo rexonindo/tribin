@@ -59,6 +59,18 @@ Route::get('/version', function () {
 });
 
 Route::middleware('auth')->group(function () {
+    # Terkait Company Group
+    Route::prefix('company')->group(function () {
+        Route::get('form', [CompanyGroupController::class, 'index'])->middleware('auth');
+        Route::get('management-form', [CompanyGroupController::class, 'form'])->middleware('auth');
+        Route::get('', [CompanyGroupController::class, 'search'])->middleware('auth');
+        Route::post('', [CompanyGroupController::class, 'save'])->middleware('auth');
+        Route::put('{id}', [CompanyGroupController::class, 'update'])->middleware('auth');
+        Route::get('access/{id}', [CompanyGroupController::class, 'loadByNickName'])->middleware('auth');
+        Route::post('access', [CompanyGroupController::class, 'saveAccess'])->middleware('auth');
+        Route::delete('access/{id}', [CompanyGroupController::class, 'deleteAccess'])->middleware('auth');
+    });
+
     # Terkait Harga Jarak
     Route::prefix('distance-price')->group(function () {
         Route::get('form', [DistancePriceController::class, 'index']);
@@ -204,15 +216,6 @@ Route::get('PDF/purchase-request/{id}', [PurchaseController::class, 'toPDF'])->m
 Route::get('PDF/purchase-order/{id}', [PurchaseController::class, 'POtoPDF'])->middleware('auth');
 Route::get('PDF/delivery-order/{id}', [DeliveryController::class, 'toPDF'])->middleware('auth');
 Route::get('PDF/SPK/{id}', [DeliveryController::class, 'SPKtoPDF'])->middleware('auth');
-
-# Terkait Company Group
-Route::get('company/form', [CompanyGroupController::class, 'index'])->middleware('auth');
-Route::get('company', [CompanyGroupController::class, 'search'])->middleware('auth');
-Route::post('company', [CompanyGroupController::class, 'save'])->middleware('auth');
-Route::put('company/{id}', [CompanyGroupController::class, 'update'])->middleware('auth');
-Route::get('company/access/{id}', [CompanyGroupController::class, 'loadByNickName'])->middleware('auth');
-Route::post('company/access', [CompanyGroupController::class, 'saveAccess'])->middleware('auth');
-Route::delete('company/access/{id}', [CompanyGroupController::class, 'deleteAccess'])->middleware('auth');
 
 #Terkait config
 Route::get('ACL/database', function () {

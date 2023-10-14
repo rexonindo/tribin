@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CompanyGroupController extends Controller
 {
+    protected $dedicatedConnection;
     function index()
     {
         $Configs = Config::get('database');
@@ -135,5 +136,16 @@ class CompanyGroupController extends Controller
         $affectedRow = CompanyGroupAccess::where('id', $request->id)->whereNull('deleted_at')
             ->update(['deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
+
+    function form()
+    {
+        if (isset($_COOKIE['CGID'])) {
+            $this->dedicatedConnection = $_COOKIE['CGID'] === '-' ? '-' : Crypt::decryptString($_COOKIE['CGID']);
+        } else {
+            $this->dedicatedConnection = '-';
+        }
+        $SelectedCompany = CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->first();
+        return view('master.company', ['SelectedCompany' => $SelectedCompany]);
     }
 }
