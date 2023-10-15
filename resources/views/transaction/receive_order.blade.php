@@ -62,11 +62,12 @@
                                         <div class="nav nav-tabs" id="quotation-type-nav-tab" role="tablist">
                                             <button class="nav-link active" id="nav-rental-tab" data-bs-toggle="tab" data-bs-target="#nav-rental" type="button" role="tab">Rental</button>
                                             <button class="nav-link" id="nav-sale-tab" data-bs-toggle="tab" data-bs-target="#nav-sale" type="button" role="tab">Sale</button>
+                                            <button class="nav-link" id="nav-service-tab" data-bs-toggle="tab" data-bs-target="#nav-service" type="button" role="tab">Service</button>
                                         </div>
                                     </nav>
                                     <div class="tab-content" id="quotation-type-nav-tabContent">
                                         <div class="tab-pane fade show active" id="nav-rental" role="tabpanel" tabindex="0">
-                                            <div class="container-fluid mt-2 border-start border-bottom rounded-start">                                                
+                                            <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                                                 <div class="row">
                                                     <div class="col-md-12 mb-1">
                                                         <div class="table-responsive" id="orderTableContainer">
@@ -125,8 +126,11 @@
                                                     <div class="col-md-6 mb-1">
                                                         <div class="input-group input-group-sm mb-1">
                                                             <span class="input-group-text">Usage</span>
-                                                            <input type="text" id="orderUsage" class="form-control orderInputItem" title="price per hour">
-                                                            <span class="input-group-text">Hour</span>
+                                                            <select id="orderUsage" class="form-select">
+                                                                @foreach ($usages as $r)
+                                                                <option value="{{$r->MUSAGE_ALIAS . ' ' . $r->MUSAGE_DESCRIPTION}}">{{$r->MUSAGE_ALIAS . ' ' . $r->MUSAGE_DESCRIPTION}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6 mb-1">
@@ -161,7 +165,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade show" id="nav-sale" role="tabpanel" tabindex="0">
+                                        <div class="tab-pane fade show" id="nav-sale" role="tabpanel" tabindex="1">
                                             <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                                                 <div class="row">
                                                     <div class="col-md-12 mb-1">
@@ -232,6 +236,15 @@
                                                             <button type="button" class="btn btn-outline-secondary" id="btnRemoveLineSale" onclick="btnRemoveLineSaleOnclick(this)">Remove line</button>
                                                             <button type="button" class="btn btn-outline-secondary" id="btnUpdateLineSale" onclick="btnUpdateLineSaleOnclick(this)">Update line</button>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade show" id="nav-service" role="tabpanel" tabindex="2">
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        on development
                                                     </div>
                                                 </div>
                                             </div>
@@ -773,6 +786,7 @@
         let itemMobDemob = []
         let ttlrows = orderTable.rows.length
         const NavRental = document.getElementById('nav-rental')
+        const NavSale = document.getElementById('nav-sale')
         let FinalQuotationType = '1'
         if (NavRental.classList.contains('active')) {
             FinalQuotationType = '1'
@@ -794,7 +808,7 @@
                 itemOperatorPrice.push(numeral(orderTable.rows[i].cells[6].innerText.trim()).value())
                 itemMobDemob.push(numeral(orderTable.rows[i].cells[7].innerText.trim()).value())
             }
-        } else {
+        } else if (NavSale.classList.contains('active')) {
             FinalQuotationType = '2'
             ttlrows = quotationSaleTable.rows.length - 1
             for (let i = 1; i < ttlrows; i++) {
@@ -805,6 +819,8 @@
                 itemOperatorPrice.push(0)
                 itemMobDemob.push(0)
             }
+        } else {
+            FinalQuotationType = '3'
         }
 
         if (ttlrows === 1) {
@@ -842,7 +858,7 @@
                 TSLO_SERVTRANS_COST: quotationServiceCost.value,
                 TSLODETA_ITMCD: itemCode,
                 TSLODETA_ITMQT: itemQty,
-                TSLODETA_USAGE: itemUsage,
+                TSLODETA_USAGE_DESCRIPTION: itemUsage,
                 TSLODETA_PRC: itemPrice,
                 TSLODETA_OPRPRC: itemOperatorPrice,
                 TSLODETA_MOBDEMOB: itemMobDemob,
@@ -1064,7 +1080,7 @@
                         newcell.innerHTML = arrayItem['TSLODETA_ITMQT']
                         newcell = newrow.insertCell(4)
                         newcell.classList.add('text-center')
-                        newcell.innerHTML = arrayItem['TSLODETA_USAGE']
+                        newcell.innerHTML = arrayItem['TSLODETA_USAGE_DESCRIPTION']
 
                         newcell = newrow.insertCell(5)
                         newcell.classList.add('text-end')
@@ -1575,7 +1591,7 @@
                         _token: '{{ csrf_token() }}',
                         TSLODETA_ITMCD: quotationItemCodeSale.value,
                         TSLODETA_ITMQT: quotationQtySale.value,
-                        TSLODETA_USAGE: 1,
+                        TSLODETA_USAGE_DESCRIPTION: 1,
                         TSLODETA_PRC: quotationPriceSale.value,
                     }
                     $.ajax({

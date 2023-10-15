@@ -25,7 +25,8 @@ class ReceiveOrderController extends Controller
     }
     public function index()
     {
-        return view('transaction.receive_order');
+        $Usages = M_USAGE::on($this->dedicatedConnection)->get();
+        return view('transaction.receive_order', ['usages' => $Usages]);
     }
     public function save(Request $request)
     {
@@ -103,8 +104,8 @@ class ReceiveOrderController extends Controller
         # data quotation detail item
         $validator = Validator::make($request->all(), [
             'TSLODETA_ITMCD' => 'required|array',
-            'TSLODETA_USAGE' => 'required|array',
-            'TSLODETA_USAGE.*' => 'required|numeric',
+            'TSLODETA_USAGE_DESCRIPTION' => 'required|array',
+            'TSLODETA_USAGE_DESCRIPTION.*' => 'required|string',
             'TSLODETA_PRC' => 'required|array',
             'TSLODETA_PRC.*' => 'required|numeric',
             'TSLODETA_MOBDEMOB' => 'required|array',
@@ -125,7 +126,8 @@ class ReceiveOrderController extends Controller
                 'TSLODETA_SLOCD' => $newDocumentCode,
                 'TSLODETA_ITMCD' => $request->TSLODETA_ITMCD[$i],
                 'TSLODETA_ITMQT' => $request->TSLODETA_ITMQT[$i],
-                'TSLODETA_USAGE' => $request->TSLODETA_USAGE[$i],
+                'TSLODETA_USAGE_DESCRIPTION' => $request->TSLODETA_USAGE_DESCRIPTION[$i],
+                'TSLODETA_USAGE' => 0,
                 'TSLODETA_PRC' => $request->TSLODETA_PRC[$i],
                 'TSLODETA_OPRPRC' => $request->TSLODETA_OPRPRC[$i],
                 'TSLODETA_MOBDEMOB' => $request->TSLODETA_MOBDEMOB[$i],
@@ -193,7 +195,7 @@ class ReceiveOrderController extends Controller
 
     function loadById(Request $request)
     {
-        $RS = T_SLODETA::on($this->dedicatedConnection)->select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE", "TSLODETA_ITMQT", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
+        $RS = T_SLODETA::on($this->dedicatedConnection)->select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE_DESCRIPTION", "TSLODETA_ITMQT", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
             ->leftJoin("M_ITM", function ($join) {
                 $join->on("TSLODETA_ITMCD", "=", "MITM_ITMCD")
                     ->on('TSLODETA_BRANCH', '=', 'MITM_BRANCH');
@@ -254,7 +256,7 @@ class ReceiveOrderController extends Controller
     }
     function report(Request $request)
     {
-        $RS = T_SLOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_SLOHEAD.*,MCUS_CUSNM,TSLODETA_ITMCD,MITM_ITMNM,TSLODETA_ITMQT,TSLODETA_USAGE,TSLODETA_PRC,TSLODETA_OPRPRC,TSLODETA_MOBDEMOB"))
+        $RS = T_SLOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_SLOHEAD.*,MCUS_CUSNM,TSLODETA_ITMCD,MITM_ITMNM,TSLODETA_ITMQT,TSLODETA_USAGE_DESCRIPTION,TSLODETA_PRC,TSLODETA_OPRPRC,TSLODETA_MOBDEMOB"))
             ->leftJoin('T_SLODETA', function ($join) {
                 $join->on('TSLO_SLOCD', '=', 'TSLODETA_SLOCD')->on('TSLO_BRANCH', '=', 'TSLODETA_BRANCH');
             })
@@ -333,7 +335,7 @@ class ReceiveOrderController extends Controller
             ->update([
                 'TSLODETA_ITMCD' => $request->TSLODETA_ITMCD,
                 'TSLODETA_ITMQT' => $request->TSLODETA_ITMQT,
-                'TSLODETA_USAGE' => $request->TSLODETA_USAGE,
+                'TSLODETA_USAGE_DESCRIPTION' => $request->TSLODETA_USAGE_DESCRIPTION,
                 'TSLODETA_PRC' => $request->TSLODETA_PRC,
                 'TSLODETA_OPRPRC' => $request->TSLODETA_OPRPRC ? $request->TSLODETA_OPRPRC : 0,
                 'TSLODETA_MOBDEMOB' => $request->TSLODETA_MOBDEMOB ? $request->TSLODETA_MOBDEMOB : 0,
