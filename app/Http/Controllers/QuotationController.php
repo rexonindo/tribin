@@ -462,7 +462,7 @@ class QuotationController extends Controller
         $this->fpdf->Cell(5, 5, ': ' . $User->phone, 0, 0, 'L');
         $this->fpdf->SetXY(140, 51);
         $this->fpdf->Cell(15, 5, 'Fax', 0, 0, 'L');
-        $this->fpdf->Cell(5, 5, ': (0711) 5645972', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': '. $RSCG->fax, 0, 0, 'L');
 
         $this->fpdf->SetXY(7, 61);
         $this->fpdf->MultiCell(0, 5, 'Dengan hormat,', 0, 'J');

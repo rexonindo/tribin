@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\C_ITRN;
 use App\Models\C_SPK;
+use App\Models\COMPANY_BRANCH;
 use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
 use App\Models\M_DISTANCE_PRICE;
@@ -158,6 +159,8 @@ class DeliveryController extends Controller
 
     public function save(Request $request)
     {
+        $monthOfRoma = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+
         # data quotation header
         $validator = Validator::make($request->all(), [
             'TDLVORD_CUSCD' => 'required',
@@ -168,6 +171,13 @@ class DeliveryController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
+        $Company = COMPANY_BRANCH::on($this->dedicatedConnection)->select(
+            'invoice_letter_id'
+        )
+            ->where('connection', $this->dedicatedConnection)
+            ->where('BRANCH', Auth::user()->branch)
+            ->first();
+
         $LastLine = DB::connection($this->dedicatedConnection)->table('T_DLVORDHEAD')
             ->whereYear('created_at', '=', date('Y'))
             ->where('TDLVORD_BRANCH', Auth::user()->branch)
@@ -175,12 +185,15 @@ class DeliveryController extends Controller
 
         $quotationHeader = [];
         $newQuotationCode = '';
+        $newInvoiceCode = '';
         if (!$LastLine) {
             $LastLine = 1;
             $newQuotationCode = 'SP-' . date('y') . '-0001';
+            $newInvoiceCode = $LastLine . '/' . $Company->invoice_letter_id . '/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         } else {
             $LastLine++;
             $newQuotationCode = 'SP-' . date('y') . '-' . substr('000' . $LastLine, -4);
+            $newInvoiceCode = $LastLine . '/' . $Company->invoice_letter_id . '/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         }
         $quotationHeader = [
             'TDLVORD_DLVCD' => $newQuotationCode,
@@ -188,6 +201,7 @@ class DeliveryController extends Controller
             'TDLVORD_LINE' => $LastLine,
             'TDLVORD_ISSUDT' => $request->TDLVORD_ISSUDT,
             'TDLVORD_REMARK' => $request->TDLVORD_REMARK,
+            'TDLVORD_INVCD' => $newInvoiceCode,
             'TDLVORD_BRANCH' => Auth::user()->branch
         ];
 
@@ -237,7 +251,6 @@ class DeliveryController extends Controller
             ->update([
                 'TDLVORD_REMARK' => $request->TDLVORD_REMARK,
                 'TDLVORD_ISSUDT' => $request->TDLVORD_ISSUDT,
-                'TDLVORD_INVCD' => $request->TDLVORD_INVCD,
                 'updated_by' => Auth::user()->nick_name,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
@@ -325,8 +338,9 @@ class DeliveryController extends Controller
 
     function toPDF(Request $request)
     {
+        $monthOfIndonesian = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $doc = base64_decode($request->id);
-        $RSHeader = T_DLVORDHEAD::on($this->dedicatedConnection)->select('TDLVORD_ISSUDT', 'MCUS_CUSNM', 'TDLVORD_REMARK', 'MCUS_TELNO', 'TDLVORD_INVCD')
+        $RSHeader = T_DLVORDHEAD::on($this->dedicatedConnection)->select('TDLVORD_ISSUDT', 'MCUS_CUSNM', 'TDLVORD_REMARK', 'MCUS_TELNO', 'TDLVORD_INVCD', 'TDLVORD_LINE')
             ->leftJoin('M_CUS', function ($join) {
                 $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
             })
@@ -334,8 +348,17 @@ class DeliveryController extends Controller
             ->where('TDLVORD_BRANCH', Auth::user()->branch)
             ->first();
         $DOIssuDate = date_format(date_create($RSHeader->TDLVORD_ISSUDT), 'd-M-Y');
+        
         $Branch = M_BRANCH::select('MBRANCH_NM')->where('MBRANCH_CD', Auth::user()->branch)->first();
-        $Company = CompanyGroup::select('name', 'address', 'phone')->where('connection', $this->dedicatedConnection)->first();
+        $Company = COMPANY_BRANCH::on($this->dedicatedConnection)->select(
+            'name',
+            'COMPANY_BRANCHES.address',
+            'COMPANY_BRANCHES.phone',
+            'invoice_letter_id'
+        )
+            ->where('connection', $this->dedicatedConnection)
+            ->where('BRANCH', Auth::user()->branch)
+            ->first();
         $RSDetail = T_DLVORDDETA::on($this->dedicatedConnection)->select(
             'TDLVORDDETA_ITMCD',
             'TDLVORDDETA_ITMQT',
@@ -352,6 +375,7 @@ class DeliveryController extends Controller
             })
             ->where('TDLVORDDETA_DLVCD', $doc)
             ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get();
+
         $Dibuat = NULL;
         $Attn = NULL;
         $Subject = NULL;
@@ -363,14 +387,13 @@ class DeliveryController extends Controller
         foreach ($RSDetail as $r) {
             $Capacity = $r->MITM_ITMNM;
             $Model = $r->MITM_MODEL;
-            $Merk = $r->MITM_BRAND;
-            $Usage = $r->TSLODETA_USAGE;
+            $Merk = $r->MITM_BRAND;            
             $Dibuat = User::where('nick_name', $r->created_by)->select('name')->first();
             $Attn = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_ATTN', 'TSLO_QUOCD', 'TSLO_POCD')
                 ->where('TSLO_SLOCD', $r->TDLVORDDETA_SLOCD)
                 ->where('TSLO_BRANCH', Auth::user()->branch)
                 ->first();
-            $Usage = T_SLODETA::on($this->dedicatedConnection)->select('TSLODETA_USAGE', 'TSLODETA_PRC', 'TSLODETA_OPRPRC', 'TSLODETA_MOBDEMOB')
+            $Usage = T_SLODETA::on($this->dedicatedConnection)->select('TSLODETA_USAGE_DESCRIPTION', 'TSLODETA_PRC', 'TSLODETA_OPRPRC', 'TSLODETA_MOBDEMOB')
                 ->where('TSLODETA_SLOCD', $r->TDLVORDDETA_SLOCD)
                 ->where('TSLODETA_BRANCH', Auth::user()->branch)
                 ->first();
@@ -519,7 +542,7 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(50, 5, ': ' . $Model, 0, 0, 'L');
             $this->fpdf->SetXY(7, 80);
             $this->fpdf->Cell(50, 5, 'Pemakaian', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ': ' . $Usage->TSLODETA_USAGE . ' Jam', 0, 0, 'L');
+            $this->fpdf->Cell(50, 5, ': ' . $Usage->TSLODETA_USAGE_DESCRIPTION . ' Jam', 0, 0, 'L');
             $this->fpdf->SetXY(7, 85);
             $this->fpdf->Cell(50, 5, 'Periode', 0, 0, 'L');
             $this->fpdf->Cell(50, 5, ': ', 0, 0, 'L');

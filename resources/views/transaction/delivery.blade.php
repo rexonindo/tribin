@@ -47,7 +47,7 @@
             <div class="col-md-12 mb-1">
                 <div class="input-group mb-1">
                     <span class="input-group-text">Invoice Code</span>
-                    <input type="text" id="orderInvoiceCode" class="form-control" maxlength="40">
+                    <input type="text" id="orderInvoiceCode" class="form-control" maxlength="40" readonly disabled>
                 </div>
             </div>
         </div>
