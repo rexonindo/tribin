@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BranchPaymentAccount;
 use App\Models\COMPANY_BRANCH;
 use App\Models\CompanyGroup;
 use App\Models\CompanyGroupAccess;
@@ -16,6 +17,12 @@ use Illuminate\Support\Facades\Validator;
 class CompanyGroupController extends Controller
 {
     protected $dedicatedConnection;
+
+    public function __construct()
+    {
+        date_default_timezone_set('Asia/Jakarta');
+    }
+
     function index()
     {
         $Configs = Config::get('database');
@@ -187,5 +194,65 @@ class CompanyGroupController extends Controller
             $id = $request->id;
         }
         return ['msg' => $message, 'id' => $id];
+    }
+
+    function savePaymentAccount(Request $request)
+    {
+        if (isset($_COOKIE['CGID'])) {
+            $this->dedicatedConnection = $_COOKIE['CGID'] === '-' ? '-' : Crypt::decryptString($_COOKIE['CGID']);
+        } else {
+            $this->dedicatedConnection = '-';
+        }
+
+        $validator = Validator::make($request->all(), [
+            'bank_name' => 'required',
+            'bank_account_name' => 'required',
+            'bank_account_number' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        BranchPaymentAccount::on($this->dedicatedConnection)->create([
+            'connection' => $this->dedicatedConnection,
+            'BRANCH' => Auth::user()->branch,
+            'bank_name' => $request->bank_name,
+            'bank_account_name' => $request->bank_account_name,
+            'bank_account_number' => $request->bank_account_number,
+            'created_by' => Auth::user()->nick_name,
+        ]);
+
+        return ['msg' => 'Saved successfully'];
+    }
+
+    function deletePaymentAccountCompanyBranch(Request $request)
+    {
+        if (isset($_COOKIE['CGID'])) {
+            $this->dedicatedConnection = $_COOKIE['CGID'] === '-' ? '-' : Crypt::decryptString($_COOKIE['CGID']);
+        } else {
+            $this->dedicatedConnection = '-';
+        }
+
+        BranchPaymentAccount::on($this->dedicatedConnection)->where('id', $request->id)
+            ->update([
+                'deleted_at' => date('Y-m-d H:i:s'),
+                'deleted_by' => Auth::user()->nick_name,
+            ]);
+        return ['msg' => 'deleted'];
+    }
+
+    function getPaymentAccountCompanyBranch()
+    {
+        if (isset($_COOKIE['CGID'])) {
+            $this->dedicatedConnection = $_COOKIE['CGID'] === '-' ? '-' : Crypt::decryptString($_COOKIE['CGID']);
+        } else {
+            $this->dedicatedConnection = '-';
+        }
+        $Accounts = BranchPaymentAccount::on($this->dedicatedConnection)
+            ->where('BRANCH', Auth::user()->branch)
+            ->whereNull('deleted_at')
+            ->get();
+        return ['data' => $Accounts];
     }
 }

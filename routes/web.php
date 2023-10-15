@@ -72,6 +72,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('access/{id}', [CompanyGroupController::class, 'deleteAccess'])->middleware('auth');
     });
 
+    # Terkait Company Group
+    Route::prefix('payment-account')->group(function () {
+        Route::post('form', [CompanyGroupController::class, 'savePaymentAccount'])->middleware('auth');
+        Route::get('', [CompanyGroupController::class, 'getPaymentAccountCompanyBranch'])->middleware('auth');
+        Route::delete('form/{id}', [CompanyGroupController::class, 'deletePaymentAccountCompanyBranch'])->middleware('auth');
+    });
+
     # Terkait Harga Jarak
     Route::prefix('distance-price')->group(function () {
         Route::get('form', [DistancePriceController::class, 'index']);
