@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\COMPANY_BRANCH;
 use App\Models\CompanyGroup;
 use App\Models\CompanyGroupAccess;
 use App\Models\Role;
@@ -145,7 +146,46 @@ class CompanyGroupController extends Controller
         } else {
             $this->dedicatedConnection = '-';
         }
-        $SelectedCompany = CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->first();
+        $SelectedCompany = COMPANY_BRANCH::on($this->dedicatedConnection)->select('*')
+            ->where('connection', $this->dedicatedConnection)
+            ->where('BRANCH', Auth::user()->branch)
+            ->first();
         return view('master.company', ['SelectedCompany' => $SelectedCompany]);
+    }
+
+    function updateBranch(Request $request)
+    {
+        if (isset($_COOKIE['CGID'])) {
+            $this->dedicatedConnection = $_COOKIE['CGID'] === '-' ? '-' : Crypt::decryptString($_COOKIE['CGID']);
+        } else {
+            $this->dedicatedConnection = '-';
+        }
+        if ($request->id === '-') {
+            $ResponseDB = COMPANY_BRANCH::on($this->dedicatedConnection)->create([
+                'created_by' => Auth::user()->nick_name,
+                'BRANCH' => Auth::user()->branch,
+                'connection' => $this->dedicatedConnection,
+                'name' => $request->name,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'fax' => $request->fax,
+                'invoice_letter_id' => $request->invoice_letter_id,
+            ]);
+            $message = 'Saved';
+            $id = $ResponseDB->id;
+        } else {
+            COMPANY_BRANCH::on($this->dedicatedConnection)->where('id', $request->id)
+                ->update([
+                    'updated_by' => Auth::user()->nick_name,
+                    'name' => $request->name,
+                    'address' => $request->address,
+                    'phone' => $request->phone,
+                    'fax' => $request->fax,
+                    'invoice_letter_id' => $request->invoice_letter_id,
+                ]);
+            $message = 'Updated';
+            $id = $request->id;
+        }
+        return ['msg' => $message, 'id' => $id];
     }
 }

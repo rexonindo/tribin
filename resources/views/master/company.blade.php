@@ -36,8 +36,8 @@
                             <div class="col-md-6 mb-1">
                                 <div class="input-group input-group-sm mb-1">
                                     <span class="input-group-text">Name</span>
-                                    <input type="text" id="companyName" class="form-control" placeholder="Company Name" maxlength="65" value="{{ $SelectedCompany->name }}" readonly disabled>
-                                    <input type="hidden" id="companyId">
+                                    <input type="text" id="companyName" class="form-control" placeholder="Company Name" maxlength="65" value="{{ $SelectedCompany ? $SelectedCompany->name : '' }}">
+                                    <input type="hidden" id="companyId" value="{{ $SelectedCompany ? $SelectedCompany->id : '-' }}">
                                 </div>
                             </div>
                         </div>
@@ -45,7 +45,7 @@
                             <div class="col-md-12 mb-1">
                                 <div class="input-group input-group-sm mb-1">
                                     <span class="input-group-text">Address</span>
-                                    <textarea class="form-control" id="companyAddress" maxlength="200">{{ $SelectedCompany->address }}</textarea>
+                                    <textarea class="form-control" id="companyAddress" maxlength="200">{{ $SelectedCompany ? $SelectedCompany->address : '' }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -53,13 +53,13 @@
                             <div class="col-md-6 mb-1">
                                 <div class="input-group input-group-sm mb-1">
                                     <span class="input-group-text">Phone</span>
-                                    <input type="text" id="companyPhone" class="form-control" placeholder="+0..." maxlength="45" value="{{ $SelectedCompany->phone }}">
+                                    <input type="text" id="companyPhone" class="form-control" placeholder="+0..." maxlength="45" value="{{ $SelectedCompany ? $SelectedCompany->phone : '' }}">
                                 </div>
                             </div>
                             <div class="col-md-6 mb-1">
                                 <div class="input-group input-group-sm mb-1">
                                     <span class="input-group-text">Fax</span>
-                                    <input type="text" id="companyFax" class="form-control" placeholder="+0..." maxlength="45" value="{{ $SelectedCompany->fax }}">
+                                    <input type="text" id="companyFax" class="form-control" placeholder="+0..." maxlength="45" value="{{ $SelectedCompany ? $SelectedCompany->fax : '' }}">
                                 </div>
                             </div>
                         </div>
@@ -67,7 +67,7 @@
                             <div class="col-md-12 mb-1">
                                 <label for="companyInvoiceNumber" class="form-label">Invoice Number Pattern</label>
                                 <div class="input-group input-group-sm mb-1">
-                                    <input type="text" id="companyInvoiceNumber" class="form-control" maxlength="15" placeholder="JP/INV  or JC/INV">
+                                    <input type="text" id="companyInvoiceNumber" class="form-control" maxlength="15" placeholder="JP/INV  or JC/INV" value="{{ $SelectedCompany ? $SelectedCompany->invoice_letter_id : '' }}">
                                 </div>
                             </div>
                         </div>
@@ -124,5 +124,46 @@
             </div>
         </div>
     </div>
-
 </form>
+<script>
+    function btnSaveOnclick(pthis) {
+        pthis.disabled = true
+        pthis.innerHTML = `Please wait...`
+        const data = {
+            name: companyName.value,
+            address: companyAddress.value,
+            phone: companyPhone.value,
+            fax: companyFax.value,
+            invoice_letter_id: companyInvoiceNumber.value,
+            _token: '{{ csrf_token() }}',
+        }
+        $.ajax({
+            type: "PUT",
+            url: `company/management-form/${companyId.value}`,
+            data: data,
+            dataType: "json",
+            success: function(response) {
+                pthis.innerHTML = `<i class="fas fa-save"></i>`
+                alertify.success(response.msg)
+                companyId.value = response.id
+                pthis.disabled = false
+                document.getElementById('div-alert').innerHTML = ''
+            },
+            error: function(xhr, xopt, xthrow) {
+                pthis.innerHTML = `<i class="fas fa-save"></i>`
+                pthis.disabled = false
+                const respon = Object.keys(xhr.responseJSON)
+                const div_alert = document.getElementById('div-alert')
+                let msg = ''
+                for (const item of respon) {
+                    msg += `<p>${xhr.responseJSON[item]}</p>`
+                }
+                div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                ${msg}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`
+                alertify.warning(xthrow);
+            }
+        });
+    }
+</script>

@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('company')->group(function () {
         Route::get('form', [CompanyGroupController::class, 'index'])->middleware('auth');
         Route::get('management-form', [CompanyGroupController::class, 'form'])->middleware('auth');
+        Route::put('management-form/{id}', [CompanyGroupController::class, 'updateBranch'])->middleware('auth');
         Route::get('', [CompanyGroupController::class, 'search'])->middleware('auth');
         Route::post('', [CompanyGroupController::class, 'save'])->middleware('auth');
         Route::put('{id}', [CompanyGroupController::class, 'update'])->middleware('auth');
