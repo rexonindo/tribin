@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CompanyGroup;
 use App\Models\M_Condition;
+use App\Models\M_USAGE;
 use App\Models\T_QUOCOND;
 use App\Models\T_QUODETA;
 use App\Models\T_QUOHEAD;
@@ -30,7 +31,8 @@ class QuotationController extends Controller
     }
     public function index()
     {
-        return view('transaction.quotation');
+        $Usages = M_USAGE::on($this->dedicatedConnection)->get();
+        return view('transaction.quotation', ['usages' => $Usages]);
     }
 
     public function formReport()
@@ -85,8 +87,7 @@ class QuotationController extends Controller
         # data quotation detail item
         $validator = Validator::make($request->all(), [
             'TQUODETA_ITMCD' => 'required|array',
-            'TQUODETA_USAGE' => 'required|array',
-            'TQUODETA_USAGE.*' => 'required|numeric',
+            'TQUODETA_USAGE_DESCRIPTION' => 'required|array',
             'TQUODETA_PRC' => 'required|array',
             'TQUODETA_PRC.*' => 'required|numeric',
             'TQUODETA_MOBDEMOB' => 'required|array',
@@ -107,7 +108,8 @@ class QuotationController extends Controller
                 'TQUODETA_QUOCD' => $newQuotationCode,
                 'TQUODETA_ITMCD' => $request->TQUODETA_ITMCD[$i],
                 'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT[$i],
-                'TQUODETA_USAGE' => $request->TQUODETA_USAGE[$i],
+                'TQUODETA_USAGE' => 1,
+                'TQUODETA_USAGE_DESCRIPTION' => $request->TQUODETA_USAGE_DESCRIPTION[$i],
                 'TQUODETA_PRC' => $request->TQUODETA_PRC[$i],
                 'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC[$i],
                 'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB[$i],
@@ -268,7 +270,7 @@ class QuotationController extends Controller
 
     function loadById(Request $request)
     {
-        $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB", 'TQUODETA_ITMQT'])
+        $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE_DESCRIPTION", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB", 'TQUODETA_ITMQT'])
             ->leftJoin("M_ITM", function ($join) {
                 $join->on("TQUODETA_ITMCD", "=", "MITM_ITMCD")
                     ->on('TQUODETA_BRANCH', '=', 'MITM_BRANCH');
@@ -393,7 +395,7 @@ class QuotationController extends Controller
             'MITM_BRAND',
             'MITM_ITMNM',
             'MITM_MODEL',
-            'TQUODETA_USAGE',
+            'TQUODETA_USAGE_DESCRIPTION',
             'TQUODETA_PRC',
             'TQUODETA_OPRPRC',
             'TQUODETA_MOBDEMOB',
@@ -462,7 +464,7 @@ class QuotationController extends Controller
         $this->fpdf->Cell(5, 5, ': ' . $User->phone, 0, 0, 'L');
         $this->fpdf->SetXY(140, 51);
         $this->fpdf->Cell(15, 5, 'Fax', 0, 0, 'L');
-        $this->fpdf->Cell(5, 5, ': '. $RSCG->fax, 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $RSCG->fax, 0, 0, 'L');
 
         $this->fpdf->SetXY(7, 61);
         $this->fpdf->MultiCell(0, 5, 'Dengan hormat,', 0, 'J');
@@ -474,9 +476,8 @@ class QuotationController extends Controller
             $this->fpdf->SetXY(6, 72);
             $this->fpdf->Cell(7, 5, 'No', 1, 0, 'L');
             $this->fpdf->Cell(20, 5, 'Merk', 1, 0, 'L');
-            $this->fpdf->Cell(45, 5, 'Capacity', 1, 0, 'L');
+            $this->fpdf->Cell(45, 5, 'Capacity / Pemakaian', 1, 0, 'L');
             $this->fpdf->Cell(35, 5, 'Model', 1, 0, 'C');
-            $this->fpdf->Cell(18, 5, 'Pemakaian', 1, 0, 'C');
             $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
             $this->fpdf->Cell(25, 5, 'Harga Sewa', 1, 0, 'C');
             $this->fpdf->Cell(20, 5, 'Operator', 1, 0, 'C');
@@ -485,9 +486,12 @@ class QuotationController extends Controller
             $NomorUrut = 1;
             foreach ($RSDetail as $r) {
                 $this->fpdf->SetXY(6, $y);
-                $this->fpdf->Cell(7, 5, $NomorUrut++, 1, 0, 'L');
-                $this->fpdf->Cell(20, 5, $r['MITM_BRAND'], 1, 0, 'L');
-                $this->fpdf->Cell(45, 5, $r['MITM_ITMNM'], 1, 0, 'L');
+                $this->fpdf->Cell(7, 10, $NomorUrut++, 1, 0, 'L');
+                $this->fpdf->Cell(20, 10, $r['MITM_BRAND'], 1, 0, 'L');
+                // $this->fpdf->Cell(45, 5, $r['MITM_ITMNM'], 0, 0, 'L');
+                $this->fpdf->Cell(45, 10, '', 1, 0, 'L');
+                $this->fpdf->Text(35, $y + 4, $r['MITM_ITMNM']);
+                $this->fpdf->Text(35, $y + 8, $r['TQUODETA_USAGE_DESCRIPTION']);
                 $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_MODEL']);
                 if ($ttlwidth > 35) {
                     $ukuranfont = 8.5;
@@ -497,14 +501,14 @@ class QuotationController extends Controller
                         $ukuranfont = $ukuranfont - 0.5;
                     }
                 }
-                $this->fpdf->Cell(35, 5, $r['MITM_MODEL'], 1, 0, 'C');
+                $this->fpdf->Cell(35, 10, $r['MITM_MODEL'], 1, 0, 'C');
                 $this->fpdf->SetFont('Arial', '', 9);
-                $this->fpdf->Cell(18, 5, $r['TQUODETA_USAGE'] . ' Jam', 1, 0, 'C');
-                $this->fpdf->Cell(10, 5, $r['TQUODETA_ITMQT'], 1, 0, 'C');
-                $this->fpdf->Cell(25, 5, number_format($r['TQUODETA_PRC']), 1, 0, 'C');
-                $this->fpdf->Cell(20, 5, number_format($r['TQUODETA_OPRPRC']), 1, 0, 'C');
-                $this->fpdf->Cell(20, 5, number_format($r['TQUODETA_MOBDEMOB']), 1, 0, 'C');
-                $y += 5;
+                // $this->fpdf->Cell(18, 5, $r['TQUODETA_USAGE_DESCRIPTION'], 1, 0, 'C');
+                $this->fpdf->Cell(10, 10, $r['TQUODETA_ITMQT'], 1, 0, 'C');
+                $this->fpdf->Cell(25, 10, number_format($r['TQUODETA_PRC']), 1, 0, 'C');
+                $this->fpdf->Cell(20, 10, number_format($r['TQUODETA_OPRPRC']), 1, 0, 'C');
+                $this->fpdf->Cell(20, 10, number_format($r['TQUODETA_MOBDEMOB']), 1, 0, 'C');
+                $y += 10;
             }
             $y += 5;
             $this->fpdf->SetXY(7, $y);
@@ -667,7 +671,7 @@ class QuotationController extends Controller
 
     function report(Request $request)
     {
-        $RS = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_QUOHEAD.*,MCUS_CUSNM,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
+        $RS = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("T_QUOHEAD.*,MCUS_CUSNM,TQUODETA_ITMCD,MITM_ITMNM,TQUODETA_ITMQT,TQUODETA_USAGE_DESCRIPTION,TQUODETA_PRC,TQUODETA_OPRPRC,TQUODETA_MOBDEMOB"))
             ->leftJoin('T_QUODETA', function ($join) {
                 $join->on('TQUO_QUOCD', '=', 'TQUODETA_QUOCD')
                     ->on('TQUO_BRANCH', '=', 'TQUODETA_BRANCH');

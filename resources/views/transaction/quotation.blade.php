@@ -98,6 +98,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                
                                                 <div class="row">
                                                     <div class="col-md-6 mb-1">
                                                         <div class="input-group input-group-sm mb-1">
@@ -117,8 +118,11 @@
                                                     <div class="col-md-6 mb-1">
                                                         <div class="input-group input-group-sm mb-1">
                                                             <span class="input-group-text">Usage</span>
-                                                            <input type="text" id="quotationUsage" class="form-control quotationInputItem" title="price per hour">
-                                                            <span class="input-group-text">Hour</span>
+                                                            <select id="quotationUsage" class="form-select">
+                                                                @foreach ($usages as $r)
+                                                                <option value="{{$r->MUSAGE_ALIAS . ' ' . $r->MUSAGE_DESCRIPTION}}">{{$r->MUSAGE_ALIAS . ' ' . $r->MUSAGE_DESCRIPTION}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6 mb-1">
@@ -852,7 +856,7 @@
                         _token: '{{ csrf_token() }}',
                         TQUODETA_ITMCD: quotationItemCode.value,
                         TQUODETA_ITMQT: 1,
-                        TQUODETA_USAGE: quotationUsage.value,
+                        TQUODETA_USAGE_DESCRIPTION: quotationUsage.value,
                         TQUODETA_PRC: quotationPrice.value,
                         TQUODETA_OPRPRC: quotationOperator.value,
                         TQUODETA_MOBDEMOB: quotationMOBDEMOB.value,
@@ -986,7 +990,7 @@
         let itemUsage = []
         let itemPrice = []
         let itemOperatorPrice = []
-        let itemMobDemob = []
+        let itemMobDemob = []        
         let quotationCondition = []
         const NavRental = document.getElementById('nav-rental')
         let FinalQuotationType = '1'
@@ -1043,7 +1047,7 @@
                 TQUO_SERVTRANS_COST: quotationServiceCost.value,
                 TQUODETA_ITMCD: itemCode,
                 TQUODETA_ITMQT: itemQty,
-                TQUODETA_USAGE: itemUsage,
+                TQUODETA_USAGE_DESCRIPTION: itemUsage,
                 TQUODETA_PRC: itemPrice,
                 TQUODETA_OPRPRC: itemOperatorPrice,
                 TQUODETA_MOBDEMOB: itemMobDemob,
@@ -1236,7 +1240,7 @@
                                 selrow.classList.add('table-info')
                                 quotationItemCode.value = arrayItem['TQUODETA_ITMCD']
                                 quotationItemName.value = arrayItem['MITM_ITMNM']
-                                quotationUsage.value = arrayItem['TQUODETA_USAGE']
+                                quotationUsage.value = arrayItem['TQUODETA_USAGE_DESCRIPTION']
                                 quotationPrice.value = arrayItem['TQUODETA_PRC']
                                 quotationOperator.value = arrayItem['TQUODETA_OPRPRC']
                                 quotationMOBDEMOB.value = arrayItem['TQUODETA_MOBDEMOB']
@@ -1251,7 +1255,7 @@
                         newcell.innerHTML = arrayItem['MITM_ITMNM']
                         newcell = newrow.insertCell(3)
                         newcell.classList.add('text-center')
-                        newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                        newcell.innerHTML = arrayItem['TQUODETA_USAGE_DESCRIPTION']
                         newcell = newrow.insertCell(4)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
@@ -1530,7 +1534,7 @@
                         _token: '{{ csrf_token() }}',
                         TQUODETA_ITMCD: quotationItemCodeSale.value,
                         TQUODETA_ITMQT: quotationQtySale.value,
-                        TQUODETA_USAGE: 1,
+                        TQUODETA_USAGE_DESCRIPTION: 1,
                         TQUODETA_PRC: quotationPriceSale.value,
                         TQUO_QUOCD: quotationCode.value,
                     }
