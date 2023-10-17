@@ -342,7 +342,7 @@ class DeliveryController extends Controller
     function toPDF(Request $request)
     {
         $doc = base64_decode($request->id);
-        $RSHeader = T_DLVORDHEAD::on($this->dedicatedConnection)->select('TDLVORD_ISSUDT', 'MCUS_CUSNM', 'TDLVORD_REMARK', 'MCUS_TELNO', 'TDLVORD_INVCD', 'TDLVORD_LINE')
+        $RSHeader = T_DLVORDHEAD::on($this->dedicatedConnection)->select('TDLVORD_ISSUDT', 'MCUS_CUSNM', 'MCUS_ADDR1', 'TDLVORD_REMARK', 'MCUS_TELNO', 'TDLVORD_INVCD', 'TDLVORD_LINE')
             ->leftJoin('M_CUS', function ($join) {
                 $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
             })
@@ -393,7 +393,6 @@ class DeliveryController extends Controller
                 ->where('TSLO_SLOCD', $r->TDLVORDDETA_SLOCD)
                 ->where('TSLO_BRANCH', Auth::user()->branch)
                 ->first();
-
 
             $Subject = T_QUOHEAD::on($this->dedicatedConnection)->select('TQUO_SBJCT')
                 ->where('TQUO_QUOCD', $Attn->TSLO_QUOCD)
@@ -483,6 +482,8 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(5, 2, '(' . $Dibuat->name . ')', 0, 0, 'L');
         }
 
+        $subjek = ucwords(trim(str_replace('penawaran', '', strtolower($Subject->TQUO_SBJCT))));
+
         if (substr($_COOKIE['JOS_PRINT_FORM'], 1, 1) == '1') {
             $this->fpdf->AddPage("P", 'A4');
             $this->fpdf->SetFont('Arial', 'B', 17);
@@ -509,7 +510,7 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(20, 5, ': ' . $RSHeader->MCUS_TELNO, 0, 0, 'L');
             $this->fpdf->SetXY(7, 42);
             $this->fpdf->Cell(20, 5, 'Subject', 0, 0, 'L');
-            $this->fpdf->Cell(20, 5, ': ' . $Subject->TQUO_SBJCT, 0, 0, 'L');
+            $this->fpdf->Cell(20, 5, ': ' . $subjek, 0, 0, 'L');
 
             $this->fpdf->SetXY(130, 27);
             $this->fpdf->Cell(20, 5, 'No', 0, 0, 'L');
@@ -524,7 +525,7 @@ class DeliveryController extends Controller
             $this->fpdf->SetXY(7, 50);
             $this->fpdf->Cell(20, 5, 'Dengan hormat,', 0, 0, 'L');
             $this->fpdf->SetXY(7, 55);
-            $this->fpdf->MultiCell(195, 5, 'Bersama ini kami lakukan penagihan atas ' . $Subject->TQUO_SBJCT . ' dengan rincian sebagai berikut :');
+            $this->fpdf->MultiCell(195, 5, 'Bersama ini kami lakukan penagihan atas ' . $subjek . ' dengan rincian sebagai berikut :');
             $Yfocus = $this->fpdf->GetY();
             $Yfocus += 5;
             $this->fpdf->SetXY(7, $Yfocus);
@@ -534,39 +535,52 @@ class DeliveryController extends Controller
             $this->fpdf->SetXY(6, $Yfocus);
             $this->fpdf->SetFont('Arial', 'B', 10);
             $this->fpdf->Cell(30, 5, 'Merk', 1, 0, 'C');
-            $this->fpdf->Cell(45, 5, 'Capacity / Pemakaian', 1, 0, 'C');
-            $this->fpdf->Cell(70, 5, 'Model', 1, 0, 'C');
+            $this->fpdf->Cell(45, 5, 'Capacity / Model', 1, 0, 'C');
+            $this->fpdf->Cell(70, 5, 'Pemakaian / Periode', 1, 0, 'C');
             $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
             $this->fpdf->Cell(45, 5, 'Total Harga Sewa', 1, 0, 'C');
             $Yfocus += 5;
             $this->fpdf->SetFont('Arial', '', 10);
+            $totalHargaSewa = 0;
             foreach ($RSDetail as $r) {
-                $Usage = T_SLODETA::on($this->dedicatedConnection)->select('TSLODETA_USAGE_DESCRIPTION', 'TSLODETA_PRC', 'TSLODETA_OPRPRC', 'TSLODETA_MOBDEMOB')
+                $Usage = T_SLODETA::on($this->dedicatedConnection)->select(
+                    'TSLODETA_USAGE_DESCRIPTION',
+                    'TSLODETA_PRC',
+                    'TSLODETA_OPRPRC',
+                    'TSLODETA_MOBDEMOB',
+                    'TSLODETA_PERIOD_FR',
+                    'TSLODETA_PERIOD_TO',
+                )
                     ->where('TSLODETA_SLOCD', $r->TDLVORDDETA_SLOCD)
                     ->where('TSLODETA_ITMCD', $r->TDLVORDDETA_ITMCD)
                     ->where('TSLODETA_BRANCH', Auth::user()->branch)
                     ->first();
                 $HargaSewa = $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
+                $PeriodFrom = date_format(date_create($Usage->TSLODETA_PERIOD_FR), 'd-M-Y');
+                $PeriodTo = date_format(date_create($Usage->TSLODETA_PERIOD_TO), 'd-M-Y');
                 $this->fpdf->SetXY(6, $Yfocus);
                 $this->fpdf->Cell(30, 10, $r->MITM_BRAND, 1, 0, 'C');
                 $this->fpdf->Cell(45, 10, '', 1, 0, 'C');
                 $this->fpdf->Text(37, $Yfocus + 4, $r->MITM_ITMNM);
-                $this->fpdf->Text(37, $Yfocus + 8, $Usage->TSLODETA_USAGE_DESCRIPTION);
+                $this->fpdf->Text(37, $Yfocus + 8, $r->MITM_MODEL);
+
                 $this->fpdf->Cell(70, 10, '', 1, 0, 'C');
-                $this->fpdf->SetXY(81, $Yfocus);
-                $this->fpdf->MultiCell(70, 5, $r->MITM_MODEL);
+                $this->fpdf->Text(82, $Yfocus + 3, $Usage->TSLODETA_USAGE_DESCRIPTION);
+                $this->fpdf->Text(82, $Yfocus + 8, $PeriodFrom . ' s/d ' . $PeriodTo);
+
                 $this->fpdf->SetXY(151, $Yfocus);
                 $this->fpdf->Cell(10, 10, $r->TDLVORDDETA_ITMQT, 1, 0, 'C');
                 $this->fpdf->Cell(45, 10, number_format($HargaSewa), 1, 0, 'C');
                 $Yfocus += 10;
+                $totalHargaSewa += $HargaSewa;
             }
             $Yfocus += 5;
             $this->fpdf->SetFont('Arial', 'B', 10);
             $this->fpdf->SetXY(7, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Total', 0, 0, 'L');
             $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
-            $this->fpdf->Cell(25, 5, ' ' . number_format($HargaSewa), 0, 0, 'R');
-            $PPNAmount = $HargaSewa * 11 / 100;
+            $this->fpdf->Cell(25, 5, ' ' . number_format($totalHargaSewa), 0, 0, 'R');
+            $PPNAmount = $totalHargaSewa * 11 / 100;
 
             $Yfocus += 5;
             $this->fpdf->SetXY(7, $Yfocus);
@@ -578,11 +592,12 @@ class DeliveryController extends Controller
             $this->fpdf->SetXY(7, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Total Tagihan', 0, 0, 'L');
             $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
-            $this->fpdf->Cell(25, 5, ' ' . number_format($PPNAmount + $HargaSewa), 0, 0, 'R');
+            $this->fpdf->Cell(25, 5, ' ' . number_format($PPNAmount + $totalHargaSewa), 0, 0, 'R');
 
             $Yfocus += 5;
             $this->fpdf->SetXY(7, $Yfocus);
-            $this->fpdf->Cell(0, 5, '( ' . ucwords(rtrim($this->numberToSentence($PPNAmount + $HargaSewa))) . ' )', 0, 0, 'C');
+            $terbilang = ucwords(rtrim($this->numberToSentence($PPNAmount + $totalHargaSewa)));
+            $this->fpdf->Cell(0, 5, '( ' . $terbilang  . ' )', 0, 0, 'C');
 
             $this->fpdf->SetFont('Arial', '', 10);
             $Yfocus += 10;
@@ -622,22 +637,96 @@ class DeliveryController extends Controller
             $this->fpdf->SetFont('Arial', 'U', 10);
             $this->fpdf->MultiCell(195, 5, '( Syapril, S.T )');
             $Yfocus += 5;
-            $this->fpdf->SetXY(10, $Yfocus);            
+            $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->SetFont('Arial', '', 10);
             $this->fpdf->Cell(10, 5, 'Direktur');
         }
 
         if (substr($_COOKIE['JOS_PRINT_FORM'], 2, 1) == '1') {
+            $totalHargaSewa = 0;
+            foreach ($RSDetail as $r) {
+                $Usage = T_SLODETA::on($this->dedicatedConnection)->select(
+                    'TSLODETA_USAGE_DESCRIPTION',
+                    'TSLODETA_PRC',
+                    'TSLODETA_OPRPRC',
+                    'TSLODETA_MOBDEMOB',
+                    'TSLODETA_PERIOD_FR',
+                    'TSLODETA_PERIOD_TO',
+                )
+                    ->where('TSLODETA_SLOCD', $r->TDLVORDDETA_SLOCD)
+                    ->where('TSLODETA_ITMCD', $r->TDLVORDDETA_ITMCD)
+                    ->where('TSLODETA_BRANCH', Auth::user()->branch)
+                    ->first();
+                $HargaSewa = $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
+                $PeriodFrom = date_format(date_create($Usage->TSLODETA_PERIOD_FR), 'd-M-Y');
+                $PeriodTo = date_format(date_create($Usage->TSLODETA_PERIOD_TO), 'd-M-Y');
+                $totalHargaSewa += $HargaSewa;
+                $DOIssuDate = date_format(date_create($RSHeader->TDLVORD_ISSUDT), 'd-M-Y');
+            }
+            $PPNAmount = $totalHargaSewa * 11 / 100;
+            $terbilang = ucwords(rtrim($this->numberToSentence($PPNAmount + $totalHargaSewa)));
             $this->fpdf->AddPage("L", 'A5');
             $this->fpdf->SetFont('Arial', 'B', 10);
             $this->fpdf->SetXY(7, 5);
             $this->fpdf->Cell(0, 8, $Company->name, 0, 0, 'L');
             $this->fpdf->SetFont('Arial', '', 10);
             $this->fpdf->SetXY(7, 12);
-            $this->fpdf->MultiCell(85, 4, $Company->address,  0, 'L');
-            $this->fpdf->SetFont('Arial', 'B', 12);
+            $this->fpdf->MultiCell(95, 4, $Company->address,  0, 'L');
+            $this->fpdf->SetFont('Arial', 'B', 14);
             $this->fpdf->SetXY(7, 20);
-            $this->fpdf->Cell(0, 8, 'KWITANSI', 0, 0, 'C');
+            $this->fpdf->Cell(0, 8, 'K W I T A N S I', 0, 0, 'C');
+            $this->fpdf->SetFont('Arial', '', 10);
+            $this->fpdf->SetXY(7, 30);
+            $this->fpdf->Cell(15, 5, 'Nomor', 0, 0, 'L');
+            $this->fpdf->Cell(15, 5, ': ' . $RSHeader->TDLVORD_INVCD, 0, 0, 'L');
+            $this->fpdf->SetXY(7, 35);
+            $this->fpdf->Cell(195, 110, '', 1, 0, 'L');
+            $this->fpdf->SetXY(10, 40);
+            $this->fpdf->Cell(50, 5, 'Sudah terima dari', 0, 0, 'L');
+            $this->fpdf->Cell(50, 5, ': ' . $RSHeader->MCUS_CUSNM, 0, 0, 'L');
+            $this->fpdf->Line(63, 46, 180, 46);
+            $this->fpdf->SetXY(10, 50);
+            $this->fpdf->Cell(50, 5, 'Alamat', 0, 0, 'L');
+            $this->fpdf->Cell(2, 5, ':');
+            $this->fpdf->MultiCell(138, 5,  $RSHeader->MCUS_ADDR1);
+            $this->fpdf->Line(63, $this->fpdf->GetY() + 2, 180, $this->fpdf->GetY() + 2);
+            $Yfocus = $this->fpdf->GetY() + 5;
+            $this->fpdf->SetXY(10, $Yfocus);
+            $this->fpdf->Cell(50, 5, 'Terbilang', 0, 0, 'L');
+            $this->fpdf->Cell(50, 5, ': ' . $terbilang, 0, 0, 'L');
+            $this->fpdf->Line(63, $Yfocus+7, 180, $Yfocus+7);
+            
+            $Yfocus += 10;
+            $this->fpdf->SetXY(10, $Yfocus);
+            $this->fpdf->Cell(50, 5, 'Untuk Pembayaran', 0, 0, 'L');
+            $this->fpdf->Cell(2, 5, ':');
+            $this->fpdf->MultiCell(138, 5, $subjek . ' Periode ' . $PeriodFrom . ' s/d ' . $PeriodTo);
+            $Yfocus = $this->fpdf->GetY() + 5;
+            $this->fpdf->Line(63, $Yfocus-3, 180, $Yfocus-3);
+
+            $this->fpdf->SetXY(10, $Yfocus);
+            $this->fpdf->Cell(50, 5, '', 0, 0, 'L');
+            $this->fpdf->Cell(40, 5, ' Total', 0, 0, 'L');
+            $this->fpdf->Cell(10, 5, ' : Rp. ', 0, 0, 'L');
+            $this->fpdf->Cell(40, 5, number_format($totalHargaSewa), 0, 0, 'R');
+            $Yfocus += 5;
+            $this->fpdf->SetXY(10, $Yfocus);
+            $this->fpdf->Cell(50, 5, '', 0, 0, 'L');
+            $this->fpdf->Cell(40, 5, ' PPN 11%', 0, 0, 'L');
+            $this->fpdf->Cell(10, 5, ' : Rp. ', 0, 0, 'L');
+            $this->fpdf->Cell(40, 5, number_format($PPNAmount), 0, 0, 'R');
+            $this->fpdf->Line(62, $Yfocus + 5, 100, $Yfocus + 5);
+            $this->fpdf->Line(110, $Yfocus + 5, 150, $Yfocus + 5);
+            $Yfocus += 6;
+            $this->fpdf->SetXY(10, $Yfocus);
+            $this->fpdf->Cell(50, 5, '', 0, 0, 'L');
+            $this->fpdf->Cell(40, 5, ' Total Yang Dibayar', 0, 0, 'L');
+            $this->fpdf->Cell(10, 5, ' : Rp. ', 0, 0, 'L');
+            $this->fpdf->Cell(40, 5, number_format($PPNAmount + $totalHargaSewa), 0, 0, 'R');
+            $Yfocus += 6;
+            $this->fpdf->SetXY(10, $Yfocus);
+            $this->fpdf->Cell(50, 5, 'Lokasi', 0, 0, 'L');
+            $this->fpdf->Cell(50, 5, ':', 0, 0, 'L');
         }
 
         $this->fpdf->Output('delivery documents ' . $doc . '.pdf', 'I');
