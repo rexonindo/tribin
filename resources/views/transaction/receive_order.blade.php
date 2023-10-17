@@ -83,6 +83,8 @@
                                                                         <th class="text-end">Price</th>
                                                                         <th class="text-end">Operator</th>
                                                                         <th class="text-end">MOB DEMOB</th>
+                                                                        <th class="text-center">Period From</th>
+                                                                        <th class="text-center">Period To</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -677,6 +679,8 @@
                 orderPrice.value = ''
                 orderOperator.value = ''
                 orderMOBDEMOB.value = ''
+                orderPeriodFrom.value = ''
+                orderPeriodTo.value = ''
             } else {
                 const ttlrows = orderTable.rows.length
                 for (let i = 1; i < ttlrows; i++) {
@@ -693,6 +697,8 @@
                 orderPrice.value = selrow.cells[5].innerText
                 orderOperator.value = selrow.cells[6].innerText
                 orderMOBDEMOB.value = selrow.cells[7].innerText
+                orderPeriodFrom.value = selrow.cells[8].innerText
+                orderPeriodTo.value = selrow.cells[9].innerText
             }
         }
         newcell = newrow.insertCell(0)
@@ -723,6 +729,10 @@
         newcell = newrow.insertCell(7)
         newcell.innerHTML = numeral(orderMOBDEMOB.value).format(',')
         newcell.classList.add('text-end')
+        newcell = newrow.insertCell(8)
+        newcell.innerHTML = orderPeriodFrom.value        
+        newcell = newrow.insertCell(9)
+        newcell.innerHTML = orderPeriodTo.value        
 
         tribinClearTextBoxByClassName('orderInputItem')
     }
@@ -784,6 +794,8 @@
         let itemPrice = []
         let itemOperatorPrice = []
         let itemMobDemob = []
+        let itemPeriodFrom = []
+        let itemPeriodTo = []
         let ttlrows = orderTable.rows.length
         const NavRental = document.getElementById('nav-rental')
         const NavSale = document.getElementById('nav-sale')
@@ -807,6 +819,8 @@
                 itemPrice.push(price)
                 itemOperatorPrice.push(numeral(orderTable.rows[i].cells[6].innerText.trim()).value())
                 itemMobDemob.push(numeral(orderTable.rows[i].cells[7].innerText.trim()).value())
+                itemPeriodFrom.push(orderTable.rows[i].cells[8].innerText.trim())
+                itemPeriodTo.push(orderTable.rows[i].cells[9].innerText.trim())
             }
         } else if (NavSale.classList.contains('active')) {
             FinalQuotationType = '2'
@@ -818,9 +832,12 @@
                 itemPrice.push(numeral(quotationSaleTable.rows[i].cells[4].innerText.trim()).value())
                 itemOperatorPrice.push(0)
                 itemMobDemob.push(0)
+                itemPeriodFrom.push(null)
+                itemPeriodTo.push(null)
             }
         } else {
             FinalQuotationType = '3'
+            ttlrows = 1
         }
 
         if (ttlrows === 1) {
@@ -862,6 +879,8 @@
                 TSLODETA_PRC: itemPrice,
                 TSLODETA_OPRPRC: itemOperatorPrice,
                 TSLODETA_MOBDEMOB: itemMobDemob,
+                TSLODETA_PERIOD_FR: itemPeriodFrom,
+                TSLODETA_PERIOD_TO: itemPeriodTo,
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to save ?`)) {
@@ -1049,6 +1068,8 @@
                                 orderPrice.value = ''
                                 orderOperator.value = ''
                                 orderMOBDEMOB.value = ''
+                                orderPeriodFrom.value = ''
+                                orderPeriodTo.value = ''
                             } else {
                                 const ttlrows = orderTable.rows.length
                                 for (let i = 1; i < ttlrows; i++) {
@@ -1065,6 +1086,8 @@
                                 orderPrice.value = selrow.cells[5].innerText
                                 orderOperator.value = selrow.cells[6].innerText
                                 orderMOBDEMOB.value = selrow.cells[7].innerText
+                                orderPeriodFrom.value = selrow.cells[8].innerText
+                                orderPeriodTo.value = selrow.cells[9].innerText
                             }
                         }
                         newcell = newrow.insertCell(0)
@@ -1091,6 +1114,12 @@
                         newcell = newrow.insertCell(7)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TSLODETA_MOBDEMOB']).format(',')
+                        newcell = newrow.insertCell(8)
+                        newcell.classList.add('text-center')
+                        newcell.innerHTML = arrayItem['TSLODETA_PERIOD_FR']
+                        newcell = newrow.insertCell(9)
+                        newcell.classList.add('text-center')
+                        newcell.innerHTML = arrayItem['TSLODETA_PERIOD_TO']
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -1347,6 +1376,8 @@
                         newcell = newrow.insertCell(7)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
+                        newcell = newrow.insertCell(8)
+                        newcell = newrow.insertCell(9)
                     })
                     myContainer.innerHTML = ''
                     myContainer.appendChild(myfrag)
@@ -1555,6 +1586,8 @@
         orderTable.rows[pindex].cells[5].innerText = orderPrice.value
         orderTable.rows[pindex].cells[6].innerText = orderOperator.value
         orderTable.rows[pindex].cells[7].innerText = orderMOBDEMOB.value
+        orderTable.rows[pindex].cells[8].innerText = orderPeriodFrom.value
+        orderTable.rows[pindex].cells[9].innerText = orderPeriodTo.value
         tribinClearTextBoxByClassName('orderInputItem')
     }
 

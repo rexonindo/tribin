@@ -105,7 +105,6 @@ class ReceiveOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'TSLODETA_ITMCD' => 'required|array',
             'TSLODETA_USAGE_DESCRIPTION' => 'required|array',
-            'TSLODETA_USAGE_DESCRIPTION.*' => 'required|string',
             'TSLODETA_PRC' => 'required|array',
             'TSLODETA_PRC.*' => 'required|numeric',
             'TSLODETA_MOBDEMOB' => 'required|array',
@@ -131,6 +130,8 @@ class ReceiveOrderController extends Controller
                 'TSLODETA_PRC' => $request->TSLODETA_PRC[$i],
                 'TSLODETA_OPRPRC' => $request->TSLODETA_OPRPRC[$i],
                 'TSLODETA_MOBDEMOB' => $request->TSLODETA_MOBDEMOB[$i],
+                'TSLODETA_PERIOD_FR' => $request->TSLODETA_PERIOD_FR[$i],
+                'TSLODETA_PERIOD_TO' => $request->TSLODETA_PERIOD_TO[$i],
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),
                 'TSLODETA_BRANCH' => Auth::user()->branch
@@ -143,7 +144,10 @@ class ReceiveOrderController extends Controller
         }
 
         return [
-            'msg' => 'OK', 'doc' => $newDocumentCode, '$RSLast' => $LastLine, 'quotationHeader' => $quotationHeader, 'quotationDetail' => $quotationDetail, 'newPOCode' => $newPOCode
+            'msg' => 'OK', 'doc' => $newDocumentCode, '$RSLast' => $LastLine,
+            'quotationHeader' => $quotationHeader,
+            'quotationDetail' => $quotationDetail,
+            'newPOCode' => $newPOCode,            
         ];
     }
 
@@ -195,7 +199,10 @@ class ReceiveOrderController extends Controller
 
     function loadById(Request $request)
     {
-        $RS = T_SLODETA::on($this->dedicatedConnection)->select(["id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE_DESCRIPTION", "TSLODETA_ITMQT", "TSLODETA_PRC", "TSLODETA_OPRPRC", "TSLODETA_MOBDEMOB"])
+        $RS = T_SLODETA::on($this->dedicatedConnection)->select([
+            "id", "TSLODETA_ITMCD", "MITM_ITMNM", "TSLODETA_USAGE_DESCRIPTION", "TSLODETA_ITMQT", "TSLODETA_PRC", "TSLODETA_OPRPRC",
+            "TSLODETA_MOBDEMOB", 'TSLODETA_PERIOD_FR', 'TSLODETA_PERIOD_TO'
+        ])
             ->leftJoin("M_ITM", function ($join) {
                 $join->on("TSLODETA_ITMCD", "=", "MITM_ITMCD")
                     ->on('TSLODETA_BRANCH', '=', 'MITM_BRANCH');
