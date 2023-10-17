@@ -275,7 +275,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12 mb-1">
-                                    <label for="orderCustomer" class="form-label">Address Name</label>
+                                    <label for="orderCustomer" class="form-label">Destination Name</label>
                                     <div class="input-group mb-1">
                                         <input type="text" id="orderAddressName" class="form-control" maxlength="45">
                                     </div>
