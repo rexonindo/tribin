@@ -283,7 +283,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12 mb-1">
-                                    <label for="orderCustomer" class="form-label">Address</label>
+                                    <label for="orderCustomer" class="form-label">Destination Address</label>
                                     <div class="input-group mb-1">
                                         <textarea id="orderAddress" class="form-control" maxlength="90">
                                         </textarea>
