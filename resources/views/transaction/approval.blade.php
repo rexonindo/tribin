@@ -350,7 +350,7 @@
                         newcell.innerHTML = arrayItem['MITM_ITMNM']
                         newcell = newrow.insertCell(3)
                         newcell.classList.add('text-center')
-                        newcell.innerHTML = arrayItem['TQUODETA_USAGE']
+                        newcell.innerHTML = arrayItem['TQUODETA_USAGE_DESCRIPTION']
                         newcell = newrow.insertCell(4)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
