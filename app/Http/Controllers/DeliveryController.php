@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BranchPaymentAccount;
 use App\Models\C_ITRN;
 use App\Models\C_SPK;
 use App\Models\COMPANY_BRANCH;
@@ -238,7 +239,9 @@ class DeliveryController extends Controller
             T_DLVORDDETA::on($this->dedicatedConnection)->insert($quotationDetail);
         }
         return [
-            'msg' => 'OK', 'doc' => $newQuotationCode
+            'msg' => 'OK',
+            'doc' => $newQuotationCode,
+            'docInvoice' => $newInvoiceCode,
         ];
     }
 
@@ -338,7 +341,6 @@ class DeliveryController extends Controller
 
     function toPDF(Request $request)
     {
-        $monthOfIndonesian = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $doc = base64_decode($request->id);
         $RSHeader = T_DLVORDHEAD::on($this->dedicatedConnection)->select('TDLVORD_ISSUDT', 'MCUS_CUSNM', 'TDLVORD_REMARK', 'MCUS_TELNO', 'TDLVORD_INVCD', 'TDLVORD_LINE')
             ->leftJoin('M_CUS', function ($join) {
@@ -348,7 +350,10 @@ class DeliveryController extends Controller
             ->where('TDLVORD_BRANCH', Auth::user()->branch)
             ->first();
         $DOIssuDate = date_format(date_create($RSHeader->TDLVORD_ISSUDT), 'd-M-Y');
-        
+        $branchPaymentAccount = BranchPaymentAccount::on($this->dedicatedConnection)
+            ->where('BRANCH', Auth::user()->branch)
+            ->whereNull('deleted_at')
+            ->get();
         $Branch = M_BRANCH::select('MBRANCH_NM')->where('MBRANCH_CD', Auth::user()->branch)->first();
         $Company = COMPANY_BRANCH::on($this->dedicatedConnection)->select(
             'name',
@@ -379,25 +384,17 @@ class DeliveryController extends Controller
         $Dibuat = NULL;
         $Attn = NULL;
         $Subject = NULL;
-        $Capacity = NULL;
-        $Model = NULL;
-        $Merk = NULL;
+
         $Usage = NULL;
         $HargaSewa = NULL;
         foreach ($RSDetail as $r) {
-            $Capacity = $r->MITM_ITMNM;
-            $Model = $r->MITM_MODEL;
-            $Merk = $r->MITM_BRAND;            
             $Dibuat = User::where('nick_name', $r->created_by)->select('name')->first();
             $Attn = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_ATTN', 'TSLO_QUOCD', 'TSLO_POCD')
                 ->where('TSLO_SLOCD', $r->TDLVORDDETA_SLOCD)
                 ->where('TSLO_BRANCH', Auth::user()->branch)
                 ->first();
-            $Usage = T_SLODETA::on($this->dedicatedConnection)->select('TSLODETA_USAGE_DESCRIPTION', 'TSLODETA_PRC', 'TSLODETA_OPRPRC', 'TSLODETA_MOBDEMOB')
-                ->where('TSLODETA_SLOCD', $r->TDLVORDDETA_SLOCD)
-                ->where('TSLODETA_BRANCH', Auth::user()->branch)
-                ->first();
-            $HargaSewa = $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
+
+
             $Subject = T_QUOHEAD::on($this->dedicatedConnection)->select('TQUO_SBJCT')
                 ->where('TQUO_QUOCD', $Attn->TSLO_QUOCD)
                 ->where('TQUO_BRANCH', Auth::user()->branch)
@@ -512,7 +509,7 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(20, 5, ': ' . $RSHeader->MCUS_TELNO, 0, 0, 'L');
             $this->fpdf->SetXY(7, 42);
             $this->fpdf->Cell(20, 5, 'Subject', 0, 0, 'L');
-            $this->fpdf->Cell(20, 5, ': Invoice ' . $Subject->TQUO_SBJCT, 0, 0, 'L');
+            $this->fpdf->Cell(20, 5, ': ' . $Subject->TQUO_SBJCT, 0, 0, 'L');
 
             $this->fpdf->SetXY(130, 27);
             $this->fpdf->Cell(20, 5, 'No', 0, 0, 'L');
@@ -527,46 +524,107 @@ class DeliveryController extends Controller
             $this->fpdf->SetXY(7, 50);
             $this->fpdf->Cell(20, 5, 'Dengan hormat,', 0, 0, 'L');
             $this->fpdf->SetXY(7, 55);
-            $this->fpdf->Cell(20, 5, 'Bersama ini kami lakukan penagihan atas ' . $Subject->TQUO_SBJCT . ' dengan rincian sebagai berikut', 0, 0, 'L');
-            $this->fpdf->SetXY(7, 60);
+            $this->fpdf->MultiCell(195, 5, 'Bersama ini kami lakukan penagihan atas ' . $Subject->TQUO_SBJCT . ' dengan rincian sebagai berikut :');
+            $Yfocus = $this->fpdf->GetY();
+            $Yfocus += 5;
+            $this->fpdf->SetXY(7, $Yfocus);
             $this->fpdf->Cell(50, 5, 'NO. PR', 0, 0, 'L');
             $this->fpdf->Cell(50, 5, ': ' . $Attn->TSLO_POCD, 0, 0, 'L');
-            $this->fpdf->SetXY(7, 65);
-            $this->fpdf->Cell(50, 5, 'Merk', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ': ' . $Merk, 0, 0, 'L');
-            $this->fpdf->SetXY(7, 70);
-            $this->fpdf->Cell(50, 5, 'Capacity', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ': ' . $Capacity, 0, 0, 'L');
-            $this->fpdf->SetXY(7, 75);
-            $this->fpdf->Cell(50, 5, 'Model', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ': ' . $Model, 0, 0, 'L');
-            $this->fpdf->SetXY(7, 80);
-            $this->fpdf->Cell(50, 5, 'Pemakaian', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ': ' . $Usage->TSLODETA_USAGE_DESCRIPTION . ' Jam', 0, 0, 'L');
-            $this->fpdf->SetXY(7, 85);
-            $this->fpdf->Cell(50, 5, 'Periode', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ': ', 0, 0, 'L');
-            $this->fpdf->SetXY(7, 90);
-            $this->fpdf->Cell(50, 5, 'Harga Sewa', 0, 0, 'L');
-            $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
-            $this->fpdf->Cell(25, 5, ' ' . number_format($HargaSewa), 0, 0, 'R');
-
+            $Yfocus += 5;
+            $this->fpdf->SetXY(6, $Yfocus);
             $this->fpdf->SetFont('Arial', 'B', 10);
-            $this->fpdf->SetXY(7, 100);
+            $this->fpdf->Cell(30, 5, 'Merk', 1, 0, 'C');
+            $this->fpdf->Cell(45, 5, 'Capacity / Pemakaian', 1, 0, 'C');
+            $this->fpdf->Cell(70, 5, 'Model', 1, 0, 'C');
+            $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
+            $this->fpdf->Cell(45, 5, 'Total Harga Sewa', 1, 0, 'C');
+            $Yfocus += 5;
+            $this->fpdf->SetFont('Arial', '', 10);
+            foreach ($RSDetail as $r) {
+                $Usage = T_SLODETA::on($this->dedicatedConnection)->select('TSLODETA_USAGE_DESCRIPTION', 'TSLODETA_PRC', 'TSLODETA_OPRPRC', 'TSLODETA_MOBDEMOB')
+                    ->where('TSLODETA_SLOCD', $r->TDLVORDDETA_SLOCD)
+                    ->where('TSLODETA_ITMCD', $r->TDLVORDDETA_ITMCD)
+                    ->where('TSLODETA_BRANCH', Auth::user()->branch)
+                    ->first();
+                $HargaSewa = $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
+                $this->fpdf->SetXY(6, $Yfocus);
+                $this->fpdf->Cell(30, 10, $r->MITM_BRAND, 1, 0, 'C');
+                $this->fpdf->Cell(45, 10, '', 1, 0, 'C');
+                $this->fpdf->Text(37, $Yfocus + 4, $r->MITM_ITMNM);
+                $this->fpdf->Text(37, $Yfocus + 8, $Usage->TSLODETA_USAGE_DESCRIPTION);
+                $this->fpdf->Cell(70, 10, '', 1, 0, 'C');
+                $this->fpdf->SetXY(81, $Yfocus);
+                $this->fpdf->MultiCell(70, 5, $r->MITM_MODEL);
+                $this->fpdf->SetXY(151, $Yfocus);
+                $this->fpdf->Cell(10, 10, $r->TDLVORDDETA_ITMQT, 1, 0, 'C');
+                $this->fpdf->Cell(45, 10, number_format($HargaSewa), 1, 0, 'C');
+                $Yfocus += 10;
+            }
+            $Yfocus += 5;
+            $this->fpdf->SetFont('Arial', 'B', 10);
+            $this->fpdf->SetXY(7, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Total', 0, 0, 'L');
             $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
             $this->fpdf->Cell(25, 5, ' ' . number_format($HargaSewa), 0, 0, 'R');
             $PPNAmount = $HargaSewa * 11 / 100;
-            $this->fpdf->SetXY(7, 105);
+
+            $Yfocus += 5;
+            $this->fpdf->SetXY(7, $Yfocus);
             $this->fpdf->Cell(50, 5, 'PPN 11%', 0, 0, 'L');
             $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
             $this->fpdf->Cell(25, 5, ' ' . number_format($PPNAmount), 0, 0, 'R');
-            $this->fpdf->SetXY(7, 110);
+
+            $Yfocus += 5;
+            $this->fpdf->SetXY(7, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Total Tagihan', 0, 0, 'L');
             $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
             $this->fpdf->Cell(25, 5, ' ' . number_format($PPNAmount + $HargaSewa), 0, 0, 'R');
-            $this->fpdf->SetXY(7, 120);
-            $this->fpdf->Cell(0, 5, ucwords(rtrim($this->numberToSentence($PPNAmount + $HargaSewa))), 0, 0, 'C');
+
+            $Yfocus += 5;
+            $this->fpdf->SetXY(7, $Yfocus);
+            $this->fpdf->Cell(0, 5, '( ' . ucwords(rtrim($this->numberToSentence($PPNAmount + $HargaSewa))) . ' )', 0, 0, 'C');
+
+            $this->fpdf->SetFont('Arial', '', 10);
+            $Yfocus += 10;
+            $this->fpdf->SetXY(7, $Yfocus);
+            $this->fpdf->MultiCell(195, 5, 'Invoice/tagihan tersebut agar dapat ditransfer ke rekening kami sebagai berikut :');
+
+            $Yfocus += 10;
+            $this->fpdf->SetFont('Arial', 'B', 10);
+            $this->fpdf->SetXY(6, $Yfocus);
+            $this->fpdf->Cell(80, 5, 'BANK', 1, 0, 'C');
+            $this->fpdf->Cell(70, 5, 'Atas Nama', 1, 0, 'C');
+            $this->fpdf->Cell(50, 5, 'Nomor Rekening', 1, 0, 'C');
+            $Yfocus += 5;
+            $this->fpdf->SetFont('Arial', '', 10);
+            foreach ($branchPaymentAccount as $r) {
+                $this->fpdf->SetXY(6, $Yfocus);
+                $this->fpdf->Cell(80, 5, $r->bank_name, 1, 0, 'C');
+                $this->fpdf->Cell(70, 5, $r->bank_account_name, 1, 0, 'C');
+                $this->fpdf->Cell(50, 5, $r->bank_account_number, 1, 0, 'C');
+                $Yfocus += 5;
+            }
+
+            $Yfocus += 10;
+            $this->fpdf->SetXY(7, $Yfocus);
+            $this->fpdf->MultiCell(195, 5, 'Pada keterangan slip transfer mohon diisi sejelas-jelasnya, seperti nama penyewa, periode, nomor invoice dan sebagainya.');
+            $Yfocus += 5;
+            $this->fpdf->SetXY(7, $Yfocus);
+            $this->fpdf->MultiCell(195, 5, 'Untuk Pembayaran yang menggunakan Bilyet Giro/Cheque, dianggap lunas jika dana sudah masuk ke rekening kami.');
+            $Yfocus += 10;
+            $this->fpdf->SetXY(7, $Yfocus);
+            $this->fpdf->MultiCell(195, 5, 'Demikian Invoice kami buat, atas perhatian dan kerjasama yang baik kami sampaikan terima kasih.');
+            $Yfocus += 20;
+            $this->fpdf->SetXY(7, $Yfocus);
+            $this->fpdf->MultiCell(195, 5, 'Hormat kami,');
+            $Yfocus += 20;
+            $this->fpdf->SetXY(7, $Yfocus);
+            $this->fpdf->SetFont('Arial', 'U', 10);
+            $this->fpdf->MultiCell(195, 5, '( Syapril, S.T )');
+            $Yfocus += 5;
+            $this->fpdf->SetXY(10, $Yfocus);            
+            $this->fpdf->SetFont('Arial', '', 10);
+            $this->fpdf->Cell(10, 5, 'Direktur');
         }
 
         if (substr($_COOKIE['JOS_PRINT_FORM'], 2, 1) == '1') {

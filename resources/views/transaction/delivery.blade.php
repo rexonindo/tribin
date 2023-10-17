@@ -493,6 +493,7 @@
                         pthis.innerHTML = `<i class="fas fa-save"></i>`
                         alertify.success(response.msg)
                         orderCode.value = response.doc
+                        orderInvoiceCode.value = response.docInvoice
                         loadDeliveryOrderDetail({
                             doc: response.doc
                         })
