@@ -389,7 +389,7 @@ class DeliveryController extends Controller
         $HargaSewa = NULL;
         foreach ($RSDetail as $r) {
             $Dibuat = User::where('nick_name', $r->created_by)->select('name')->first();
-            $Attn = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_ATTN', 'TSLO_QUOCD', 'TSLO_POCD')
+            $Attn = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_ATTN', 'TSLO_QUOCD', 'TSLO_POCD', 'TSLO_ADDRESS_DESCRIPTION')
                 ->where('TSLO_SLOCD', $r->TDLVORDDETA_SLOCD)
                 ->where('TSLO_BRANCH', Auth::user()->branch)
                 ->first();
@@ -726,7 +726,7 @@ class DeliveryController extends Controller
             $Yfocus += 6;
             $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Lokasi', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ':', 0, 0, 'L');
+            $this->fpdf->Cell(50, 5, ': ' . $Attn->TSLO_ADDRESS_DESCRIPTION, 0, 0, 'L');
             $this->fpdf->Line(63, $Yfocus + 5, 150, $Yfocus + 5);
             $Yfocus += 5;
             $this->fpdf->SetXY(110, $Yfocus);
@@ -734,7 +734,7 @@ class DeliveryController extends Controller
             $Yfocus += 10;
             $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Jumlah', 0, 0, 'L');
-            $this->fpdf->Cell(50, 5, ': Rp. ' . number_format($PPNAmount + $totalHargaSewa), 0, 0, 'L');            
+            $this->fpdf->Cell(50, 5, ': Rp. ' . number_format($PPNAmount + $totalHargaSewa), 0, 0, 'L');
             $Yfocus += 15;
             $this->fpdf->SetXY(120, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Syapril, S.T', 0, 0, 'L');
