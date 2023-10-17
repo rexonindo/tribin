@@ -694,15 +694,15 @@ class DeliveryController extends Controller
             $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Terbilang', 0, 0, 'L');
             $this->fpdf->Cell(50, 5, ': ' . $terbilang, 0, 0, 'L');
-            $this->fpdf->Line(63, $Yfocus+7, 180, $Yfocus+7);
-            
+            $this->fpdf->Line(63, $Yfocus + 7, 180, $Yfocus + 7);
+
             $Yfocus += 10;
             $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Untuk Pembayaran', 0, 0, 'L');
             $this->fpdf->Cell(2, 5, ':');
             $this->fpdf->MultiCell(138, 5, $subjek . ' Periode ' . $PeriodFrom . ' s/d ' . $PeriodTo);
             $Yfocus = $this->fpdf->GetY() + 5;
-            $this->fpdf->Line(63, $Yfocus-3, 180, $Yfocus-3);
+            $this->fpdf->Line(63, $Yfocus - 3, 180, $Yfocus - 3);
 
             $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->Cell(50, 5, '', 0, 0, 'L');
@@ -727,6 +727,21 @@ class DeliveryController extends Controller
             $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->Cell(50, 5, 'Lokasi', 0, 0, 'L');
             $this->fpdf->Cell(50, 5, ':', 0, 0, 'L');
+            $this->fpdf->Line(63, $Yfocus + 5, 150, $Yfocus + 5);
+            $Yfocus += 5;
+            $this->fpdf->SetXY(110, $Yfocus);
+            $this->fpdf->Cell(50, 5, $Branch->MBRANCH_NM . ', ' . $DOIssuDate, 0, 0, 'L');
+            $Yfocus += 10;
+            $this->fpdf->SetXY(10, $Yfocus);
+            $this->fpdf->Cell(50, 5, 'Jumlah', 0, 0, 'L');
+            $this->fpdf->Cell(50, 5, ': Rp. ' . number_format($PPNAmount + $totalHargaSewa), 0, 0, 'L');            
+            $Yfocus += 15;
+            $this->fpdf->SetXY(120, $Yfocus);
+            $this->fpdf->Cell(50, 5, 'Syapril, S.T', 0, 0, 'L');
+            $Yfocus += 9;
+            $this->fpdf->SetXY(6, $Yfocus);
+            $this->fpdf->SetFont('Arial', '', 8);
+            $this->fpdf->Cell(50, 5, 'Note: Pembayaran dengan Giro/Cheque/Transfer dianggap sah apabila dan sudah masuk ke rekening kami', 0, 0, 'L');
         }
 
         $this->fpdf->Output('delivery documents ' . $doc . '.pdf', 'I');
