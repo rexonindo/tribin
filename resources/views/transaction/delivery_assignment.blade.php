@@ -131,13 +131,13 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col mb-1">
+                                            <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">KM</span>
                                                     <input type="number" id="KM" class="form-control orderInputItem">
                                                 </div>
                                             </div>
-                                            <div class="col mb-1">
+                                            <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Wheels</span>
                                                     <select class="form-select" id="Wheels">
@@ -149,30 +149,30 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col mb-1">
+                                            <div class="col-md-4 mb-1">
                                                 <label class="form-label">Solar Supplier</label>
                                                 <select class="form-select form-select-sm" id="Supplier">
                                                     <option value="SPBU">SPBU</option>
                                                     <option value="JAT">JAT</option>
                                                 </select>
                                             </div>
-                                            <div class="col mb-1">
+                                            <div class="col-md-4 mb-1">
                                                 <label class="form-label">Liters (Existing)</label>
                                                 <input type="number" id="litersExisting" class="form-control form-control-sm orderInputItem">
                                             </div>
-                                            <div class="col mb-1">
+                                            <div class="col-md-4 mb-1">
                                                 <label class="form-label">Liters</label>
                                                 <input type="number" id="liters" class="form-control form-control-sm orderInputItem">
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col mb-1">
+                                            <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Makan</span>
                                                     <input type="number" id="uangMakan" class="form-control orderInputItem">
                                                 </div>
                                             </div>
-                                            <div class="col mb-1">
+                                            <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Mandah</span>
                                                     <input type="number" id="uangMandah" class="form-control orderInputItem">
@@ -180,13 +180,13 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col mb-1">
+                                            <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Pengawalan</span>
                                                     <input type="number" id="uangPengawalan" class="form-control orderInputItem">
                                                 </div>
                                             </div>
-                                            <div class="col mb-1">
+                                            <div class="col-md-6 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Penginapan</span>
                                                     <input type="number" id="uangPenginapan" class="form-control orderInputItem">
@@ -194,7 +194,7 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col mb-1">
+                                            <div class="col-md-12 mb-1">
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text">Uang Lain<sup>2</sup></span>
                                                     <input type="number" id="uangLain" class="form-control orderInputItem">
@@ -615,6 +615,9 @@
                     newcell = newrow.insertCell(-1)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_SUPPLIER']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['CSPK_LITER_EXISTING']
                     newcell = newrow.insertCell(-1)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_LITER']
