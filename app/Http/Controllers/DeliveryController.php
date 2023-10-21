@@ -1083,6 +1083,11 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(10, 5, 'PIC yang ditugaskan', 0, 0, 'L');
             $this->fpdf->SetXY(100, 120);
             $this->fpdf->Cell(10, 5, 'PIC yang menugaskan', 0, 0, 'L');
+
+            $this->fpdf->SetXY(3, 155);
+            $this->fpdf->Cell(10, 5, ucwords($PICDitugaskan->name) . ' - ' . $Data->CSPK_PIC_AS, 0, 0, 'L');
+            $this->fpdf->SetXY(100, 155);
+            $this->fpdf->Cell(10, 5, ucwords($PICMenugaskan->name), 0, 0, 'L');
         } else {
             $this->fpdf->SetXY(3, 95);
             $this->fpdf->Cell(10, 5, '1', 1, 0, 'C');
@@ -1125,13 +1130,7 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(10, 5, 'PIC yang ditugaskan', 0, 0, 'L');
             $this->fpdf->SetXY(100, 155);
             $this->fpdf->Cell(10, 5, 'PIC yang menugaskan', 0, 0, 'L');
-
-            $this->fpdf->SetXY(3, 185);
-            $this->fpdf->Cell(10, 5, ucwords($PICDitugaskan->name) . ' - ' . $Data->CSPK_PIC_AS, 0, 0, 'L');
-            $this->fpdf->SetXY(100, 185);
-            $this->fpdf->Cell(10, 5, ucwords($PICMenugaskan->name), 0, 0, 'L');
         }
-
 
 
         $this->fpdf->AddPage("P", 'A5');
