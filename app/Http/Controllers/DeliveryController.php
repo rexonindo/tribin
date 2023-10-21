@@ -1003,6 +1003,10 @@ class DeliveryController extends Controller
         $doc = base64_decode($request->id);
         $Data = C_SPK::on($this->dedicatedConnection)->where('id', $doc)->first();
 
+        if (empty($Data)) {
+            return 'something wrong happen';
+        }
+
         $PICMenugaskan = User::where('nick_name', $Data->created_by)->first();
         $PICDitugaskan = User::where('nick_name', $Data->CSPK_PIC_NAME)->first();
 
