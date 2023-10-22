@@ -6,6 +6,7 @@ use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
 use App\Models\M_COA;
 use App\Models\M_ITM;
+use App\Models\M_UOM;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -29,7 +30,8 @@ class ItemController extends Controller
             'coas' => M_COA::on($this->dedicatedConnection)->select('*')->get(),
             'branches' => M_BRANCH::on($this->dedicatedConnection)->get(),
             'companies' => CompanyGroup::select('*')->where('connection', '!=', $this->dedicatedConnection)->get(),
-            'CurrentCompanies' => CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->get()
+            'CurrentCompanies' => CompanyGroup::select('*')->where('connection', $this->dedicatedConnection)->get(),
+            'uoms' => M_UOM::on($this->dedicatedConnection)->whereNull('deleted_at')->where('MUOM_BRANCH', Auth::user()->branch)->get(),
         ]);
     }
 

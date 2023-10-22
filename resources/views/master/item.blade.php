@@ -34,9 +34,9 @@
                 <div class="input-group input-group-sm mb-1">
                     <span class="input-group-text">Unit Measurement</span>
                     <select class="form-select" id="unitMeasurement" onchange="unitMeasurementOnChange()">
-                        <option value="UNIT">Unit</option>
-                        <option value="PCS">PCS</option>
-                        <option value="EA">EA</option>
+                        @foreach ($uoms as $uom)
+                        <option value="{{ $uom->MUOM_UOMCD }}">{{ $uom->MUOM_UOMNM }}</option>                       
+                        @endforeach
                     </select>
                 </div>
             </div>
