@@ -11,6 +11,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\MeasurementController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\QuotationController;
@@ -112,6 +113,15 @@ Route::middleware('auth')->group(function () {
         Route::get('', [CoaController::class, 'search']);
         Route::post('', [CoaController::class, 'simpan']);
         Route::put('{id}', [CoaController::class, 'update']);
+    });
+
+    # Terkait Unit of Measurement Master
+    Route::prefix('uom')->group(function () {
+        Route::get('form', [MeasurementController::class, 'index']);
+        Route::post('import', [MeasurementController::class, 'importFromAnotherCompany']);
+        Route::get('', [MeasurementController::class, 'search']);
+        Route::post('', [MeasurementController::class, 'simpan']);
+        Route::put('{id}', [MeasurementController::class, 'update']);
     });
 
     # Terkait Item Master
