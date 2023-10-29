@@ -107,124 +107,138 @@
                                             <div class="col mb-1" id="div-alert-cost">
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">PIC As</span>
-                                                    <select class="form-select" id="PICAs" onchange="PICAsOnChange(event)">
-                                                        <option value="-">-</option>
-                                                        <option value="DRIVER">DRIVER</option>
-                                                        <option value="MECHANIC">MECHANIC</option>
-                                                        <option value="OPERATOR">OPERATOR</option>
+                                        <fieldset class="border rounded-3 p-2">
+                                            <legend class="float-none w-auto px-3">Orang</legend>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">PIC As</span>
+                                                        <select class="form-select" id="PICAs" onchange="PICAsOnChange(event)">
+                                                            <option value="-">-</option>
+                                                            <option value="DRIVER">DRIVER</option>
+                                                            <option value="MECHANIC">MECHANIC</option>
+                                                            <option value="OPERATOR">OPERATOR</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">PIC Name</span>
+                                                        <select class="form-select" id="PICName">
+                                                            @foreach($PICs as $r)
+                                                            <option value="{{ $r->nick_name }}">{{ $r->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Tugas</span>
+                                                        <input type="text" id="tugas" class="form-control orderInputItem" maxlength="70">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="border rounded-3 p-2">
+                                            <legend class="float-none w-auto px-3">Kendaraan</legend>
+                                            <div class="row">
+                                                <div class="col-md-3 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">KM</span>
+                                                        <input type="number" id="KM" class="form-control orderInputItem">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Jenis</span>
+                                                        <input type="text" id="jenisKendaraan" class="form-control orderInputItem" maxlength="35">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Jumlah Roda</span>
+                                                        <select class="form-select" id="Wheels">
+                                                            <option value="4">4</option>
+                                                            <option value="6">6</option>
+                                                            <option value="10">10</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4 mb-1">
+                                                    <label class="form-label">Solar Supplier</label>
+                                                    <select class="form-select form-select-sm" id="Supplier">
+                                                        <option value="SPBU">SPBU</option>
+                                                        <option value="JAT">JAT</option>
                                                     </select>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">PIC Name</span>
-                                                    <select class="form-select" id="PICName">
-                                                        @foreach($PICs as $r)
-                                                        <option value="{{ $r->nick_name }}">{{ $r->name }}</option>
-                                                        @endforeach
-                                                    </select>
+                                                <div class="col-md-4 mb-1">
+                                                    <label class="form-label">Liters (Existing)</label>
+                                                    <input type="number" id="litersExisting" class="form-control form-control-sm orderInputItem">
+                                                </div>
+                                                <div class="col-md-4 mb-1">
+                                                    <label class="form-label">Liters</label>
+                                                    <input type="number" id="liters" class="form-control form-control-sm orderInputItem">
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">KM</span>
-                                                    <input type="number" id="KM" class="form-control orderInputItem">
+                                        </fieldset>
+
+                                        <fieldset class="border rounded-3 p-2">
+                                            <legend class="float-none w-auto px-3">Biaya</legend>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Makan</span>
+                                                        <input type="number" id="uangMakan" class="form-control orderInputItem">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Mandah</span>
+                                                        <input type="number" id="uangMandah" class="form-control orderInputItem">
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Wheels</span>
-                                                    <select class="form-select" id="Wheels">
-                                                        <option value="4">4</option>
-                                                        <option value="6">6</option>
-                                                        <option value="10">10</option>
-                                                    </select>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Pengawalan</span>
+                                                        <input type="number" id="uangPengawalan" class="form-control orderInputItem">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Penginapan</span>
+                                                        <input type="number" id="uangPenginapan" class="form-control orderInputItem">
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-4 mb-1">
-                                                <label class="form-label">Solar Supplier</label>
-                                                <select class="form-select form-select-sm" id="Supplier">
-                                                    <option value="SPBU">SPBU</option>
-                                                    <option value="JAT">JAT</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4 mb-1">
-                                                <label class="form-label">Liters (Existing)</label>
-                                                <input type="number" id="litersExisting" class="form-control form-control-sm orderInputItem">
-                                            </div>
-                                            <div class="col-md-4 mb-1">
-                                                <label class="form-label">Liters</label>
-                                                <input type="number" id="liters" class="form-control form-control-sm orderInputItem">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Uang Makan</span>
-                                                    <input type="number" id="uangMakan" class="form-control orderInputItem">
+                                            <div class="row">
+                                                <div class="col-md-12 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Lain<sup>2</sup></span>
+                                                        <input type="number" id="uangLain" class="form-control orderInputItem">
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Uang Mandah</span>
-                                                    <input type="number" id="uangMandah" class="form-control orderInputItem">
+                                        </fieldset>
+                                        <fieldset class="border rounded-3 p-2 mb-2">
+                                            <legend class="float-none w-auto px-3">Waktu</legend>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-1">
+                                                    <label for="tanggalBerangkat" class="form-label">Berangkat</label>
+                                                    <input type="text" id="tanggalBerangkat" class="form-control orderInputItem" maxlength="20" readonly>
+                                                </div>
+                                                <div class="col-md-6 mb-1">
+                                                    <label for="tanggalKembali" class="form-label">Kembali</label>
+                                                    <input type="text" id="tanggalKembali" class="form-control orderInputItem" maxlength="20" readonly>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Uang Pengawalan</span>
-                                                    <input type="number" id="uangPengawalan" class="form-control orderInputItem">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Uang Penginapan</span>
-                                                    <input type="number" id="uangPenginapan" class="form-control orderInputItem">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Uang Lain<sup>2</sup></span>
-                                                    <input type="number" id="uangLain" class="form-control orderInputItem">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <label for="tanggalBerangkat" class="form-label">Tanggal Berangkat</label>
-                                                <input type="text" id="tanggalBerangkat" class="form-control orderInputItem" maxlength="20" readonly>
-                                            </div>
-                                            <div class="col-md-6 mb-1">
-                                                <label for="tanggalKembali" class="form-label">Tanggal Kembali</label>
-                                                <input type="text" id="tanggalKembali" class="form-control orderInputItem" maxlength="20" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-3 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Jenis Kenadaraan</span>
-                                                    <input type="text" id="jenisKendaraan" class="form-control orderInputItem" maxlength="35">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-9 mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Tugas</span>
-                                                    <input type="text" id="tugas" class="form-control orderInputItem" maxlength="70">
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </fieldset>
+
                                         <div class="row">
                                             <div class="col text-center mb-1">
                                                 <div class="btn-group btn-group-sm">
@@ -247,16 +261,16 @@
                                                                 <th>PIC Name</th>
                                                                 <th>KM</th>
                                                                 <th>Wheels</th>
-                                                                <th>Uang Jalan</th>
-                                                                <th>Solar Supplier</th>
-                                                                <th>Liters (Existing)</th>
+                                                                <th style="white-space: nowrap;">Uang Jalan</th>
+                                                                <th style="white-space: nowrap;">Solar Supplier</th>
+                                                                <th style="white-space: nowrap;">Liters (Existing)</th>
                                                                 <th>Liters</th>
-                                                                <th>Uang Solar</th>
-                                                                <th>Uang Makan</th>
-                                                                <th>Uang Mandah</th>
-                                                                <th>Penginapan</th>
-                                                                <th>Pengawalan</th>
-                                                                <th>Biaya Lain<sup>2</sup></th>
+                                                                <th style="white-space: nowrap;">Uang Solar</th>
+                                                                <th style="white-space: nowrap;">Uang Makan</th>
+                                                                <th style="white-space: nowrap;">Uang Mandah</th>
+                                                                <th style="white-space: nowrap;">Penginapan</th>
+                                                                <th style="white-space: nowrap;">Pengawalan</th>
+                                                                <th style="white-space: nowrap;">Biaya Lain<sup>2</sup></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -548,14 +562,44 @@
                 myTableBody.innerHTML = ''
 
                 response.SPK.forEach((arrayItem) => {
+                    let elemDropDownContainer = document.createElement('div')
                     let elem = document.createElement('button')
-                    elem.classList.add('btn', 'btn-sm', 'btn-primary', 'btn-icon')
-                    elem.innerHTML = '<i class="fas fa-print"></i>'
-                    elem.onclick = function() {
+                    let elemPrint = document.createElement('a')
+                    let elemSubmit = document.createElement('a')
+                    let elemUl = document.createElement('ul')
+                    let elemLi = document.createElement('li')
+                    elemDropDownContainer.classList.add('dropdown')
+                    elem.classList.add('btn', 'btn-sm', 'btn-info', 'btn-icon', 'dropdown-toggle')
+                    elem.innerHTML = 'Action'
+                    elem.setAttribute('data-bs-toggle', 'dropdown')
+
+                    elemUl.classList.add('dropdown-menu')
+
+                    elemPrint.classList.add('dropdown-item')
+                    elemPrint.innerHTML = 'Print'
+                    elemPrint.setAttribute('href', '#')
+                    elemPrint.onclick = function() {
                         window.open(`PDF/SPK/${btoa(arrayItem['id'])}`, '_blank');
                     }
+                    elemSubmit.classList.add('dropdown-item')
+                    elemSubmit.innerHTML = 'Submit'
+                    elemSubmit.setAttribute('href', '#')
+                    elemSubmit.onclick = function() {
+                        alert('submit coba')
+                    }
+
+                    elemLi.appendChild(elemSubmit)
+                    elemLi.appendChild(elemPrint)
+                    elemUl.appendChild(elemLi)
+
+                    elemDropDownContainer.appendChild(elem)
+                    elemDropDownContainer.appendChild(elemUl)
+
                     newrow = myTableBody.insertRow(-1)
                     newrow.onclick = (event) => {
+                        if (['BUTTON', 'A'].includes(event.target.tagName)) {
+                            return
+                        }
                         const selrow = costTable.rows[event.target.parentElement.rowIndex]
                         if (selrow.title === 'selected') {
                             selrow.title = 'not selected'
@@ -596,12 +640,10 @@
                     newcell.innerHTML = arrayItem['CSPK_PIC_NAME']
                     newcell = newrow.insertCell(-1)
                     newcell.classList.add('text-center')
-                    newcell.appendChild(elem)
+                    newcell.appendChild(elemDropDownContainer)
                     newcell = newrow.insertCell(-1)
-                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_PIC_AS']
                     newcell = newrow.insertCell(-1)
-                    newcell.classList.add('text-end')
                     newcell.innerHTML = arrayItem['CSPK_PIC_NAME']
                     newcell = newrow.insertCell(-1)
                     newcell.classList.add('text-end')
