@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
         Route::put('{id}', [DeliveryController::class, 'updateSPK']);
         Route::delete('{id}', [DeliveryController::class, 'deleteSPK']);
         Route::put('delivery-order/{id}', [DeliveryController::class, 'getSPKByDO']);
+        Route::put('submit/{id}', [DeliveryController::class, 'submitSPK']);
     });
 
     # Terkait Supplier Master

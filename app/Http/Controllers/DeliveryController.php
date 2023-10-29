@@ -307,6 +307,9 @@ class DeliveryController extends Controller
                     'CSPK_BACKDT',
                     'CSPK_VEHICLE_TYPE',
                     'CSPK_JOBDESK',
+                    'CSPK_JOBDESK',
+                    'submitted_by',
+                    'submitted_at',
                 )
                 ->get()
         ];
@@ -1253,5 +1256,16 @@ class DeliveryController extends Controller
 
         $this->fpdf->Output('SPK ' . $doc . '.pdf', 'I');
         exit;
+    }
+
+    function submitSPK(Request $request)
+    {
+        $affectedRow = C_SPK::on($this->dedicatedConnection)
+            ->where('id', base64_decode($request->id))
+            ->update([
+                'submitted_by' => Auth::user()->nick_name,
+                'submitted_at' => date('Y-m-d H:i:s')
+            ]);
+        return ['message' => 'Submitted'];
     }
 }

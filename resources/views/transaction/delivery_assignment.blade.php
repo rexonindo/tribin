@@ -582,10 +582,46 @@
                         window.open(`PDF/SPK/${btoa(arrayItem['id'])}`, '_blank');
                     }
                     elemSubmit.classList.add('dropdown-item')
-                    elemSubmit.innerHTML = 'Submit'
+
                     elemSubmit.setAttribute('href', '#')
                     elemSubmit.onclick = function() {
-                        alert('submit coba')
+                        if (confirm('Are you sure ?')) {
+                            const div_alert = document.getElementById('div-alert-cost')
+                            elemSubmit.innerHTML = 'Please wait'
+                            elemSubmit.classList.add('disabled')
+                            $.ajax({
+                                type: "PUT",
+                                url: `SPK/submit/${btoa(arrayItem['id'])}`,
+                                data: {
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                dataType: "json",
+                                success: function(response) {
+                                    elemSubmit.innerHTML = 'Submitted'
+                                    alertify.message(response.message)
+                                },
+                                error: function(xhr, xopt, xthrow) {
+                                    elemSubmit.innerHTML = 'Submit'
+                                    elemSubmit.classList.remove('disabled')
+                                    const respon = Object.keys(xhr.responseJSON)
+                                    let msg = ''
+                                    for (const item of respon) {
+                                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                                    }
+                                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                ${msg}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>`
+                                    alertify.warning(xthrow);
+                                }
+                            });
+                        }
+                    }
+                    if (arrayItem['submitted_at']) {
+                        elemSubmit.innerHTML = 'Submitted'
+                        elemSubmit.classList.add('disabled')
+                    } else {
+                        elemSubmit.innerHTML = 'Submit'
                     }
 
                     elemLi.appendChild(elemSubmit)
