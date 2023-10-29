@@ -504,6 +504,7 @@
     function loadQuotationDetail(data) {
         quotationAddressName.value = 'Please wait'
         quotationAddressDescription.value = 'Please wait'
+        costTable.getElementsByTagName('tbody')[0].innerHTML = `<tr><td class="text-center" colspan="16">Please wait</td></tr>`
         $.ajax({
             type: "GET",
             url: `delivery/document/${btoa(data.doc)}`,
