@@ -152,9 +152,11 @@ Route::middleware('auth')->group(function () {
         Route::get('purchase-request', [PurchaseController::class, 'notifications']);
         Route::get('purchase-order', [PurchaseController::class, 'notificationsPO']);
         Route::get('sales-order-draft', [ReceiveOrderController::class, 'notificationsDraft']);
+        Route::get('spk', [DeliveryController::class, 'notificationsSPK']);
         Route::get('form/quotation', [QuotationController::class, 'formApproval']);
         Route::get('form/purchase-request', [PurchaseController::class, 'formApproval']);
         Route::get('form/purchase-order', [PurchaseController::class, 'formApprovalPO']);
+        Route::get('form/spk', [DeliveryController::class, 'formApprovalSPK']);
     });
 
     # Terkait Delivery

@@ -160,6 +160,9 @@
                     <li id="liHeadDelivery">
                         <h6 class="dropdown-header">Delivery</h6>
                     </li>
+                    <li id="liHeadSPK">
+                        <h6 class="dropdown-header">SPK</h6>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -362,8 +365,12 @@
                     const totalNotifQTDeliveryNoDriver = response.dataDeliveryOrderNoDriver.length
                     const totalNotifQTDeliveryUndelivered = response.dataDeliveryOrderUndelivered.length
 
+                    // SPK
+                    const totalNotifQTUnApprovedSPK = response.dataUnApprovedSPK.length
+
                     const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest + totalNotifQTSalesOrderDraft +
-                        totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver + totalNotifQTDeliveryUndelivered
+                        totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver + totalNotifQTDeliveryUndelivered +
+                        totalNotifQTUnApprovedSPK
                     labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
 
                     // Quotations Group
@@ -383,6 +390,8 @@
                     // Delivery Group
                     createLiItem('linotif7', 'labelNotifDeliveryAssignment', 'Delivery Assignment', totalNotifQTDeliveryNoDriver, liHeadDelivery, liDeliveryAssignmentOnclick)
                     createLiItem('linotif8', 'labelNotifDeliveryOnGoing', 'On going', totalNotifQTDeliveryUndelivered, liHeadDelivery, liDeliveryOnGoingOnclick)
+                    // SPK Group
+                    createLiItem('linotif9', 'labelNotifUnApprovedSPK', 'SPK Approval', totalNotifQTUnApprovedSPK, liHeadSPK, liUnApprovedSPKOnclick)
                 }
             });
         }
@@ -458,6 +467,20 @@
                 $.ajax({
                     type: "GET",
                     url: "/confirmation/form/delivery",
+                    success: function(response) {
+                        setInnerHTML(ContentContainer, response)
+                    }
+                });
+            }
+        }
+
+        function liUnApprovedSPKOnclick(e) {
+            e.preventDefault()
+            if (labelNotifUnApprovedSPK.innerText.length > 0) {
+                ContentContainer.innerHTML = 'Please wait'
+                $.ajax({
+                    type: "GET",
+                    url: "/approval/form/spk",
                     success: function(response) {
                         setInnerHTML(ContentContainer, response)
                     }

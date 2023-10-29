@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\C_SPK;
 use App\Models\M_BRANCH;
 use App\Models\T_DLVORDHEAD;
 use App\Models\T_PCHORDHEAD;
@@ -90,6 +91,7 @@ class HomeController extends Controller
         $dataPurchaseOrderTobeUpproved = [];
         $dataDeliveryOrderNoDriver = [];
         $dataDeliveryOrderUndelivered = [];
+        $UnApprovedSPK = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
             # Query untuk data Quotation
@@ -211,6 +213,20 @@ class HomeController extends Controller
                 ->get();
         }
 
+        if (in_array($activeRole['code'], ['ga_manager', 'ga_spv'])) {
+            $SPK = C_SPK::on($this->dedicatedConnection)->select('CSPK_PIC_AS','CSPK_REFF_DOC', 'CSPK_JOBDESK')
+                ->whereNotNull('submitted_at');
+            if ($activeRole['code'] === 'ga_manager') {
+                $SPK->whereNull('CSPK_GA_MGR_APPROVED_AT');
+            }
+            if ($activeRole['code'] === 'ga_spv') {
+                $SPK->whereNull('CSPK_GA_SPV_APPROVED_AT');
+            }
+            $UnApprovedSPK = $SPK->get();
+            $UnApprovedSPK = json_decode(json_encode($UnApprovedSPK), true);
+            
+        }
+
         return [
             'data' => $dataTobeApproved, 'dataApproved' => $dataApproved,
             'dataPurchaseRequest' => $dataPurchaseRequestTobeUpproved, 'dataPurchaseRequestApproved' => $dataPurchaseRequestApproved,
@@ -218,6 +234,7 @@ class HomeController extends Controller
             'dataPurchaseOrder' => $dataPurchaseOrderTobeUpproved,
             'dataDeliveryOrderNoDriver' => $dataDeliveryOrderNoDriver,
             'dataDeliveryOrderUndelivered' => $dataDeliveryOrderUndelivered,
+            'dataUnApprovedSPK' => $UnApprovedSPK,
         ];
     }
 }

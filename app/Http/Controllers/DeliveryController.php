@@ -1268,4 +1268,58 @@ class DeliveryController extends Controller
             ]);
         return ['message' => 'Submitted'];
     }
+
+    function formApprovalSPK()
+    {
+        return view('transaction.spk_approval');
+    }
+
+    function notificationsSPK()
+    {
+        $currentDBName = DB::getDatabaseName();
+
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        $SPK = C_SPK::on($this->dedicatedConnection)->selectRaw('C_SPK.*, A.name AS USER_PIC_NAME')
+            ->leftJoin($currentDBName . '.users AS A', 'C_SPK.CSPK_PIC_NAME', '=', 'A.nick_name')
+            ->whereNotNull('submitted_at');
+        if ($activeRole['code'] === 'ga_manager') {
+            $SPK->whereNull('CSPK_GA_MGR_APPROVED_AT');
+        }
+        if ($activeRole['code'] === 'ga_spv') {
+            $SPK->whereNull('CSPK_GA_SPV_APPROVED_AT');
+        }
+        $UnApprovedSPK = $SPK->get();
+        $UnApprovedSPK = json_decode(json_encode($UnApprovedSPK), true);
+
+        $data = [];
+
+        $ArrayUniqueDO = [];
+        foreach ($UnApprovedSPK as $r) {
+            if (!in_array($r['CSPK_REFF_DOC'], $ArrayUniqueDO)) {
+                $ArrayUniqueDO[] = $r['CSPK_REFF_DOC'];
+            }
+        }
+
+        $data = T_DLVORDHEAD::on($this->dedicatedConnection)
+            ->select('MCUS_CUSNM', 'TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'T_DLVORDHEAD.created_at', 'MCUS_ADDR1')
+            ->leftJoin('M_CUS', function ($join) {
+                $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+            })
+            ->whereIn('TDLVORD_DLVCD', $ArrayUniqueDO)
+            ->where('TDLVORD_BRANCH', Auth::user()->branch)
+            ->get();
+
+        foreach ($UnApprovedSPK as &$r) {
+            foreach ($data as $d) {
+                if ($r['CSPK_REFF_DOC'] === $d['TDLVORD_DLVCD']) {
+                    $r['MCUS_CUSNM'] = $d['MCUS_CUSNM'];
+                    $r['MCUS_ADDR1'] = $d['MCUS_ADDR1'];
+                    break;
+                }
+            }
+        }
+        unset($r);
+
+        return ['data' => $UnApprovedSPK];
+    }
 }
