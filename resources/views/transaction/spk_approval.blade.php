@@ -244,6 +244,14 @@
             <div class="modal-footer">
                 <div class="container">
                     <div class="row">
+                        <div class="col text-center">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" id="btnAction">Action</button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Assign</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
