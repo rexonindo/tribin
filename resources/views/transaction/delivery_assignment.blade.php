@@ -60,15 +60,7 @@
                                                     </textarea>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <label for="quotationCustomer" class="form-label">Vehicle Reg. Number</label>
-                                                <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationVehicleRegistrationNumber" class="form-control" maxlength="45">
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </div>                                        
                                         <div class="row border-top">
                                             <div class="col-md-12 mb-1">
                                                 <div class="table-responsive" id="quotationTableContainer">
@@ -332,6 +324,7 @@
             CSPK_BACKDT: tanggalKembali.value,
             CSPK_VEHICLE_TYPE: jenisKendaraan.value,
             CSPK_JOBDESK: tugas.value,
+            CSPK_VEHICLE_REGNUM: nomorPolisi.value,
             _token: '{{ csrf_token() }}',
         }
         const div_alert = document.getElementById('div-alert-cost')
@@ -650,6 +643,7 @@
                             tanggalBerangkat.value = arrayItem['CSPK_LEAVEDT']
                             tanggalKembali.value = arrayItem['CSPK_BACKDT']
                             jenisKendaraan.value = arrayItem['CSPK_VEHICLE_TYPE']
+                            nomorPolisi.value = arrayItem['CSPK_VEHICLE_REGNUM']
                             tugas.value = arrayItem['CSPK_JOBDESK']
                         }
                     }
@@ -732,6 +726,7 @@
             CSPK_LEAVEDT: tanggalBerangkat.value,
             CSPK_BACKDT: tanggalKembali.value,
             CSPK_VEHICLE_TYPE: jenisKendaraan.value,
+            CSPK_VEHICLE_REGNUM: nomorPolisi.value,
             CSPK_JOBDESK: tugas.value,
             _token: '{{ csrf_token() }}'
         }

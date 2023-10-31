@@ -152,6 +152,7 @@ class DeliveryController extends Controller
                 'CSPK_LEAVEDT' => $request->CSPK_LEAVEDT,
                 'CSPK_BACKDT' => $request->CSPK_BACKDT,
                 'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE,
+                'CSPK_VEHICLE_REGNUM' => $request->CSPK_VEHICLE_REGNUM,
                 'CSPK_JOBDESK' => $request->CSPK_JOBDESK,
                 'updated_by' => Auth::user()->nick_name
             ]);
@@ -306,6 +307,7 @@ class DeliveryController extends Controller
                     'CSPK_LEAVEDT',
                     'CSPK_BACKDT',
                     'CSPK_VEHICLE_TYPE',
+                    'CSPK_VEHICLE_REGNUM',
                     'CSPK_JOBDESK',
                     'CSPK_JOBDESK',
                     'submitted_by',
@@ -934,6 +936,7 @@ class DeliveryController extends Controller
         if ($request->CSPK_PIC_AS === 'DRIVER') {
             $validator = Validator::make($request->all(), [
                 'CSPK_VEHICLE_TYPE' => 'required',
+                'CSPK_VEHICLE_REGNUM' => 'required',
                 'CSPK_KM' => 'required|numeric',
                 'CSPK_WHEELS' => 'required|numeric',
                 'CSPK_SUPPLIER' => 'required',
@@ -945,8 +948,6 @@ class DeliveryController extends Controller
                 return response()->json($validator->errors(), 406);
             }
         }
-
-
 
         $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
             ->where('RANGE2', '>=', $request->CSPK_KM)
@@ -987,6 +988,7 @@ class DeliveryController extends Controller
             'CSPK_LEAVEDT' => $request->CSPK_LEAVEDT,
             'CSPK_BACKDT' => $request->CSPK_BACKDT,
             'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE ? $request->CSPK_VEHICLE_TYPE : '',
+            'CSPK_VEHICLE_REGNUM' => $request->CSPK_VEHICLE_REGNUM ? $request->CSPK_VEHICLE_REGNUM : '',
             'CSPK_JOBDESK' => $request->CSPK_JOBDESK,
             'CSPK_DOCNO' => $newDocCode,
             'CSPK_DOCNO_ORDER' => $LastLine,
