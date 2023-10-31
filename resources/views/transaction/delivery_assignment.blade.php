@@ -68,12 +68,6 @@
                                                     <input type="text" id="quotationVehicleRegistrationNumber" class="form-control" maxlength="45">
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-1 d-none">
-                                                <label for="quotationCustomer" class="form-label"><i>Uang Jalan</i></label>
-                                                <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationUangJalan" class="form-control" maxlength="15" readonly value="0">
-                                                </div>
-                                            </div>
                                         </div>
                                         <div class="row border-top">
                                             <div class="col-md-12 mb-1">
@@ -145,26 +139,24 @@
                                             <legend class="float-none w-auto px-3">Kendaraan</legend>
                                             <div class="row">
                                                 <div class="col-md-3 mb-1">
-                                                    <div class="input-group input-group-sm">
-                                                        <span class="input-group-text">KM</span>
-                                                        <input type="number" id="KM" class="form-control orderInputItem">
-                                                    </div>
+                                                    <label for="KM" class="form-label">KM</label>
+                                                    <input type="number" id="KM" class="form-control form-control-sm orderInputItem">
                                                 </div>
                                                 <div class="col-md-3 mb-1">
-                                                    <div class="input-group input-group-sm">
-                                                        <span class="input-group-text">Jenis</span>
-                                                        <input type="text" id="jenisKendaraan" class="form-control orderInputItem" maxlength="35">
-                                                    </div>
+                                                    <label for="jenisKendaraan" class="form-label">Jenis</label>
+                                                    <input type="text" id="jenisKendaraan" class="form-control form-control-sm orderInputItem" maxlength="35">
                                                 </div>
-                                                <div class="col-md-6 mb-1">
-                                                    <div class="input-group input-group-sm">
-                                                        <span class="input-group-text">Jumlah Roda</span>
-                                                        <select class="form-select" id="Wheels">
-                                                            <option value="4">4</option>
-                                                            <option value="6">6</option>
-                                                            <option value="10">10</option>
-                                                        </select>
-                                                    </div>
+                                                <div class="col-md-3 mb-1">
+                                                    <label for="nomorPolisi" class="form-label">Nomor Polisi</label>
+                                                    <input type="text" id="nomorPolisi" class="form-control form-control-sm orderInputItem" maxlength="15">
+                                                </div>
+                                                <div class="col-md-3 mb-1">
+                                                    <label for="Wheels" class="form-label">Jumlah Roda</label>
+                                                    <select class="form-select form-select-sm" id="Wheels">
+                                                        <option value="4">4</option>
+                                                        <option value="6">6</option>
+                                                        <option value="10">10</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -288,7 +280,7 @@
             </div>
             <div class="modal-footer">
                 <div class="container">
-                    <div class="row">                        
+                    <div class="row">
                     </div>
                 </div>
             </div>
