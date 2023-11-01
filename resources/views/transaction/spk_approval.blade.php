@@ -61,20 +61,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-1">
-                                                <label for="quotationCustomer" class="form-label">Vehicle Reg. Number</label>
-                                                <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationVehicleRegistrationNumber" class="form-control" maxlength="45">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 mb-1 d-none">
-                                                <label for="quotationCustomer" class="form-label"><i>Uang Jalan</i></label>
-                                                <div class="input-group input-group-sm mb-1">
-                                                    <input type="text" id="quotationUangJalan" class="form-control" maxlength="15" readonly value="0">
-                                                </div>
-                                            </div>
-                                        </div>
                                         <div class="row border-top">
                                             <div class="col-md-12 mb-1">
                                                 <div class="table-responsive" id="quotationTableContainer">
@@ -248,7 +234,7 @@
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" id="btnAction">Action</button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Assign</a></li>
+                                    <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Approve</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -259,6 +245,7 @@
     </div>
 </div>
 <input type="hidden" id="selectedRowAtOrderTable">
+<input type="hidden" id="idSPK">
 <script>
     function loadApprovalList() {
         approvalContainer.innerHTML = 'Please wait'
@@ -298,6 +285,7 @@
                     elButton2.innerHTML = 'Review'
                     elButton2.onclick = () => {
                         event.preventDefault()
+                        idSPK.value = arrayItem['id']
                         quotationCustomer.value = arrayItem['MCUS_CUSNM']
 
                         labelQuotationInModal.innerHTML = arrayItem['CSPK_REFF_DOC']
@@ -357,12 +345,9 @@
             btnAction.disabled = true
             $.ajax({
                 type: "PUT",
-                url: `assignment-driver/form/delivery/${btoa(labelQuotationInModal.innerText)}`,
+                url: `approval/approve-spk/${idSPK.value}`,
                 data: {
                     _token: '{{ csrf_token() }}',
-                    TDLVORD_BRANCH: branch.value,
-                    TDLVORD_JALAN_COST: quotationUangJalan.value,
-                    TDLVORD_VEHICLE_REGNUM: quotationVehicleRegistrationNumber.value,
                 },
                 dataType: "json",
                 success: function(response) {

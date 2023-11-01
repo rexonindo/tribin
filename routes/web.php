@@ -157,6 +157,7 @@ Route::middleware('auth')->group(function () {
         Route::get('form/purchase-request', [PurchaseController::class, 'formApproval']);
         Route::get('form/purchase-order', [PurchaseController::class, 'formApprovalPO']);
         Route::get('form/spk', [DeliveryController::class, 'formApprovalSPK']);
+        Route::put('approve-spk/{id}', [DeliveryController::class, 'approveSPK']);
     });
 
     # Terkait Delivery

@@ -1324,4 +1324,29 @@ class DeliveryController extends Controller
 
         return ['data' => $UnApprovedSPK];
     }
+
+    public function approveSPK(Request $request)
+    {
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        $ColumnFocusName = '';
+        $ColumnFocusTime = '';
+        switch ($activeRole['code']) {
+            case 'ga_manager':
+                $ColumnFocusName = 'CSPK_GA_MGR_APPROVED_BY';
+                $ColumnFocusTime = 'CSPK_GA_MGR_APPROVED_AT';
+                break;
+            case 'ga_spv':
+                $ColumnFocusName = 'CSPK_GA_SPV_APPROVED_BY';
+                $ColumnFocusTime = 'CSPK_GA_SPV_APPROVED_AT';
+                break;
+        }
+        # ubah data header
+        $affectedRow = C_SPK::on($this->dedicatedConnection)
+            ->where('id', $request->id)
+            ->update([
+                $ColumnFocusName => Auth::user()->nick_name,
+                $ColumnFocusTime => date('Y-m-d H:i:s')
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
 }
