@@ -9,8 +9,11 @@ use App\Models\COMPANY_BRANCH;
 use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
 use App\Models\M_DISTANCE_PRICE;
+use App\Models\M_SUP;
 use App\Models\T_DLVORDDETA;
 use App\Models\T_DLVORDHEAD;
+use App\Models\T_PCHORDDETA;
+use App\Models\T_PCHORDHEAD;
 use App\Models\T_QUOHEAD;
 use App\Models\T_SLODETA;
 use App\Models\T_SLOHEAD;
@@ -26,6 +29,8 @@ class DeliveryController extends Controller
 {
     protected $dedicatedConnection;
     protected $fpdf;
+    protected $monthOfRoma = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+
     public function __construct()
     {
         date_default_timezone_set('Asia/Jakarta');
@@ -1003,6 +1008,82 @@ class DeliveryController extends Controller
         return ['data' => $SPKs];
     }
 
+    function autoPurchaseToSparepart($ParamData)
+    {
+        # Periksa apakah sparepart sudah diregistrasi sebagai supplier
+        $Supplier = M_SUP::on($this->dedicatedConnection)
+            ->where('MSUP_CGCON', 'connect_jos_service')
+            ->where('MSUP_BRANCH', Auth::user()->branch)
+            ->first();
+
+        if (!empty($Supplier)) {
+
+            if (
+                T_PCHORDHEAD::on($this->dedicatedConnection)
+                ->where('TPCHORD_BRANCH', Auth::user()->branch)
+                ->where('TPCHORD_REMARK', $ParamData['DOC'])->count() > 0
+            ) {
+                return true;
+            }
+
+            # Generate Nomor PO
+            $RSAlias = CompanyGroup::select('alias_code')
+                ->where('connection', $this->dedicatedConnection)
+                ->first();
+
+            $LastLine = DB::connection($this->dedicatedConnection)->table('T_PCHORDHEAD')
+                ->whereMonth('created_at', '=', date('m'))
+                ->whereYear('created_at', '=', date('Y'))
+                ->whereYear('TPCHORD_BRANCH', '=', Auth::user()->branch)
+                ->max('TPCHORD_LINE');
+
+            $newPOCode = '';
+            if (!$LastLine) {
+                $LastLine = 1;
+                $newPOCode = '001/' . $RSAlias->alias_code . '-PO/' . $this->monthOfRoma[date('n') - 1] . '/' . date('y');
+            } else {
+                $LastLine++;
+                $newPOCode = substr('00' . $LastLine, -3) . '/' . $RSAlias->alias_code . '-PO/' . $this->monthOfRoma[date('n') - 1] . '/' . date('y');
+            }
+
+            $headerTable = [
+                'TPCHORD_PCHCD' => $newPOCode,
+                'TPCHORD_ATTN' => '-',
+                'TPCHORD_SUPCD' => $Supplier->MSUP_SUPCD,
+                'TPCHORD_LINE' => $LastLine,
+                'TPCHORD_ISSUDT' => date('Y-m-d'),
+                'TPCHORD_APPRVBY' => Auth::user()->nick_name,
+                'TPCHORD_APPRVDT' => date('Y-m-d H:i:s'),
+                'created_by' => Auth::user()->nick_name,
+                'TPCHORD_BRANCH' => Auth::user()->branch,
+                'TPCHORD_REMARK' => $ParamData['DOC'],
+                'TPCHORD_REQCD' => '',
+            ];
+
+            $detailTable = [];
+
+            $detailTable[] = [
+                'TPCHORDDETA_PCHCD' => $newPOCode,
+                'TPCHORDDETA_ITMCD' => 'SOLAR',
+                'TPCHORDDETA_ITMQT' => $ParamData['QTY'],
+                'TPCHORDDETA_ITMPRC_PER' => 0,
+                'created_by' => Auth::user()->nick_name,
+                'created_at' => date('Y-m-d H:i:s'),
+                'TPCHORDDETA_BRANCH' => Auth::user()->branch,
+            ];
+
+            # Simpan data ke Tabel PO Header
+            T_PCHORDHEAD::on($this->dedicatedConnection)->create($headerTable);
+
+            # Simpan data ke Tabel PO Detail
+            T_PCHORDDETA::on($this->dedicatedConnection)->insert($detailTable);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     function SPKtoPDF(Request $request)
     {
         $doc = base64_decode($request->id);
@@ -1084,6 +1165,9 @@ class DeliveryController extends Controller
             + $Data->CSPK_UANG_MANDAH + $Data->CSPK_UANG_PENGINAPAN + $Data->CSPK_UANG_PENGAWALAN
             + $Data->CSPK_UANG_LAIN2;
         if ($Data->CSPK_PIC_AS === 'DRIVER') {
+            if ($Data->CSPK_SUPPLIER !== 'SPBU') {
+                $resultPurchase = $this->autoPurchaseToSparepart(['QTY' => $Data->CSPK_LITER, 'DOC' => $Data->CSPK_DOCNO]);
+            }
             $this->fpdf->SetXY(3, 95);
             $this->fpdf->Cell(10, 5, '1', 1, 0, 'C');
             $this->fpdf->Cell(75, 5, 'Total', 1, 0, 'C');
