@@ -1012,6 +1012,14 @@ class DeliveryController extends Controller
             return 'something wrong happen';
         }
 
+        if (!$Data->CSPK_GA_SPV_APPROVED_BY) {
+            return ['message' => 'GA Supervisor Approval is required'];
+        }
+
+        if (!$Data->CSPK_GA_MGR_APPROVED_BY) {
+            return ['message' => 'GA Manager Approval is required'];
+        }
+
         $PICMenugaskan = User::where('nick_name', $Data->created_by)->first();
         $PICDitugaskan = User::where('nick_name', $Data->CSPK_PIC_NAME)->first();
 
