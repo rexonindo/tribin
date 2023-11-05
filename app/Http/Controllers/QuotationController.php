@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\COMPANY_BRANCH;
 use App\Models\CompanyGroup;
 use App\Models\M_Condition;
 use App\Models\M_USAGE;
@@ -362,8 +363,9 @@ class QuotationController extends Controller
 
     public function toPDF(Request $request)
     {
-        $RSCG = CompanyGroup::select('name', 'address', 'phone', 'fax')
+        $RSCG = COMPANY_BRANCH::on($this->dedicatedConnection)->select('name', 'address', 'phone', 'fax', 'letter_head')
             ->where('connection', $this->dedicatedConnection)
+            ->where('BRANCH', Auth::user()->branch)
             ->first();
 
         $doc = base64_decode($request->id);
@@ -421,7 +423,7 @@ class QuotationController extends Controller
         $this->fpdf->SetFont('Arial', 'BU', 24);
         $this->fpdf->AddPage("P", 'A4');
         $this->fpdf->SetXY(7, 3);
-        $this->fpdf->Cell(0, 8, $RSCG->name, 0, 0, 'C');
+        $this->fpdf->Cell(0, 8, $RSCG->letter_head, 0, 0, 'C');
         $this->fpdf->SetFont('Arial', 'B', 12);
         $this->fpdf->SetXY(7, 13);
         $this->fpdf->Cell(0, 5, 'SALES & RENTAL DIESEL GENSET - FORKLIF - TRAVOLAS - TRUK', 0, 0, 'C');
