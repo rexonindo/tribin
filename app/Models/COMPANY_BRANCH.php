@@ -10,7 +10,7 @@ class COMPANY_BRANCH extends Model
     use HasFactory;
     protected $table = 'COMPANY_BRANCHES';
     protected $fillable = [
-        'name', 'address', 'connection', 'phone', 'fax', 'invoice_letter_id', 'created_by', 'updated_by', 
-        'BRANCH'
+        'name', 'address', 'connection', 'phone', 'fax', 'invoice_letter_id', 'created_by', 'updated_by',
+        'BRANCH', 'letter_head'
     ];
 }

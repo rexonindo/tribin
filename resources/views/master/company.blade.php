@@ -72,6 +72,14 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-12 mb-1">
+                                <label for="companyLetterHead" class="form-label">Letter Head</label>
+                                <div class="input-group input-group-sm mb-1">
+                                    <input type="text" id="companyLetterHead" class="form-control" maxlength="55" value="{{ $SelectedCompany ? $SelectedCompany->letter_head : '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col mb-1">
                                 <div class="btn-group btn-group-sm">
                                     <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
@@ -146,6 +154,7 @@
             phone: companyPhone.value,
             fax: companyFax.value,
             invoice_letter_id: companyInvoiceNumber.value,
+            letter_head: companyLetterHead.value,
             _token: '{{ csrf_token() }}',
         }
         $.ajax({
