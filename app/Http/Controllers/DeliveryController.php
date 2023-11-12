@@ -1441,4 +1441,25 @@ class DeliveryController extends Controller
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
+
+    function searchSPK(Request $request)
+    {
+        $currentDBName = DB::getDatabaseName();
+        $columnMap = [
+            'CSPK_DOCNO',
+            'A.name',
+        ];
+        $RS = C_SPK::on($this->dedicatedConnection)->select([
+            "CSPK_DOCNO",
+            DB::raw("A.name AS USER_PIC_NAME"),
+            DB::raw("CSPK_UANG_JALAN + CSPK_UANG_SOLAR + CSPK_UANG_MAKAN
+            + CSPK_UANG_MANDAH + CSPK_UANG_PENGINAPAN + CSPK_UANG_PENGAWALAN
+            + CSPK_UANG_LAIN2 AS TOTAL_AMOUNT")
+        ])
+            ->leftJoin($currentDBName . '.users AS A', 'C_SPK.CSPK_PIC_NAME', '=', 'A.nick_name')
+            ->where('CSPK_BRANCH', Auth::user()->branch)
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->get();
+        return ['data' => $RS];
+    }
 }

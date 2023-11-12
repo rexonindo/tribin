@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccessRulesController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\CashierController;
 use App\Http\Controllers\CoaController;
 use App\Http\Controllers\CompanyGroupController;
 use App\Http\Controllers\CustomerController;
@@ -75,9 +76,9 @@ Route::middleware('auth')->group(function () {
 
     # Terkait Company Group
     Route::prefix('payment-account')->group(function () {
-        Route::post('form', [CompanyGroupController::class, 'savePaymentAccount'])->middleware('auth');
-        Route::get('', [CompanyGroupController::class, 'getPaymentAccountCompanyBranch'])->middleware('auth');
-        Route::delete('form/{id}', [CompanyGroupController::class, 'deletePaymentAccountCompanyBranch'])->middleware('auth');
+        Route::post('form', [CompanyGroupController::class, 'savePaymentAccount']);
+        Route::get('', [CompanyGroupController::class, 'getPaymentAccountCompanyBranch']);
+        Route::delete('form/{id}', [CompanyGroupController::class, 'deletePaymentAccountCompanyBranch']);
     });
 
     # Terkait Harga Jarak
@@ -92,6 +93,7 @@ Route::middleware('auth')->group(function () {
     # Terkait SPK , Surat Perintah Kerja
     Route::prefix('SPK')->group(function () {
         Route::post('', [DeliveryController::class, 'saveSPK']);
+        Route::get('', [DeliveryController::class, 'searchSPK']);
         Route::put('{id}', [DeliveryController::class, 'updateSPK']);
         Route::delete('{id}', [DeliveryController::class, 'deleteSPK']);
         Route::put('delivery-order/{id}', [DeliveryController::class, 'getSPKByDO']);
@@ -162,31 +164,36 @@ Route::middleware('auth')->group(function () {
 
     # Terkait Delivery
     Route::prefix('delivery')->group(function () {
-        Route::get('form', [DeliveryController::class, 'index'])->middleware('auth');
-        Route::get('outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse'])->middleware('auth');
-        Route::get('outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument'])->middleware('auth');
-        Route::put('items/{id}', [DeliveryController::class, 'updateDODetail'])->middleware('auth');
-        Route::post('', [DeliveryController::class, 'save'])->middleware('auth');
-        Route::get('', [DeliveryController::class, 'search'])->middleware('auth');
-        Route::put('{id}', [DeliveryController::class, 'update'])->middleware('auth');
-        Route::get('document/{id}', [DeliveryController::class, 'loadByDocument'])->middleware('auth');
+        Route::get('form', [DeliveryController::class, 'index']);
+        Route::get('outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse']);
+        Route::get('outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument']);
+        Route::put('items/{id}', [DeliveryController::class, 'updateDODetail']);
+        Route::post('', [DeliveryController::class, 'save']);
+        Route::get('', [DeliveryController::class, 'search']);
+        Route::put('{id}', [DeliveryController::class, 'update']);
+        Route::get('document/{id}', [DeliveryController::class, 'loadByDocument']);
     });
 
     #Terkait Receive Order
     Route::prefix('receive-order')->group(function () {
-        Route::get('form', [ReceiveOrderController::class, 'index'])->middleware('auth');
-        Route::post('', [ReceiveOrderController::class, 'save'])->middleware('auth');
-        Route::get('', [ReceiveOrderController::class, 'search'])->middleware('auth');
-        Route::put('{id}', [ReceiveOrderController::class, 'update'])->middleware('auth');
-        Route::get('{id}', [ReceiveOrderController::class, 'loadById'])->middleware('auth');
-        Route::delete('items/{id}', [ReceiveOrderController::class, 'deleteItemById'])->middleware('auth');
+        Route::get('form', [ReceiveOrderController::class, 'index']);
+        Route::post('', [ReceiveOrderController::class, 'save']);
+        Route::get('', [ReceiveOrderController::class, 'search']);
+        Route::put('{id}', [ReceiveOrderController::class, 'update']);
+        Route::get('{id}', [ReceiveOrderController::class, 'loadById']);
+        Route::delete('items/{id}', [ReceiveOrderController::class, 'deleteItemById']);
         Route::put('items/{id}', [ReceiveOrderController::class, 'updateItem']);
     });
 
     Route::prefix('assignment-driver')->group(function () {
-        Route::get('form/delivery', [DeliveryController::class, 'formDriverAssignment'])->middleware('auth');
-        Route::get('data/delivery', [DeliveryController::class, 'emptyDriver'])->middleware('auth');
-        Route::put('form/delivery/{id}', [DeliveryController::class, 'assignDriver'])->middleware('auth');
+        Route::get('form/delivery', [DeliveryController::class, 'formDriverAssignment']);
+        Route::get('data/delivery', [DeliveryController::class, 'emptyDriver']);
+        Route::put('form/delivery/{id}', [DeliveryController::class, 'assignDriver']);
+    });
+
+    Route::prefix('cashier')->group(function () {
+        Route::get('form', [CashierController::class, 'index']);
+        Route::post('', [CashierController::class, 'save']);
     });
 
     # Terkait Quotation Transaction
