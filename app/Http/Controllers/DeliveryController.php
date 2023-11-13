@@ -1462,4 +1462,42 @@ class DeliveryController extends Controller
             ->get();
         return ['data' => $RS];
     }
+
+    function formUnconfirmed()
+    {
+        return view(
+            'transaction.outgoing_confirmation'
+        );
+    }
+
+    function unconfirmed()
+    {
+        $Delivery = T_DLVORDHEAD::on($this->dedicatedConnection)
+            ->leftJoin('T_DLVORDDETA', function ($join) {
+                $join->on('TDLVORD_DLVCD', '=', 'TDLVORDDETA_DLVCD')->on('TDLVORD_BRANCH', '=', 'TDLVORDDETA_BRANCH');
+            })
+            ->leftJoin('M_CUS', function ($join) {
+                $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+            })
+            ->leftJoin('M_ITM', function ($join) {
+                $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD');
+            })
+            ->select('TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'MCUS_CUSNM')
+            ->where('TDLVORD_BRANCH', Auth::user()->branch)
+            ->whereNull('T_DLVORDDETA.deleted_at')
+            ->where('MITM_ITMTYPE', '!=', '3')
+            ->groupBy('TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'MCUS_CUSNM');
+
+        $ITRN = C_ITRN::on($this->dedicatedConnection)
+            ->select('CITRN_DOCNO', 'CITRN_BRANCH')
+            ->where('CITRN_BRANCH', Auth::user()->branch)
+            ->groupBy('CITRN_DOCNO', 'CITRN_BRANCH');
+
+        $Data = DB::connection($this->dedicatedConnection)->query()->fromSub($Delivery, 'V1')
+            ->leftJoinSub($ITRN, 'V2', function ($join) {
+                $join->on('TDLVORD_DLVCD', '=', 'CITRN_DOCNO')->on('TDLVORD_BRANCH', '=', 'CITRN_BRANCH');
+            })
+            ->whereNull('CITRN_DOCNO');
+        return ['data' => $Data->get(), 'sql' => $Data->toSql()];
+    }
 }
