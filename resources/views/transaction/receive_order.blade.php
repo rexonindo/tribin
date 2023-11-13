@@ -1370,7 +1370,7 @@
                         newcell = newrow.insertCell(5)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
-                        newcell = newrow.insertCell(5)
+                        newcell = newrow.insertCell(6)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
                         newcell = newrow.insertCell(7)
