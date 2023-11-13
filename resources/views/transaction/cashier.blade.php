@@ -8,60 +8,98 @@
         </div>
     </div>
 </div>
-<form id="cashier-form">
-    <div class="row">
-        <div class="col mb-1" id="div-alert">
-        </div>
+<div class="row">
+    <div class="col mb-1" id="div-alert">
     </div>
-    <div class="row">
-        <div class="col">
-            <nav>
-                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <button class="nav-link active" id="nav-input-tab" data-bs-toggle="tab" data-bs-target="#nav-input" type="button" role="tab">Transaction</button>
-                    <button class="nav-link" id="nav-history-tab" data-bs-toggle="tab" data-bs-target="#nav-history" type="button" role="tab">History</button>
-                </div>
-            </nav>
-            <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade show active" id="nav-input" role="tabpanel" aria-labelledby="nav-input-tab" tabindex="0">
-                    <div class="container-fluid mt-2 border-start border-bottom rounded-start">
-                        <div class="row">
-                            <div class="col-md-6 mb-1">
-                                <label class="form-label" for="cashierCode">Reference</label>
-                                <div class="input-group">
-                                    <input type="text" id="cashierCode" class="form-control">
-                                    <button class="btn btn-primary" type="button" onclick="btnShowCoaModal()"><i class="fas fa-search"></i></button>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-1">
-                                <label class="form-label" for="cashierName">User</label>
-                                <input type="text" id="cashierName" class="form-control" maxlength="50">
+</div>
+<div class="row">
+    <div class="col">
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="nav-input-tab" data-bs-toggle="tab" data-bs-target="#nav-input" type="button" role="tab">Transaction</button>
+                <button class="nav-link" id="nav-history-tab" data-bs-toggle="tab" data-bs-target="#nav-history" type="button" role="tab">History</button>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-input" role="tabpanel" aria-labelledby="nav-input-tab" tabindex="0">
+                <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label" for="cashierCode">Reference</label>
+                            <div class="input-group">
+                                <input type="text" id="cashierCode" class="form-control">
+                                <button class="btn btn-primary" type="button" onclick="btnShowCoaModal()"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-1">
-                                <label class="form-label" for="cashierDate">Date</label>
-                                <div class="input-group">
-                                    <input type="text" id="cashierDate" class="form-control" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-1">
-                                <label class="form-label" for="cashierAmount">Amount</label>
-                                <input type="text" id="cashierAmount" class="form-control">
-                            </div>
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label" for="cashierName">User</label>
+                            <input type="text" id="cashierName" class="form-control" maxlength="50">
                         </div>
-                        <input type="hidden" id="cashierInputMode" value="0">
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label" for="cashierDate">Date</label>
+                            <div class="input-group">
+                                <input type="text" id="cashierDate" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label" for="cashierAmount">Amount</label>
+                            <input type="text" id="cashierAmount" class="form-control">
+                        </div>
+                    </div>
+                    <input type="hidden" id="cashierInputMode" value="0">
                 </div>
-                <div class="tab-pane fade" id="nav-history" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="1">
-                    <div class="container-fluid mt-2 border-start border-bottom rounded-start">
-
+            </div>
+            <div class="tab-pane fade" id="nav-history" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="1">
+                <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label" for="cashierFilterDate">Date from</label>
+                            <div class="input-group">
+                                <input type="text" id="cashierFilterDate" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label" for="cashierFilterDate2">Date to</label>
+                            <div class="input-group">
+                                <input type="text" id="cashierFilterDate2" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-1 text-center">
+                            <button class="btn btn-primary" onclick="btnCashierFilterOnClick(this)"><i class="fas fa-filter"></i></button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="table-responsive" id="coaReportTabelContainer">
+                                <table id="coaReportTabel" class="table table-sm table-striped table-bordered table-hover">
+                                    <thead class="table-light align-middle">
+                                        <tr class="text-center">
+                                            <th rowspan="2">Date</th>
+                                            <th rowspan="2">Document</th>
+                                            <th rowspan="2">User</th>
+                                            <th colspan="3">Amount</th>
+                                        </tr>
+                                        <tr class="text-center">
+                                            <th>IN</th>
+                                            <th>OUT</th>
+                                            <th>Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-</form>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="coaModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -114,6 +152,20 @@
     })
     cashierDate.value = moment().format('YYYY-MM-DD')
 
+    $("#cashierFilterDate").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        uiLibrary: 'bootstrap5'
+    })
+    cashierFilterDate.value = moment().format('YYYY-MM-DD')
+
+    $("#cashierFilterDate2").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        uiLibrary: 'bootstrap5'
+    })
+    cashierFilterDate2.value = moment().format('YYYY-MM-DD')
+
     Inputmask({
         'alias': 'decimal',
         'groupSeparator': ',',
@@ -127,8 +179,7 @@
             CCASHIER_ISSUDT: cashierDate.value.trim(),
             _token: '{{ csrf_token() }}',
         }
-        if(data.CCASHIER_PRICE==0)
-        {
+        if (data.CCASHIER_PRICE == 0) {
             cashierAmount.focus()
             alertify.warning('Amount should not be zero')
             return
@@ -226,5 +277,79 @@
                 }
             });
         }
+    }
+
+    function btnCashierFilterOnClick(senderElementContext) {
+        const data = {
+            DATE_FROM: cashierFilterDate.value,
+            DATE_TO: cashierFilterDate2.value,
+        }
+        senderElementContext.disabled = true
+        coaReportTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please wait</td></tr>`
+        $.ajax({
+            type: "GET",
+            url: "cashier",
+            data: data,
+            dataType: "JSON",
+            success: function(response) {
+                senderElementContext.disabled = false
+                let myContainer = document.getElementById("coaReportTabelContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = coaReportTabel.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("coaReportTabel");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                response.data.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    if(!arrayItem['CCASHIER_ISSUDT']){
+                        newrow.classList.add('table-info')
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.innerHTML = arrayItem['CCASHIER_ISSUDT']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CCASHIER_REFF_DOC']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CCASHIER_USER']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['INVALUE']).format('0,0.00')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['OUTVALUE']).format('0,0.00')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['PREVIOUS_BALANCE']).format('0,0.00')
+                })
+                response.dataTx.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    if(!arrayItem['CCASHIER_ISSUDT']){
+                        newrow.classList.add('table-info')
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.innerHTML = arrayItem['CCASHIER_ISSUDT']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CCASHIER_REFF_DOC']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['CCASHIER_USER']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['INVALUE']).format('0,0.00')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['OUTVALUE']).format('0,0.00')
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = numeral(arrayItem['PREVIOUS_BALANCE']).format('0,0.00')
+                })
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+                senderElementContext.disabled = false
+                coaReportTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please try again</td></tr>`
+            }
+        });
     }
 </script>

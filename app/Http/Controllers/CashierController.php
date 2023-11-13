@@ -6,6 +6,7 @@ use App\Models\C_CASHIER;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class CashierController extends Controller
@@ -27,7 +28,7 @@ class CashierController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'CCASHIER_PRICE' => 'required|numeric',
-            'CCASHIER_ISSUDT' => 'required|date',            
+            'CCASHIER_ISSUDT' => 'required|date',
         ]);
 
         if ($validator->fails()) {
@@ -41,10 +42,48 @@ class CashierController extends Controller
             'CCASHIER_REMARK' => '',
             'CCASHIER_PRICE' => $request->CCASHIER_PRICE,
             'CCASHIER_ISSUDT' => $request->CCASHIER_ISSUDT,
-            'CCASHIER_REFF_DOC' => $request->CCASHIER_ISSUDT,
-            'CCASHIER_USER' => $request->CCASHIER_ISSUDT,
+            'CCASHIER_REFF_DOC' => $request->CCASHIER_REFF_DOC,
+            'CCASHIER_USER' => $request->CCASHIER_USER,
             'created_by' => Auth::user()->nick_name,
         ]);
         return ['msg' => 'OK'];
+    }
+
+    function search(Request $request)
+    {
+        $PreviousBalance = C_CASHIER::on($this->dedicatedConnection)
+            ->select(
+                DB::raw('NULL CCASHIER_ISSUDT'),
+                DB::raw('NULL CCASHIER_REFF_DOC'),
+                DB::raw('NULL CCASHIER_USER'),
+                DB::raw('SUM(CASE WHEN CCASHIER_PRICE > 0 THEN CCASHIER_PRICE ELSE 0 END ) AS INVALUE'),
+                DB::raw('SUM(CASE WHEN CCASHIER_PRICE < 0 THEN CCASHIER_PRICE ELSE 0 END ) AS OUTVALUE'),
+                DB::raw("IFNULL(SUM(CCASHIER_PRICE),0) PREVIOUS_BALANCE")
+            )
+            ->where('CCASHIER_ISSUDT', '<', $request->DATE_FROM)
+            ->get();
+        $PeriodTrans = C_CASHIER::on($this->dedicatedConnection)
+            ->select(
+                DB::raw('CCASHIER_ISSUDT'),
+                DB::raw('CCASHIER_REFF_DOC'),
+                DB::raw('CCASHIER_USER'),
+                DB::raw('SUM(CASE WHEN CCASHIER_PRICE > 0 THEN CCASHIER_PRICE ELSE 0 END ) AS INVALUE'),
+                DB::raw('SUM(CASE WHEN CCASHIER_PRICE < 0 THEN CCASHIER_PRICE ELSE 0 END ) AS OUTVALUE'),
+                DB::raw("0 PREVIOUS_BALANCE")
+            )
+            ->where('CCASHIER_ISSUDT', '>', $request->DATE_FROM)
+            ->where('CCASHIER_ISSUDT', '<=', $request->DATE_TO)
+            ->groupBy('CCASHIER_ISSUDT', 'CCASHIER_REFF_DOC', 'CCASHIER_USER')
+            ->orderBy('CCASHIER_ISSUDT')
+            ->get();
+        $PeriodTrans = json_decode(json_encode($PeriodTrans), true);
+        foreach ($PreviousBalance as $r) {
+            $currentBalance = $r->PREVIOUS_BALANCE;
+            foreach ($PeriodTrans as &$n) {
+                $currentBalance = $currentBalance - $n['OUTVALUE'] + $n['INVALUE'];
+                $n['PREVIOUS_BALANCE'] = $currentBalance;
+            }
+        }
+        return ['data' => $PreviousBalance, 'dataTx' => $PeriodTrans];
     }
 }
