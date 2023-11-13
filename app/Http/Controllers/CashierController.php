@@ -67,8 +67,8 @@ class CashierController extends Controller
                 DB::raw('CCASHIER_ISSUDT'),
                 DB::raw('CCASHIER_REFF_DOC'),
                 DB::raw('CCASHIER_USER'),
-                DB::raw('SUM(CASE WHEN CCASHIER_PRICE > 0 THEN CCASHIER_PRICE ELSE 0 END ) AS INVALUE'),
-                DB::raw('SUM(CASE WHEN CCASHIER_PRICE < 0 THEN CCASHIER_PRICE ELSE 0 END ) AS OUTVALUE'),
+                DB::raw('ABS(SUM(CASE WHEN CCASHIER_PRICE > 0 THEN CCASHIER_PRICE ELSE 0 END )) AS INVALUE'),
+                DB::raw('ABS(SUM(CASE WHEN CCASHIER_PRICE < 0 THEN CCASHIER_PRICE ELSE 0 END )) AS OUTVALUE'),
                 DB::raw("0 PREVIOUS_BALANCE")
             )
             ->where('CCASHIER_ISSUDT', '>', $request->DATE_FROM)
