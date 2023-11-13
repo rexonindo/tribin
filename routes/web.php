@@ -211,6 +211,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('conditions/{id}', [QuotationController::class, 'deleteConditionById']);
         Route::delete('items/{id}', [QuotationController::class, 'deleteItemById']);
         Route::put('items/{id}', [QuotationController::class, 'updateItem']);
+        Route::post('items/{id}', [QuotationController::class, 'saveItem']);
     });
     Route::post('quotation-item', [QuotationController::class, 'saveItem']);
     Route::post('quotation-condition', [QuotationController::class, 'saveCondition']);

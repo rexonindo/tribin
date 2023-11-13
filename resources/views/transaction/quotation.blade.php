@@ -98,7 +98,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div class="row">
                                                     <div class="col-md-6 mb-1">
                                                         <div class="input-group input-group-sm mb-1">
@@ -661,65 +661,113 @@
         }
     }
 
-    function btnSaveLineOnclick() {
+    function btnSaveLineOnclick(pthis) {
         if (quotationItemCode.value.length === 0) {
             quotationItemCode.focus()
             alertify.warning(`Item Code is required`)
             return
         }
-        const quotationTableBody = quotationTable.getElementsByTagName('tbody')[0]
-        const subTotal = numeral(quotationPrice.value).value() +
-            numeral(quotationOperator.value).value() +
-            numeral(quotationMOBDEMOB.value).value()
-        newrow = quotationTableBody.insertRow(-1)
-        newrow.title = 'not selected'
-        newrow.onclick = (event) => {
-            const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
-            if (selrow.title === 'selected') {
-                selrow.title = 'not selected'
-                selrow.classList.remove('table-info')
-            } else {
-                const ttlrows = quotationTable.rows.length
-                for (let i = 1; i < ttlrows; i++) {
-                    quotationTable.rows[i].classList.remove('table-info')
-                    quotationTable.rows[i].title = 'not selected'
-                }
-                selrow.title = 'selected'
-                selrow.classList.add('table-info')
+        if (quotationCode.value.trim().length > 0) {
+            const data = {
+                TQUODETA_QUOCD: quotationCode.value,
+                TQUODETA_ITMCD: quotationItemCode.value,
+                TQUODETA_ITMQT: 1,
+                TQUODETA_USAGE: 1,
+                TQUODETA_USAGE_DESCRIPTION: quotationUsage.value,
+                TQUODETA_PRC: numeral(quotationPrice.value).value(),
+                TQUODETA_OPRPRC: numeral(quotationOperator.value).value(),
+                TQUODETA_MOBDEMOB: numeral(quotationMOBDEMOB.value).value(),
+                _token: '{{ csrf_token() }}',
             }
+            pthis.disabled = true
+            pthis.innerHTML = `Please wait`
+            $.ajax({
+                type: "POST",
+                url: `quotation/items/${btoa(quotationCode.value)}`,
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    pthis.innerHTML = `Save line`
+                    pthis.disabled = false
+                    alertify.success(response.msg)
+                    loadQuotationDetail({
+                        doc: quotationCode.value
+                    })
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    pthis.disabled = false
+                    pthis.innerHTML = `Save line`
+
+                    const respon = Object.keys(xhr.responseJSON)
+                    const div_alert = document.getElementById('div-alert')
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+
+                }
+            });
+        } else {
+            const quotationTableBody = quotationTable.getElementsByTagName('tbody')[0]
+            const subTotal = numeral(quotationPrice.value).value() +
+                numeral(quotationOperator.value).value() +
+                numeral(quotationMOBDEMOB.value).value()
+            newrow = quotationTableBody.insertRow(-1)
+            newrow.title = 'not selected'
+            newrow.onclick = (event) => {
+                const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
+                if (selrow.title === 'selected') {
+                    selrow.title = 'not selected'
+                    selrow.classList.remove('table-info')
+                } else {
+                    const ttlrows = quotationTable.rows.length
+                    for (let i = 1; i < ttlrows; i++) {
+                        quotationTable.rows[i].classList.remove('table-info')
+                        quotationTable.rows[i].title = 'not selected'
+                    }
+                    selrow.title = 'selected'
+                    selrow.classList.add('table-info')
+                }
+            }
+            newcell = newrow.insertCell(0)
+            newcell.classList.add('d-none')
+
+            newcell = newrow.insertCell(1)
+            newcell.innerHTML = quotationItemCode.value
+
+            newcell = newrow.insertCell(2)
+            newcell.innerHTML = quotationItemName.value
+
+            newcell = newrow.insertCell(3)
+            newcell.innerHTML = quotationUsage.value
+            newcell.classList.add('text-center')
+
+            newcell = newrow.insertCell(4)
+            newcell.innerHTML = numeral(quotationPrice.value).format(',')
+            newcell.classList.add('text-end')
+
+            newcell = newrow.insertCell(5)
+            newcell.innerHTML = numeral(quotationOperator.value).format(',')
+            newcell.classList.add('text-end')
+
+            newcell = newrow.insertCell(6)
+            newcell.innerHTML = numeral(quotationMOBDEMOB.value).format(',')
+            newcell.classList.add('text-end')
+
+            newcell = newrow.insertCell(7)
+            newcell.innerHTML = numeral(subTotal).format(',')
+            newcell.classList.add('text-end')
+
+            grandTotal += subTotal
+            strongGrandTotal.innerText = numeral(grandTotal).format(',')
+            tribinClearTextBoxByClassName('quotationInputItem')
+
         }
-        newcell = newrow.insertCell(0)
-        newcell.classList.add('d-none')
-
-        newcell = newrow.insertCell(1)
-        newcell.innerHTML = quotationItemCode.value
-
-        newcell = newrow.insertCell(2)
-        newcell.innerHTML = quotationItemName.value
-
-        newcell = newrow.insertCell(3)
-        newcell.innerHTML = quotationUsage.value
-        newcell.classList.add('text-center')
-
-        newcell = newrow.insertCell(4)
-        newcell.innerHTML = numeral(quotationPrice.value).format(',')
-        newcell.classList.add('text-end')
-
-        newcell = newrow.insertCell(5)
-        newcell.innerHTML = numeral(quotationOperator.value).format(',')
-        newcell.classList.add('text-end')
-
-        newcell = newrow.insertCell(6)
-        newcell.innerHTML = numeral(quotationMOBDEMOB.value).format(',')
-        newcell.classList.add('text-end')
-
-        newcell = newrow.insertCell(7)
-        newcell.innerHTML = numeral(subTotal).format(',')
-        newcell.classList.add('text-end')
-
-        grandTotal += subTotal
-        strongGrandTotal.innerText = numeral(grandTotal).format(',')
-        tribinClearTextBoxByClassName('quotationInputItem')
     }
 
     function btnSaveLineSaleOnclick() {
@@ -990,7 +1038,7 @@
         let itemUsage = []
         let itemPrice = []
         let itemOperatorPrice = []
-        let itemMobDemob = []        
+        let itemMobDemob = []
         let quotationCondition = []
         const NavRental = document.getElementById('nav-rental')
         let FinalQuotationType = '1'
