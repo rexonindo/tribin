@@ -1500,4 +1500,9 @@ class DeliveryController extends Controller
             ->whereNull('CITRN_DOCNO');
         return ['data' => $Data->get(), 'sql' => $Data->toSql()];
     }
+
+    function confirmOutgoing(Request $request)
+    {
+        
+    }
 }

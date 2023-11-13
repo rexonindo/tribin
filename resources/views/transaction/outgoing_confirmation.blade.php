@@ -31,12 +31,12 @@
     var DTOutgoingConfirmation;
 
     function si_conf_on_GridActionButton_Click(event) {
-        if (confirm("Is this DO (" + event.data.DLV_ID + ") delivered ?")) {
+        if (confirm("Is this DO (" + event.data.TDLVORD_DLVCD + ") delivered ?")) {
             $.ajax({
-                type: "PUT",
+                type: "POST",
                 url: "confirm",
                 data: {
-                    indo: event.data.DLV_ID
+                    id: event.data.TDLVORD_DLVCD
                 },
                 dataType: "json",
                 success: function(response) {

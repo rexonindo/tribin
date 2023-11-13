@@ -167,6 +167,7 @@ Route::middleware('auth')->group(function () {
         Route::get('form', [DeliveryController::class, 'index']);
         Route::get('unconfirmed-form', [DeliveryController::class, 'formUnconfirmed']);
         Route::get('unconfirmed', [DeliveryController::class, 'unconfirmed']);
+        Route::post('confirm', [DeliveryController::class, 'confirmOutgoing']);
         Route::get('outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse']);
         Route::get('outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument']);
         Route::put('items/{id}', [DeliveryController::class, 'updateDODetail']);
