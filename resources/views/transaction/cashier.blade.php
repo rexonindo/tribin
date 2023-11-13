@@ -4,7 +4,7 @@
         <div class="btn-group btn-group-sm">
             <button type="button" class="btn btn-outline-primary" id="btnNew" onclick="btnNewOnclick(this)"><i class="fas fa-file"></i></button>
             <button type="button" class="btn btn-outline-primary" id="btnSave" onclick="btnSaveOnclick(this)"><i class="fas fa-save"></i></button>
-            <button type="button" class="btn btn-outline-primary" id="btnImport" onclick="btnShowImportDataModal()" title="Import"><i class="fas fa-file-import"></i></button>
+            <button type="button" class="btn btn-outline-primary" id="btnPrint" onclick="btnPrintOnClick(this)" title="Print"><i class="fas fa-print"></i></button>
         </div>
     </div>
 </div>
@@ -48,7 +48,23 @@
                             <input type="text" id="cashierAmount" class="form-control">
                         </div>
                     </div>
-                    <input type="hidden" id="cashierInputMode" value="0">
+                    <div class="row">
+                        <div class="col-md-12 mb-1">
+                            <label class="form-label" for="cashierDocNumber">Description</label>
+                            <div class="input-group">
+                                <input type="text" id="cashierDescription" class="form-control" maxlength="45">                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-1">
+                            <label class="form-label" for="cashierDocNumber">Transaction Number</label>
+                            <div class="input-group">
+                                <input type="text" id="cashierDocNumber" class="form-control" disabled>
+                                <button class="btn btn-primary" type="button" onclick="btnShowSavedDataModal()"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="tab-pane fade" id="nav-history" role="tabpanel" aria-labelledby="nav-history-tab" tabindex="1">
@@ -128,6 +144,51 @@
                                 <table id="coaTabel" class="table table-sm table-striped table-bordered table-hover">
                                     <thead class="table-light">
                                         <tr>
+                                            <th class="text-center">Document</th>
+                                            <th class="text-center">User</th>
+                                            <th class="text-center">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Saved Cash Transaction -->
+<div class="modal fade" id="coaSavedModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Transaction List</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col mb-1">
+                            <div class="input-group input-group-sm mb-1">
+                                <span class="input-group-text">Search by</span>
+                                <select id="coaSavedSearchBy" class="form-select" onchange="coaSavedSearch.focus()">
+                                    <option value="0">Reference</option>
+                                    <option value="1">User</option>
+                                </select>
+                                <input type="text" id="coaSavedSearch" class="form-control" maxlength="50" onkeypress="coaSavedSearchOnKeypress(event)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="table-responsive" id="coaSavedTabelContainer">
+                                <table id="coaSavedTabel" class="table table-sm table-striped table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center">Date</th>
                                             <th class="text-center">Document</th>
                                             <th class="text-center">User</th>
                                             <th class="text-center">Amount</th>
@@ -228,6 +289,14 @@
         myModal.show()
     }
 
+    function btnShowSavedDataModal() {
+        const myModal = new bootstrap.Modal(document.getElementById('coaSavedModal'), {})
+        coaModal.addEventListener('shown.bs.modal', () => {
+            coaSearch.focus()
+        })
+        myModal.show()
+    }
+
     function coaSearchOnKeypress(e) {
         if (e.key === 'Enter') {
             e.target.disabled = true
@@ -256,7 +325,7 @@
                         newcell.innerHTML = arrayItem['CSPK_DOCNO']
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
-                            $('#coaModal').modal('hide')
+                            $('#coaModal').modal('hide')                            
                             cashierCode.value = arrayItem['CSPK_DOCNO']
                             cashierName.value = arrayItem['USER_PIC_NAME']
                             Inputmask.setValue(cashierAmount, numeral(arrayItem['TOTAL_AMOUNT']).value())
@@ -302,7 +371,7 @@
                 myTableBody.innerHTML = ''
                 response.data.forEach((arrayItem) => {
                     newrow = myTableBody.insertRow(-1)
-                    if(!arrayItem['CCASHIER_ISSUDT']){
+                    if (!arrayItem['CCASHIER_ISSUDT']) {
                         newrow.classList.add('table-info')
                     }
                     newcell = newrow.insertCell(0)
@@ -323,7 +392,7 @@
                 })
                 response.dataTx.forEach((arrayItem) => {
                     newrow = myTableBody.insertRow(-1)
-                    if(!arrayItem['CCASHIER_ISSUDT']){
+                    if (!arrayItem['CCASHIER_ISSUDT']) {
                         newrow.classList.add('table-info')
                     }
                     newcell = newrow.insertCell(0)
@@ -351,5 +420,60 @@
                 coaReportTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="6">Please try again</td></tr>`
             }
         });
+    }
+
+    function coaSavedSearchOnKeypress(e) {
+        if (e.key === 'Enter') {
+            e.target.disabled = true
+            const data = {
+                searchBy: coaSavedSearchBy.value,
+                searchValue: e.target.value,
+            }
+            coaSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4" class="text-center">Please wait</td></tr>`
+            $.ajax({
+                type: "GET",
+                url: "cashier/search",
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    e.target.disabled = false
+                    let myContainer = document.getElementById("coaSavedTabelContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = coaSavedTabel.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("coaSavedTabel");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    response.data.forEach((arrayItem) => {
+                        newrow = myTableBody.insertRow(-1)
+                        newcell = newrow.insertCell(0)
+                        newcell.innerHTML = arrayItem['CCASHIER_ISSUDT']
+                        newcell.style.cssText = 'cursor:pointer'
+                        newcell.onclick = () => {
+                            $('#coaSavedModal').modal('hide')                            
+                            cashierDocNumber.value = arrayItem['id']
+                            cashierCode.value = arrayItem['CCASHIER_REFF_DOC']
+                            cashierName.value = arrayItem['CCASHIER_USER']
+                            cashierDate.value = arrayItem['CCASHIER_ISSUDT']
+                            Inputmask.setValue(cashierAmount, numeral(arrayItem['CCASHIER_PRICE']).value())
+                        }
+                        newcell = newrow.insertCell(-1)
+                        newcell.innerHTML = arrayItem['CCASHIER_REFF_DOC']
+                        newcell = newrow.insertCell(-1)
+                        newcell.innerHTML = arrayItem['CCASHIER_USER']
+                        newcell = newrow.insertCell(-1)
+                        newcell.classList.add('text-end')
+                        newcell.innerHTML = numeral(arrayItem['CCASHIER_PRICE']).format('0,0.00')
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    e.target.disabled = false
+                    coaSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4">Please try again</td></tr>`
+                }
+            });
+        }
     }
 </script>

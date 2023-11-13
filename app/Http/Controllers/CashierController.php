@@ -86,4 +86,19 @@ class CashierController extends Controller
         }
         return ['data' => $PreviousBalance, 'dataTx' => $PeriodTrans];
     }
+
+    function searchHeader(Request $request)
+    {
+        $columnMap = [
+            'CCASHIER_REFF_DOC',
+            'CCASHIER_USER',
+        ];
+        $Data = C_CASHIER::on($this->dedicatedConnection)
+            ->select('id', 'CCASHIER_ISSUDT', 'CCASHIER_REFF_DOC', 'CCASHIER_USER', 'CCASHIER_PRICE')
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->orderBy('CCASHIER_ISSUDT')
+            ->orderBy('created_at')
+            ->get();
+        return ['data' => $Data];
+    }
 }

@@ -195,6 +195,7 @@ Route::middleware('auth')->group(function () {
         Route::get('form', [CashierController::class, 'index']);
         Route::post('', [CashierController::class, 'save']);
         Route::get('', [CashierController::class, 'search']);
+        Route::get('search', [CashierController::class, 'searchHeader']);
     });
 
     # Terkait Quotation Transaction
