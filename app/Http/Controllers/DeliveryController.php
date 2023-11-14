@@ -575,7 +575,18 @@ class DeliveryController extends Controller
                 $this->fpdf->Text(37, $Yfocus + 8, $r->MITM_MODEL);
 
                 $this->fpdf->Cell(70, 10, '', 1, 0, 'C');
+                $ttlwidth = $this->fpdf->GetStringWidth($r['TSLODETA_USAGE_DESCRIPTION']);
+                if ($ttlwidth > 70) {
+                    $ukuranfont = 9.5;
+                    while ($ttlwidth > 70) {
+                        $this->fpdf->SetFont('Arial', '', $ukuranfont);
+                        $ttlwidth = $this->fpdf->GetStringWidth($r['TSLODETA_USAGE_DESCRIPTION']);
+                        $ukuranfont = $ukuranfont - 0.5;
+                    }
+                }
                 $this->fpdf->Text(82, $Yfocus + 3, $Usage->TSLODETA_USAGE_DESCRIPTION);
+
+                $this->fpdf->SetFont('Arial', '', 10);
                 $this->fpdf->Text(82, $Yfocus + 8, $PeriodFrom . ' s/d ' . $PeriodTo);
 
                 $this->fpdf->SetXY(151, $Yfocus);
