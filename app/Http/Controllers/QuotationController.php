@@ -680,7 +680,7 @@ class QuotationController extends Controller
     function approve(Request $request)
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
                 ->where('TQUO_QUOCD', base64_decode($request->id))
                 ->where('TQUO_BRANCH', $request->TQUO_BRANCH)
@@ -698,7 +698,7 @@ class QuotationController extends Controller
     function reject(Request $request)
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
                 ->where('TQUO_QUOCD', base64_decode($request->id))
                 ->where('TQUO_BRANCH', $request->TQUO_BRANCH)
