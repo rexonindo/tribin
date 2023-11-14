@@ -565,7 +565,7 @@ class DeliveryController extends Controller
                     ->where('TSLODETA_ITMCD', $r->TDLVORDDETA_ITMCD)
                     ->where('TSLODETA_BRANCH', Auth::user()->branch)
                     ->first();
-                $HargaSewa = $Usage->TSLODETA_PRC + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
+                $HargaSewa = ($Usage->TSLODETA_PRC * $r->TDLVORDDETA_ITMQT) + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
                 $PeriodFrom = date_format(date_create($Usage->TSLODETA_PERIOD_FR), 'd-M-Y');
                 $PeriodTo = date_format(date_create($Usage->TSLODETA_PERIOD_TO), 'd-M-Y');
                 $this->fpdf->SetXY(6, $Yfocus);
@@ -678,7 +678,7 @@ class DeliveryController extends Controller
                     ->where('TSLODETA_ITMCD', $r->TDLVORDDETA_ITMCD)
                     ->where('TSLODETA_BRANCH', Auth::user()->branch)
                     ->first();
-                $HargaSewa = $Usage->TSLODETA_PRC + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
+                $HargaSewa = ($Usage->TSLODETA_PRC * $r->TDLVORDDETA_ITMQT)  + $Usage->TSLODETA_OPRPRC + $Usage->TSLODETA_MOBDEMOB;
                 $PeriodFrom = date_format(date_create($Usage->TSLODETA_PERIOD_FR), 'd-M-Y');
                 $PeriodTo = date_format(date_create($Usage->TSLODETA_PERIOD_TO), 'd-M-Y');
                 $totalHargaSewa += $HargaSewa;
