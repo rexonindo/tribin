@@ -601,11 +601,17 @@ class DeliveryController extends Controller
             $this->fpdf->Cell(50, 5, 'Total', 0, 0, 'L');
             $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
             $this->fpdf->Cell(25, 5, ' ' . number_format($totalHargaSewa), 0, 0, 'R');
-            $PPNAmount = $totalHargaSewa * 11 / 100;
 
             $Yfocus += 5;
             $this->fpdf->SetXY(7, $Yfocus);
-            $this->fpdf->Cell(50, 5, 'PPN 11%', 0, 0, 'L');
+            if (in_array($this->dedicatedConnection, ['connect_jos_retail', 'connect_jos_service'])) {
+                $PPNAmount = 0;
+                $this->fpdf->Cell(50, 5, 'PPN 0%', 0, 0, 'L');
+            } else {
+                $PPNAmount = $totalHargaSewa * 11 / 100;
+                $this->fpdf->Cell(50, 5, 'PPN 11%', 0, 0, 'L');
+            }
+
             $this->fpdf->Cell(3, 5, ':', 0, 0, 'L');
             $this->fpdf->Cell(25, 5, ' ' . number_format($PPNAmount), 0, 0, 'R');
 
@@ -684,7 +690,11 @@ class DeliveryController extends Controller
                 $totalHargaSewa += $HargaSewa;
                 $DOIssuDate = date_format(date_create($RSHeader->TDLVORD_ISSUDT), 'd-M-Y');
             }
-            $PPNAmount = $totalHargaSewa * 11 / 100;
+            if (in_array($this->dedicatedConnection, ['connect_jos_retail', 'connect_jos_service'])) {
+                $PPNAmount = 0;
+            } else {
+                $PPNAmount = $totalHargaSewa * 11 / 100;
+            }
             $terbilang = ucwords(rtrim($this->numberToSentence($PPNAmount + $totalHargaSewa)));
             $this->fpdf->AddPage("L", 'A5');
             $this->fpdf->SetFont('Arial', 'B', 10);
@@ -733,7 +743,11 @@ class DeliveryController extends Controller
             $Yfocus += 5;
             $this->fpdf->SetXY(10, $Yfocus);
             $this->fpdf->Cell(50, 5, '', 0, 0, 'L');
-            $this->fpdf->Cell(40, 5, ' PPN 11%', 0, 0, 'L');
+            if (in_array($this->dedicatedConnection, ['connect_jos_retail', 'connect_jos_service'])) {
+                $this->fpdf->Cell(40, 5, ' PPN 0%', 0, 0, 'L');
+            } else {
+                $this->fpdf->Cell(40, 5, ' PPN 11%', 0, 0, 'L');
+            }
             $this->fpdf->Cell(10, 5, ' : Rp. ', 0, 0, 'L');
             $this->fpdf->Cell(40, 5, number_format($PPNAmount), 0, 0, 'R');
             $this->fpdf->Line(62, $Yfocus + 5, 100, $Yfocus + 5);
