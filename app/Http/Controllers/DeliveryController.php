@@ -1093,10 +1093,6 @@ class DeliveryController extends Controller
             return 'something wrong happen';
         }
 
-        if (!$Data->CSPK_GA_SPV_APPROVED_BY) {
-            return ['message' => 'GA Supervisor Approval is required'];
-        }
-
         if (!$Data->CSPK_GA_MGR_APPROVED_BY) {
             return ['message' => 'GA Manager Approval is required'];
         }
