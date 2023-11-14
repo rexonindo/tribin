@@ -26,7 +26,36 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade" id="modalPlatNomor" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="inputTXID" class="form-label">TX ID</label>
+                                <input type="text" class="form-control" id="inputTXID" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="platNomor" class="form-label">Outgoing date</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     var DTOutgoingConfirmation;
 
@@ -34,18 +63,16 @@
         if (confirm("Is this DO (" + event.data.TDLVORD_DLVCD + ") delivered ?")) {
             $.ajax({
                 type: "POST",
-                url: "confirm",
+                url: "delivery/confirm",
                 data: {
-                    id: event.data.TDLVORD_DLVCD
+                    id: event.data.TDLVORD_DLVCD,
+                    _token: '{{ csrf_token() }}',
                 },
                 dataType: "json",
                 success: function(response) {
-                    if (response.status[0].cd == 1) {
-                        alertify.success(response.status[0].msg);
-                        btnRefreshOnclick();
-                    } else {
-                        alertify.message(response.status[0].msg);
-                    }
+                    alertify.success(response.msg);
+                    btnRefreshOnclick(btnRefresh);
+
                 },
                 error: function(xhr, xopt, xthrow) {
                     alertify.error(xthrow);

@@ -174,8 +174,7 @@ Route::middleware('auth')->group(function () {
         Route::post('', [DeliveryController::class, 'save']);
         Route::get('', [DeliveryController::class, 'search']);
         Route::put('{id}', [DeliveryController::class, 'update']);
-        Route::get('document/{id}', [DeliveryController::class, 'loadByDocument']);
-        Route::put('confirm/{id}', [DeliveryController::class, 'confirm']);
+        Route::get('document/{id}', [DeliveryController::class, 'loadByDocument']);        
     });
 
     #Terkait Receive Order

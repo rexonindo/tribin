@@ -1510,6 +1510,57 @@ class DeliveryController extends Controller
 
     function confirmOutgoing(Request $request)
     {
-        
+        $Delivery = T_DLVORDHEAD::on($this->dedicatedConnection)
+            ->leftJoin('T_DLVORDDETA', function ($join) {
+                $join->on('TDLVORD_DLVCD', '=', 'TDLVORDDETA_DLVCD')->on('TDLVORD_BRANCH', '=', 'TDLVORDDETA_BRANCH');
+            })
+            ->leftJoin('M_CUS', function ($join) {
+                $join->on('TDLVORD_CUSCD', '=', 'MCUS_CUSCD')->on('TDLVORD_BRANCH', '=', 'MCUS_BRANCH');
+            })
+            ->leftJoin('M_ITM', function ($join) {
+                $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD');
+            })
+            ->select('TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'MCUS_CUSNM')
+            ->where('TDLVORD_BRANCH', Auth::user()->branch)
+            ->where('TDLVORD_DLVCD', $request->id)
+            ->whereNull('T_DLVORDDETA.deleted_at')
+            ->where('MITM_ITMTYPE', '!=', '3')
+            ->groupBy('TDLVORD_DLVCD', 'TDLVORD_BRANCH', 'MCUS_CUSNM');
+
+        $ITRN = C_ITRN::on($this->dedicatedConnection)
+            ->select('CITRN_DOCNO', 'CITRN_BRANCH')
+            ->where('CITRN_BRANCH', Auth::user()->branch)
+            ->where('CITRN_DOCNO', $request->id)
+            ->groupBy('CITRN_DOCNO', 'CITRN_BRANCH');
+
+        $Data = DB::connection($this->dedicatedConnection)->query()->fromSub($Delivery, 'V1')
+            ->leftJoinSub($ITRN, 'V2', function ($join) {
+                $join->on('TDLVORD_DLVCD', '=', 'CITRN_DOCNO')->on('TDLVORD_BRANCH', '=', 'CITRN_BRANCH');
+            })
+            ->whereNull('CITRN_DOCNO')->get();
+
+        if (count($Data)) {
+            $Delivery = T_DLVORDDETA::on($this->dedicatedConnection)
+                ->select('TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT')
+                ->where('TDLVORDDETA_DLVCD', $request->id)
+                ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
+                ->get();
+            foreach ($Delivery as $r) {
+                C_ITRN::on($this->dedicatedConnection)->create([
+                    'CITRN_BRANCH' => Auth::user()->branch,
+                    'CITRN_LOCCD' => 'WH1',
+                    'CITRN_DOCNO' => $request->id,
+                    'CITRN_ISSUDT' => date('Y-m-d'),
+                    'CITRN_FORM' => 'OUT-SHP',
+                    'CITRN_ITMCD' => $r->TDLVORDDETA_ITMCD,
+                    'CITRN_ITMQT' => $r->TDLVORDDETA_ITMQT * -1,
+                    'CITRN_PRCPER' => 0,
+                    'CITRN_PRCAMT' => 0,
+                    'created_by' => Auth::user()->nick_name,
+                ]);
+            }
+        }
+
+        return ['msg' => 'Confirmed !'];
     }
 }
