@@ -447,7 +447,7 @@ class DeliveryController extends Controller
             $Y = 45;
             foreach ($RSDetail as $r) {
                 $this->fpdf->SetXY(3, $Y);
-                $this->fpdf->Cell(12, 5, $nomor, 0, 0, 'L');
+                $this->fpdf->Cell(12, 5, $nomor++, 0, 0, 'L');
                 $this->fpdf->Cell(40, 5, $r->TDLVORDDETA_ITMCD, 0, 0, 'L');
                 $this->fpdf->Cell(67, 5, $r->MITM_ITMNM, 0, 0, 'L');
                 $this->fpdf->Cell(20, 5, $r->TDLVORDDETA_ITMQT . ' ' . $r->MITM_STKUOM, 0, 0, 'R');
