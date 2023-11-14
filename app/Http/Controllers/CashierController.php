@@ -29,6 +29,7 @@ class CashierController extends Controller
         $validator = Validator::make($request->all(), [
             'CCASHIER_PRICE' => 'required|numeric',
             'CCASHIER_ISSUDT' => 'required|date',
+            'CCASHIER_REMARK' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -39,7 +40,7 @@ class CashierController extends Controller
             'CCASHIER_BRANCH' => Auth::user()->branch,
             'CCASHIER_ITMCD' => '',
             'CCASHIER_LOCATION' => '',
-            'CCASHIER_REMARK' => '',
+            'CCASHIER_REMARK' => $request->CCASHIER_REMARK,
             'CCASHIER_PRICE' => $request->CCASHIER_PRICE,
             'CCASHIER_ISSUDT' => $request->CCASHIER_ISSUDT,
             'CCASHIER_REFF_DOC' => $request->CCASHIER_REFF_DOC,

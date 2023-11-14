@@ -50,7 +50,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-1">
-                            <label class="form-label" for="cashierDocNumber">Description</label>
+                            <label class="form-label" for="cashierDescription">Description</label>
                             <div class="input-group">
                                 <input type="text" id="cashierDescription" class="form-control" maxlength="45">                                
                             </div>
@@ -238,6 +238,7 @@
             CCASHIER_USER: cashierName.value.trim(),
             CCASHIER_PRICE: cashierAmount.inputmask ? cashierAmount.inputmask.unmaskedvalue() : cashierAmount.value.trim(),
             CCASHIER_ISSUDT: cashierDate.value.trim(),
+            CCASHIER_REMARK: cashierDescription.value.trim(),
             _token: '{{ csrf_token() }}',
         }
         if (data.CCASHIER_PRICE == 0) {
