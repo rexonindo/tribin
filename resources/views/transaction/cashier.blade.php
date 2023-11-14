@@ -52,7 +52,7 @@
                         <div class="col-md-12 mb-1">
                             <label class="form-label" for="cashierDescription">Description</label>
                             <div class="input-group">
-                                <input type="text" id="cashierDescription" class="form-control" maxlength="45">                                
+                                <input type="text" id="cashierDescription" class="form-control" maxlength="45">
                             </div>
                         </div>
                     </div>
@@ -264,6 +264,9 @@
                     Inputmask.setValue(cashierAmount, 0)
                 },
                 error: function(xhr, xopt, xthrow) {
+                    pthis.disabled = false
+                    pthis.innerHTML = `<i class="fas fa-save"></i>`
+                    alertify.warning(xthrow);
                     const respon = Object.keys(xhr.responseJSON)
                     const div_alert = document.getElementById('div-alert')
                     let msg = ''
@@ -274,9 +277,6 @@
                 ${msg}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>`
-                    pthis.innerHTML = `<i class="fas fa-save"></i>`
-                    alertify.warning(xthrow);
-                    pthis.disabled = false
                 }
             });
         }
@@ -326,7 +326,7 @@
                         newcell.innerHTML = arrayItem['CSPK_DOCNO']
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
-                            $('#coaModal').modal('hide')                            
+                            $('#coaModal').modal('hide')
                             cashierCode.value = arrayItem['CSPK_DOCNO']
                             cashierName.value = arrayItem['USER_PIC_NAME']
                             Inputmask.setValue(cashierAmount, numeral(arrayItem['TOTAL_AMOUNT']).value())
@@ -451,7 +451,7 @@
                         newcell.innerHTML = arrayItem['CCASHIER_ISSUDT']
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
-                            $('#coaSavedModal').modal('hide')                            
+                            $('#coaSavedModal').modal('hide')
                             cashierDocNumber.value = arrayItem['id']
                             cashierCode.value = arrayItem['CCASHIER_REFF_DOC']
                             cashierName.value = arrayItem['CCASHIER_USER']
