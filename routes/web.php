@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\DistancePriceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MaintenanceController;
@@ -174,7 +175,7 @@ Route::middleware('auth')->group(function () {
         Route::post('', [DeliveryController::class, 'save']);
         Route::get('', [DeliveryController::class, 'search']);
         Route::put('{id}', [DeliveryController::class, 'update']);
-        Route::get('document/{id}', [DeliveryController::class, 'loadByDocument']);        
+        Route::get('document/{id}', [DeliveryController::class, 'loadByDocument']);
     });
 
     #Terkait Receive Order
@@ -215,6 +216,20 @@ Route::middleware('auth')->group(function () {
     });
     Route::post('quotation-item', [QuotationController::class, 'saveItem']);
     Route::post('quotation-condition', [QuotationController::class, 'saveCondition']);
+
+    #Terkait laporan berupa xls
+    Route::prefix('report-form')->group(function () {
+        Route::get('item-master', [ItemController::class, 'formReport']);
+        Route::get('quotation', [QuotationController::class, 'formReport']);
+        Route::get('received-order', [ReceiveOrderController::class, 'formReport']);
+        Route::get('maintenance-schedule', [MaintenanceController::class, 'formReport']);
+    });
+
+    Route::prefix('report')->group(function () {
+        Route::get('item-master', [ItemController::class, 'report']);
+        Route::get('quotation', [QuotationController::class, 'report']);
+        Route::get('received-order', [ReceiveOrderController::class, 'report']);
+    });
 });
 
 # Terkait Quotation Condition
@@ -235,15 +250,6 @@ Route::put('reject/purchase-order/{id}', [PurchaseController::class, 'rejectPO']
 
 #Terkait Dasbor
 Route::get('dashboard-resource', [HomeController::class, 'supportDashboard'])->middleware('auth');
-
-#Terkait laporan berupa xls
-Route::get('report-form/item-master', [ItemController::class, 'formReport'])->middleware('auth');
-Route::get('report/item-master', [ItemController::class, 'report'])->middleware('auth');
-Route::get('report-form/quotation', [QuotationController::class, 'formReport'])->middleware('auth');
-Route::get('report/quotation', [QuotationController::class, 'report'])->middleware('auth');
-Route::get('report-form/received-order', [ReceiveOrderController::class, 'formReport'])->middleware('auth');
-Route::get('report/received-order', [ReceiveOrderController::class, 'report'])->middleware('auth');
-Route::get('report-form/maintenance-schedule', [MaintenanceController::class, 'formReport'])->middleware('auth');
 
 #Terkait laporan berupa Pdf
 Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');
