@@ -677,6 +677,7 @@
                 TQUODETA_PRC: numeral(quotationPrice.value).value(),
                 TQUODETA_OPRPRC: numeral(quotationOperator.value).value(),
                 TQUODETA_MOBDEMOB: numeral(quotationMOBDEMOB.value).value(),
+                TQUO_TYPE: '2',
                 _token: '{{ csrf_token() }}',
             }
             pthis.disabled = true
@@ -770,56 +771,103 @@
         }
     }
 
-    function btnSaveLineSaleOnclick() {
+    function btnSaveLineSaleOnclick(pthis) {
         if (quotationItemCodeSale.value.length === 0) {
             quotationItemCodeSale.focus()
             alertify.warning(`Item Code is required`)
             return
         }
-        const quotationTableBody = quotationSaleTable.getElementsByTagName('tbody')[0]
-        const subTotal = numeral(quotationPriceSale.value).value() *
-            numeral(quotationQtySale.value).value()
-        newrow = quotationTableBody.insertRow(-1)
-        newrow.title = 'not selected'
-        newrow.onclick = (event) => {
-            const selrow = quotationSaleTable.rows[event.target.parentElement.rowIndex]
-            if (selrow.title === 'selected') {
-                selrow.title = 'not selected'
-                selrow.classList.remove('table-info')
-            } else {
-                const ttlrows = quotationSaleTable.rows.length
-                for (let i = 1; i < ttlrows; i++) {
-                    quotationSaleTable.rows[i].classList.remove('table-info')
-                    quotationSaleTable.rows[i].title = 'not selected'
-                }
-                selrow.title = 'selected'
-                selrow.classList.add('table-info')
+        if (quotationCode.value.trim().length > 0) {
+            const data = {
+                TQUODETA_QUOCD: quotationCode.value,
+                TQUODETA_ITMCD: quotationItemCodeSale.value,
+                TQUODETA_ITMQT: quotationQtySale.value,
+                TQUODETA_USAGE: 1,
+                TQUODETA_PRC: numeral(quotationPriceSale.value).value(),
+                TQUODETA_OPRPRC: 0,
+                TQUODETA_MOBDEMOB: 0,
+                TQUO_TYPE: '2',
+                _token: '{{ csrf_token() }}',
             }
+            pthis.disabled = true
+            pthis.innerHTML = `Please wait`
+            $.ajax({
+                type: "POST",
+                url: `quotation/items/${btoa(quotationCode.value)}`,
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    pthis.innerHTML = `Save line`
+                    pthis.disabled = false
+                    alertify.success(response.msg)
+                    loadQuotationDetail({
+                        doc: quotationCode.value
+                    })
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    pthis.disabled = false
+                    pthis.innerHTML = `Save line`
+
+                    const respon = Object.keys(xhr.responseJSON)
+                    const div_alert = document.getElementById('div-alert')
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+
+                }
+            });
+        } else {
+            const quotationTableBody = quotationSaleTable.getElementsByTagName('tbody')[0]
+            const subTotal = numeral(quotationPriceSale.value).value() *
+                numeral(quotationQtySale.value).value()
+            newrow = quotationTableBody.insertRow(-1)
+            newrow.title = 'not selected'
+            newrow.onclick = (event) => {
+                const selrow = quotationSaleTable.rows[event.target.parentElement.rowIndex]
+                if (selrow.title === 'selected') {
+                    selrow.title = 'not selected'
+                    selrow.classList.remove('table-info')
+                } else {
+                    const ttlrows = quotationSaleTable.rows.length
+                    for (let i = 1; i < ttlrows; i++) {
+                        quotationSaleTable.rows[i].classList.remove('table-info')
+                        quotationSaleTable.rows[i].title = 'not selected'
+                    }
+                    selrow.title = 'selected'
+                    selrow.classList.add('table-info')
+                }
+            }
+            newcell = newrow.insertCell(0)
+            newcell.classList.add('d-none')
+
+            newcell = newrow.insertCell(1)
+            newcell.innerHTML = quotationItemCodeSale.value
+
+            newcell = newrow.insertCell(2)
+            newcell.innerHTML = quotationItemNameSale.value
+
+            newcell = newrow.insertCell(3)
+            newcell.innerHTML = quotationQtySale.value
+            newcell.classList.add('text-center')
+
+            newcell = newrow.insertCell(4)
+            newcell.innerHTML = numeral(quotationPriceSale.value).format(',')
+            newcell.classList.add('text-end')
+
+            newcell = newrow.insertCell(5)
+            newcell.innerHTML = numeral(subTotal).format(',')
+            newcell.classList.add('text-end')
+
+            grandTotal += subTotal
+            strongGrandTotalSale.innerText = numeral(grandTotal).format(',')
+            tribinClearTextBoxByClassName('quotationInputItem')
         }
-        newcell = newrow.insertCell(0)
-        newcell.classList.add('d-none')
-
-        newcell = newrow.insertCell(1)
-        newcell.innerHTML = quotationItemCodeSale.value
-
-        newcell = newrow.insertCell(2)
-        newcell.innerHTML = quotationItemNameSale.value
-
-        newcell = newrow.insertCell(3)
-        newcell.innerHTML = quotationQtySale.value
-        newcell.classList.add('text-center')
-
-        newcell = newrow.insertCell(4)
-        newcell.innerHTML = numeral(quotationPriceSale.value).format(',')
-        newcell.classList.add('text-end')
-
-        newcell = newrow.insertCell(5)
-        newcell.innerHTML = numeral(subTotal).format(',')
-        newcell.classList.add('text-end')
-
-        grandTotal += subTotal
-        strongGrandTotalSale.innerText = numeral(grandTotal).format(',')
-        tribinClearTextBoxByClassName('quotationInputItem')
     }
 
     function btnNewOnclick() {

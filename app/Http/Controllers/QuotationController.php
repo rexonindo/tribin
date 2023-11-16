@@ -159,7 +159,6 @@ class QuotationController extends Controller
         $validator = Validator::make($request->all(), [
             'TQUODETA_QUOCD' => 'required',
             'TQUODETA_ITMCD' => 'required',
-            'TQUODETA_USAGE_DESCRIPTION' => 'required',
             'TQUODETA_PRC' => 'required|numeric',
             'TQUODETA_MOBDEMOB' => 'required|numeric',
             'TQUODETA_OPRPRC' => 'required|numeric',
@@ -168,6 +167,16 @@ class QuotationController extends Controller
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 406);
+        }
+
+        if ($request->TQUO_TYPE === '1') {
+            $validator = Validator::make($request->all(), [
+                'TQUODETA_USAGE_DESCRIPTION' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 406);
+            }
         }
 
         T_QUODETA::on($this->dedicatedConnection)->create([
