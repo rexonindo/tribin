@@ -140,6 +140,7 @@
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" id="btnAction">Action</button>
                                 <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" onclick="previewQuotation()">Print Preview</a></li>
                                     <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Approve</a></li>
                                     <li><a class="dropdown-item" onclick="rejectQuotation(this)"><i class="fas fa-xmark text-danger"></i> Reject</a></li>
                                 </ul>
@@ -152,6 +153,14 @@
     </div>
 </div>
 <script>
+    function previewQuotation() {
+        if (labelQuotationInModal.innerText.trim().length === 0) {
+            alertify.message('Quotation Code is required')
+            return
+        }
+        window.open(`PDF/quotation/${btoa(labelQuotationInModal.innerText)}`, '_blank');
+    }
+
     function loadApprovalList() {
         approvalContainer.innerHTML = 'Please wait'
         $.ajax({
