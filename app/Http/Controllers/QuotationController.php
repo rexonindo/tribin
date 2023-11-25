@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApprovalHistory;
 use App\Models\COMPANY_BRANCH;
 use App\Models\M_Condition;
 use App\Models\M_USAGE;
@@ -314,23 +315,35 @@ class QuotationController extends Controller
 
     function loadById(Request $request)
     {
+        $documentNumber = base64_decode($request->id);
+
         $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE_DESCRIPTION", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB", 'TQUODETA_ITMQT'])
             ->leftJoin("M_ITM", function ($join) {
                 $join->on("TQUODETA_ITMCD", "=", "MITM_ITMCD")
                     ->on('TQUODETA_BRANCH', '=', 'MITM_BRANCH');
             })
-            ->where('TQUODETA_QUOCD', base64_decode($request->id))
+            ->where('TQUODETA_QUOCD', $documentNumber)
             ->where('TQUODETA_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
-        $RS1 = T_QUOCOND::on($this->dedicatedConnection)->select(["id", "TQUOCOND_CONDI"])
-            ->where('TQUOCOND_QUOCD', base64_decode($request->id))
+
+        $Conditions = T_QUOCOND::on($this->dedicatedConnection)->select(["id", "TQUOCOND_CONDI"])
+            ->where('TQUOCOND_QUOCD', $documentNumber)
             ->where('TQUOCOND_BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')->get();
+
         $RSHeader = T_QUOHEAD::on($this->dedicatedConnection)->select('TQUO_TYPE', 'TQUO_SERVTRANS_COST')
-            ->where('TQUO_QUOCD', base64_decode($request->id))
+            ->where('TQUO_QUOCD', $documentNumber)
             ->where('TQUO_BRANCH', Auth::user()->branch)
             ->get();
-        return ['dataItem' => $RS, 'dataCondition' => $RS1, 'dataHeader' => $RSHeader];
+
+        $Histories = ApprovalHistory::on($this->dedicatedConnection)
+            ->where('code', $documentNumber)
+            ->get();
+
+        return [
+            'dataItem' => $RS, 'dataCondition' => $Conditions,
+            'dataHeader' => $RSHeader, 'approvalHistories' => $Histories
+        ];
     }
 
     function deleteConditionById(Request $request)
@@ -373,12 +386,25 @@ class QuotationController extends Controller
                 ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH', 'TQUO_TYPE')->get();
         }
         if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
+            $LatestApprovalStatus = ApprovalHistory::on($this->dedicatedConnection)
+                ->select('code', DB::raw("MAX(id) id"), 'branch')
+                ->where('form', 'QUOTATION')
+                ->where('branch', Auth::user()->branch)
+                ->groupBy('code', 'branch');
+
+            $ApprovalQuotation = ApprovalHistory::on($this->dedicatedConnection)
+                ->select('v1.*', 'type')
+                ->joinSub($LatestApprovalStatus, 'v1', function ($join) {
+                    $join->on('approval_histories.id', '=', 'v1.id');
+                });
+
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->groupBy("TQUODETA_QUOCD")
                 ->where('TQUODETA_BRANCH', Auth::user()->branch)
                 ->whereNull('deleted_at');
-            $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT"))
+
+            $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT, type"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
@@ -387,6 +413,9 @@ class QuotationController extends Controller
                 })
                 ->leftJoin('T_SLOHEAD', function ($join) {
                     $join->on('TQUO_QUOCD', '=', 'TSLO_QUOCD')->on('TQUO_BRANCH', '=', 'TSLO_BRANCH');
+                })
+                ->leftJoinSub($ApprovalQuotation, 'v11', function ($join) {
+                    $join->on('TQUO_QUOCD', '=', 'v11.code')->on('TQUO_BRANCH', '=', 'v11.branch');
                 })
                 ->whereNull("TSLO_QUOCD")
                 ->where('T_QUOHEAD.created_by', Auth::user()->nick_name)
@@ -689,15 +718,28 @@ class QuotationController extends Controller
     function approve(Request $request)
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        $documentNumber = base64_decode($request->id);
+
         if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
+
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
-                ->where('TQUO_QUOCD', base64_decode($request->id))
+                ->where('TQUO_QUOCD', $documentNumber)
                 ->where('TQUO_BRANCH', $request->TQUO_BRANCH)
                 ->whereNull('TQUO_APPRVBY')
                 ->update([
                     'TQUO_APPRVBY' => Auth::user()->nick_name, 'TQUO_APPRVDT' => date('Y-m-d H:i:s')
                 ]);
+
+            ApprovalHistory::on($this->dedicatedConnection)->create([
+                'created_by' => Auth::user()->nick_name,
+                'form' => 'QUOTATION',
+                'code' => $documentNumber,
+                'type' => '3',
+                'remark' => '-',
+            ]);
+
             $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
+
             return ['message' => $message];
         } else {
             return response()->json(['message' => 'forbidden'], 403);
@@ -785,5 +827,27 @@ class QuotationController extends Controller
     function getAllCondition()
     {
         return ['data' => M_Condition::on($this->dedicatedConnection)->select('MCONDITION_DESCRIPTION')->orderBy('MCONDITION_DESCRIPTION')->get()];
+    }
+
+    function revise(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'remark' => 'required|max:50',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        ApprovalHistory::on($this->dedicatedConnection)->create([
+            'created_by' => Auth::user()->nick_name,
+            'form' => 'QUOTATION',
+            'code' => base64_decode($request->id),
+            'type' => '2',
+            'remark' => $request->remark,
+            'branch' => $request->TQUO_BRANCH,
+        ]);
+
+        return ['message' => 'OK'];
     }
 }

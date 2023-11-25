@@ -31,10 +31,11 @@
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab">Item</button>
                                     <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-condition" type="button" role="tab"><i class="fa fa-users-rectangle"></i> Conditions</button>
+                                    <button class="nav-link" id="nav-history-tab" data-bs-toggle="tab" data-bs-target="#nav-history" type="button" role="tab"><i class="fa fa-timeline"></i> Approval Histories</button>
                                 </div>
                             </nav>
                             <div class="tab-content" id="nav-tabContent">
-                                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+                                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" tabindex="0">
                                     <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                                         <div class="row">
                                             <div class="col-md-6 mb-1">
@@ -118,12 +119,33 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="nav-condition" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
+                                <div class="tab-pane fade" id="nav-condition" role="tabpanel" tabindex="1">
                                     <div class="container-fluid mt-2 border-start border-bottom rounded-start">
                                         <div class="row">
                                             <div class="col-md-12 mb-1">
                                                 <ul class="list-group list-group-flush list-group-numbered" id="quotationConditionContainer">
                                                 </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="nav-history" role="tabpanel" tabindex="2">
+                                    <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                                        <div class="row">
+                                            <div class="col-md-12 mb-1">
+                                                <div class="table-responsive" id="approvalHistoryTableContainer">
+                                                    <table id="approvalHistoryTable" class="table table-sm table-hover table-bordered caption-top">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Time</th>
+                                                                <th>Status</th>
+                                                                <th>Remark</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -142,7 +164,7 @@
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" onclick="previewQuotation()">Print Preview</a></li>
                                     <li><a class="dropdown-item" onclick="approveQuotation(this)"><i class="fas fa-check text-success"></i> Approve</a></li>
-                                    <li><a class="dropdown-item" onclick="rejectQuotation(this)"><i class="fas fa-xmark text-danger"></i> Reject</a></li>
+                                    <li><a class="dropdown-item" onclick="rejectQuotation(this)"><i class="fas fa-xmark text-danger"></i> Revise</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -278,13 +300,19 @@
     }
 
     function rejectQuotation(pthis) {
-        if (confirm('Are you sure want to reject ?')) {
+        if (confirm('Are you sure want to suggest for revision ?')) {
+            const remark = prompt("Remark")
+            if (remark == "" || remark === null) {
+                alertify.warning('Remark is required')
+                return
+            }
             btnAction.disabled = true
             $.ajax({
                 type: "PUT",
-                url: `reject/quotations/${btoa(labelQuotationInModal.innerText)}`,
+                url: `revise/quotations/${btoa(labelQuotationInModal.innerText)}`,
                 data: {
                     _token: '{{ csrf_token() }}',
+                    remark: remark,
                     TQUO_BRANCH: branch.value
                 },
                 dataType: "json",
@@ -314,6 +342,12 @@
     }
 
     function loadQuotationDetail(data) {
+        approvalHistoryTable.getElementsByTagName("tbody")[0].innerHTML = `<tr><td colspan="3" class="text-center">Please wait</td></tr>`
+        let notifContainer = document.getElementById('div-alert')
+        notifContainer.innerHTML = ''
+        quotationTable.getElementsByTagName("tbody")[0].innerHTML = '<tr><td colspan="8">Please wait</td></tr>'
+        quotationSaleTable.getElementsByTagName("tbody")[0].innerHTML = '<tr><td colspan="6">Please wait</td></tr>'
+
         $.ajax({
             type: "GET",
             url: `quotation/${btoa(data.doc)}`,
@@ -426,6 +460,27 @@
                     liElement.appendChild(childLiElement2)
                     quotationConditionContainer.appendChild(liElement)
                 })
+
+                // load approval history
+                let myContainer = document.getElementById("approvalHistoryTableContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = approvalHistoryTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("approvalHistoryTable");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                response.approvalHistories.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newcell = newrow.insertCell(0)
+                    newcell.innerHTML = arrayItem['created_at']
+                    newcell = newrow.insertCell(1)
+                    newcell.innerHTML = arrayItem['type'] == '2' ? 'Advise for revision' : 'Approved'
+                    newcell = newrow.insertCell(2)
+                    newcell.innerHTML = arrayItem['remark']
+                })
+
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
             },
             error: function(xhr, xopt, xthrow) {
                 alertify.warning(xthrow);

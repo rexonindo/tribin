@@ -183,7 +183,7 @@
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
                 <a class="nav-link col-md-3 col-lg-2 me-0 px-3 fs-6" href="#" role="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasEnd" aria-controls="offcanvasEnd">
-                    <span class="align-text-bottom fas fa-user"></span> {{ substr(Auth::user()->name, 0 ,21)}}
+                    <span class="align-text-bottom fas fa-user"></span> {{ ucfirst(substr(Auth::user()->name, 0 ,21))}}
                 </a>
             </div>
         </div>

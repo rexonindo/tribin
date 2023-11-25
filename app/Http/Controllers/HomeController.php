@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApprovalHistory;
 use App\Models\C_SPK;
 use App\Models\M_BRANCH;
 use App\Models\T_DLVORDHEAD;
@@ -138,13 +139,28 @@ class HomeController extends Controller
                 ->whereNull("TPCHORD_REJCTBY")
                 ->groupBy('TPCHORD_PCHCD')->get();
         }
+
         if (in_array($activeRole['code'], ['marketing', 'marketing_adm'])) {
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD")
                 ->where('TQUODETA_BRANCH', Auth::user()->branch)
                 ->whereNull('deleted_at')
                 ->groupBy("TQUODETA_QUOCD");
-            $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT,TQUO_BRANCH"))
+
+
+            $LatestApprovalStatus = ApprovalHistory::on($this->dedicatedConnection)
+                ->select('code', DB::raw("MAX(id) id"), 'branch')
+                ->where('form', 'QUOTATION')
+                ->where('branch', Auth::user()->branch)
+                ->groupBy('code', 'branch');
+
+            $ApprovalQuotation = ApprovalHistory::on($this->dedicatedConnection)
+                ->select('v1.*', 'type')
+                ->joinSub($LatestApprovalStatus, 'v1', function ($join) {
+                    $join->on('approval_histories.id', '=', 'v1.id');
+                });
+
+            $dataApproved = T_QUOHEAD::on($this->dedicatedConnection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT, max(TQUO_REJCTDT) TQUO_REJCTDT, max(TQUO_APPRVDT) TQUO_APPRVDT,TQUO_BRANCH, type"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD");
                 })
@@ -153,6 +169,9 @@ class HomeController extends Controller
                 })
                 ->leftJoin('T_SLOHEAD', function ($join) {
                     $join->on('TQUO_QUOCD', '=', 'TSLO_QUOCD')->on('TQUO_BRANCH', '=', 'TSLO_BRANCH');
+                })
+                ->leftJoinSub($ApprovalQuotation, 'v11', function ($join) {
+                    $join->on('TQUO_QUOCD', '=', 'v11.code')->on('TQUO_BRANCH', '=', 'v11.branch');
                 })
                 ->whereNull("TSLO_QUOCD")
                 ->where('TQUO_BRANCH', Auth::user()->branch)
@@ -165,6 +184,7 @@ class HomeController extends Controller
                 ->groupBy("TSLODRAFTDETA_SLOCD")
                 ->whereNull('deleted_at')
                 ->where('TSLODRAFTDETA_BRANCH', Auth::user()->branch);
+
             $dataSalesOrderDraftTobeProcessed = T_SLO_DRAFT_HEAD::on($this->dedicatedConnection)->select(DB::raw("TSLODRAFT_SLOCD,max(TTLDETAIL) TTLDETAIL, max(T_SLO_DRAFT_HEAD.created_at) CREATED_AT,max(TSLODRAFT_POCD) TSLODRAFT_POCD"))
                 ->joinSub($RSDetail, 'dt', function ($join) {
                     $join->on("TSLODRAFT_SLOCD", "=", "TSLODRAFTDETA_SLOCD");
@@ -214,7 +234,7 @@ class HomeController extends Controller
         }
 
         if (in_array($activeRole['code'], ['ga_manager', 'ga_spv'])) {
-            $SPK = C_SPK::on($this->dedicatedConnection)->select('CSPK_PIC_AS','CSPK_REFF_DOC', 'CSPK_JOBDESK')
+            $SPK = C_SPK::on($this->dedicatedConnection)->select('CSPK_PIC_AS', 'CSPK_REFF_DOC', 'CSPK_JOBDESK')
                 ->whereNotNull('submitted_at');
             if ($activeRole['code'] === 'ga_manager') {
                 $SPK->whereNull('CSPK_GA_MGR_APPROVED_AT');
@@ -224,7 +244,6 @@ class HomeController extends Controller
             }
             $UnApprovedSPK = $SPK->get();
             $UnApprovedSPK = json_decode(json_encode($UnApprovedSPK), true);
-            
         }
 
         return [
