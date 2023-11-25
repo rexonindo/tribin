@@ -20,6 +20,7 @@ use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReceiveController;
 use App\Http\Controllers\ReceiveOrderController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UsageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Config;
@@ -80,6 +81,15 @@ Route::middleware('auth')->group(function () {
         Route::post('form', [CompanyGroupController::class, 'savePaymentAccount']);
         Route::get('', [CompanyGroupController::class, 'getPaymentAccountCompanyBranch']);
         Route::delete('form/{id}', [CompanyGroupController::class, 'deletePaymentAccountCompanyBranch']);
+    });
+
+    # Terkait Usage Master
+    Route::prefix('usage')->group(function () {
+        Route::get('form', [UsageController::class, 'index']);
+        Route::post('import', [UsageController::class, 'importFromAnotherCompany']);
+        Route::get('', [UsageController::class, 'search']);
+        Route::post('', [UsageController::class, 'simpan']);
+        Route::put('{id}', [UsageController::class, 'update']);
     });
 
     # Terkait Harga Jarak
@@ -230,6 +240,20 @@ Route::middleware('auth')->group(function () {
         Route::get('quotation', [QuotationController::class, 'report']);
         Route::get('received-order', [ReceiveOrderController::class, 'report']);
     });
+
+    # Terkait Rejection
+    Route::prefix('reject')->group(function () {
+        Route::put('quotations/{id}', [QuotationController::class, 'reject']);
+        Route::put('purchase-request/{id}', [PurchaseController::class, 'reject']);
+        Route::put('purchase-order/{id}', [PurchaseController::class, 'rejectPO']);
+    });
+
+    # Terkait Suggest for Revision
+    Route::prefix('revise')->group(function () {
+        Route::put('quotations/{id}', [QuotationController::class, 'revise']);
+        Route::put('purchase-request/{id}', [PurchaseController::class, 'reject']);
+        Route::put('purchase-order/{id}', [PurchaseController::class, 'rejectPO']);
+    });
 });
 
 # Terkait Quotation Condition
@@ -242,11 +266,6 @@ Route::put('approve/purchase-order/{id}', [PurchaseController::class, 'approvePO
 Route::get('approved/form/quotation', [QuotationController::class, 'formApproved'])->middleware('auth');
 Route::get('approved/form/purchase-request', [PurchaseController::class, 'formStatus'])->middleware('auth');
 Route::get('approved/form/sales-order-draft', [ReceiveOrderController::class, 'formApprovalDraft'])->middleware('auth');
-
-#Terkait Rejection
-Route::put('reject/quotations/{id}', [QuotationController::class, 'reject'])->middleware('auth');
-Route::put('reject/purchase-request/{id}', [PurchaseController::class, 'reject'])->middleware('auth');
-Route::put('reject/purchase-order/{id}', [PurchaseController::class, 'rejectPO'])->middleware('auth');
 
 #Terkait Dasbor
 Route::get('dashboard-resource', [HomeController::class, 'supportDashboard'])->middleware('auth');
