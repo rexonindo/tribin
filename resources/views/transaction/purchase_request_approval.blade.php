@@ -237,6 +237,7 @@
     }
 
     function loadQuotationDetail(data) {
+        quotationTable.getElementsByTagName("tbody")[0].innerHTML = `<tr><td colspan="6">Please wait</td></tr>`
         $.ajax({
             type: "GET",
             url: `purchase-request-approval/${btoa(data.doc)}`,
@@ -292,6 +293,7 @@
             },
             error: function(xhr, xopt, xthrow) {
                 alertify.warning(xthrow);
+                quotationTable.getElementsByTagName("tbody")[0].innerHTML = `<tr><td colspan="6"></td></tr>`
             }
         });
     }
