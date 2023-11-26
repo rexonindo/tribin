@@ -95,7 +95,7 @@ class HomeController extends Controller
         $dataDeliveryOrderUndelivered = [];
         $UnApprovedSPK = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager', 'general_manager'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD, TQUODETA_BRANCH")
@@ -262,7 +262,7 @@ class HomeController extends Controller
     {
         $data = $PurchaseRequest = $PurchaseOrder = $SPKData = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager', 'general_manager'])) {
 
             $Business = CompanyGroup::select('name', 'connection')->get();
 

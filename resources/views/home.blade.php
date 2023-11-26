@@ -105,7 +105,7 @@
     </div>
 
 </div>
-@if (in_array(Auth::user()->role, ['director','manager']) )
+@if (in_array(Auth::user()->role, ['director','manager', 'general_manager']) )
 <script src="{{ url('assets/js/JOSDashboard.js') }} "></script>
 @endif
 <script>

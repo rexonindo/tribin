@@ -370,7 +370,7 @@ class QuotationController extends Controller
         $dataTobeApproved = [];
         $dataApproved = [];
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager', 'general_manager'])) {
             # Query untuk data Quotation
             $RSDetail = DB::connection($this->dedicatedConnection)->table('T_QUODETA')
                 ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD,TQUODETA_BRANCH")
@@ -721,7 +721,7 @@ class QuotationController extends Controller
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
         $documentNumber = base64_decode($request->id);
 
-        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager', 'general_manager'])) {
 
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
                 ->where('TQUO_QUOCD', $documentNumber)
@@ -750,7 +750,7 @@ class QuotationController extends Controller
     function reject(Request $request)
     {
         $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
-        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager', 'general_manager'])) {
             $affectedRow = T_QUOHEAD::on($this->dedicatedConnection)
                 ->where('TQUO_QUOCD', base64_decode($request->id))
                 ->where('TQUO_BRANCH', $request->TQUO_BRANCH)
