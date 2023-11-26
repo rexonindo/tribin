@@ -43,7 +43,7 @@ $.ajax({
                 newcell.classList.add('text-info')
                 newcell.style.cssText = "font-weight: bold; cursor: pointer"
                 newcell.onclick = () => {
-                    setCompanyGroupTopUser({name: arrayItem['name']})
+                    setCompanyGroupTopUser({ name: arrayItem['name'] })
 
                     ContentContainer.innerHTML = 'Please wait'
                     $.ajax({
@@ -65,6 +65,18 @@ $.ajax({
                     if (_totalData) {
                         newcell.classList.add('text-info')
                         newcell.style.cssText = "font-weight: bold; cursor: pointer"
+                        newcell.onclick = () => {
+                            setCompanyGroupTopUser({ name: arrayItem['name'] })
+
+                            ContentContainer.innerHTML = 'Please wait'
+                            $.ajax({
+                                type: "GET",
+                                url: "/approval/form/purchase-request",
+                                success: function (response) {
+                                    setInnerHTML(ContentContainer, response)
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -78,6 +90,18 @@ $.ajax({
                     if (_totalData) {
                         newcell.classList.add('text-info')
                         newcell.style.cssText = "font-weight: bold; cursor: pointer"
+                        newcell.onclick = () => {
+                            setCompanyGroupTopUser({ name: arrayItem['name'] })
+
+                            ContentContainer.innerHTML = 'Please wait'
+                            $.ajax({
+                                type: "GET",
+                                url: "/approval/form/purchase-order",
+                                success: function (response) {
+                                    setInnerHTML(ContentContainer, response)
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -92,7 +116,7 @@ $.ajax({
                         newcell.classList.add('text-info')
                         newcell.style.cssText = "font-weight: bold; cursor: pointer"
                         newcell.onclick = () => {
-                            setCompanyGroupTopUser({name: arrayItem['name']})
+                            setCompanyGroupTopUser({ name: arrayItem['name'] })
 
                             ContentContainer.innerHTML = 'Please wait'
                             $.ajax({
