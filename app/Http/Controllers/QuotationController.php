@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ApprovalHistory;
 use App\Models\COMPANY_BRANCH;
+use App\Models\CompanyGroup;
 use App\Models\M_Condition;
 use App\Models\M_USAGE;
 use App\Models\T_QUOCOND;
@@ -426,7 +427,7 @@ class QuotationController extends Controller
         return [
             'data' => $dataTobeApproved, 'dataApproved' => $dataApproved,
         ];
-    }
+    }    
 
     public function formApproval()
     {

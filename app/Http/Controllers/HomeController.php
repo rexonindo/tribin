@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ApprovalHistory;
 use App\Models\C_SPK;
+use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
 use App\Models\T_DLVORDHEAD;
 use App\Models\T_PCHORDHEAD;
@@ -255,5 +256,72 @@ class HomeController extends Controller
             'dataDeliveryOrderUndelivered' => $dataDeliveryOrderUndelivered,
             'dataUnApprovedSPK' => $UnApprovedSPK,
         ];
+    }
+
+    function TopUserNotifications()
+    {
+        $data = $PurchaseRequest = $PurchaseOrder = $SPKData = [];
+        $activeRole = CompanyGroupController::getRoleBasedOnCompanyGroup($this->dedicatedConnection);
+        if (in_array($activeRole['code'], ['accounting', 'director', 'manager'])) {
+
+            $Business = CompanyGroup::select('name', 'connection')->get();
+
+            foreach ($Business as $r) {
+                $RSDetail = DB::connection($r->connection)->table('T_QUODETA')
+                    ->selectRaw("COUNT(*) TTLDETAIL, TQUODETA_QUOCD,TQUODETA_BRANCH")
+                    ->groupBy("TQUODETA_QUOCD", "TQUODETA_BRANCH")
+                    ->whereNull('deleted_at');
+                $dataTobeApproved = T_QUOHEAD::on($r->connection)->select(DB::raw("TQUO_QUOCD,max(TTLDETAIL) TTLDETAIL,max(MCUS_CUSNM) MCUS_CUSNM, max(T_QUOHEAD.created_at) CREATED_AT,max(TQUO_SBJCT) TQUO_SBJCT,max(TQUO_ATTN) TQUO_ATTN,TQUO_BRANCH, TQUO_TYPE"))
+                    ->joinSub($RSDetail, 'dt', function ($join) {
+                        $join->on("TQUO_QUOCD", "=", "TQUODETA_QUOCD")
+                            ->on("TQUO_BRANCH", "=", "TQUODETA_BRANCH");
+                    })
+                    ->join('M_CUS', 'TQUO_CUSCD', '=', 'MCUS_CUSCD')
+                    ->whereNull("TQUO_APPRVDT")
+                    ->whereNull("TQUO_REJCTDT")
+                    ->groupBy('TQUO_QUOCD', 'TQUO_BRANCH', 'TQUO_TYPE')->get()->toArray();
+                $preparedData = ['name' => $r->name, 'connection' => $r->connection, 'data' => $dataTobeApproved];
+                $data[] = $preparedData;
+
+                # Query untuk data Purchase Request dengan tipe "Auto PO" 
+                $RSDetail = DB::connection($r->connection)->table('T_PCHREQDETA')
+                    ->selectRaw("COUNT(*) TTLDETAIL, TPCHREQDETA_PCHCD")
+                    ->groupBy("TPCHREQDETA_PCHCD")
+                    ->whereNull('deleted_at');
+                $dataPurchaseRequestTobeUpproved = T_PCHREQHEAD::on($r->connection)->select(DB::raw("TPCHREQ_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHREQHEAD.created_at) CREATED_AT,max(TPCHREQ_PURPOSE) TPCHREQ_PURPOSE"))
+                    ->joinSub($RSDetail, 'dt', function ($join) {
+                        $join->on("TPCHREQ_PCHCD", "=", "TPCHREQDETA_PCHCD");
+                    })
+                    ->whereNull("TPCHREQ_APPRVDT")
+                    ->whereNull("TPCHREQ_REJCTDT")
+                    ->where("TPCHREQ_TYPE", '2')
+                    ->groupBy('TPCHREQ_PCHCD')->get();
+                $preparedData = ['name' => $r->name, 'connection' => $r->connection, 'data' => $dataPurchaseRequestTobeUpproved];
+                $PurchaseRequest[] = $preparedData;
+
+                # Query untuk data Purchase order
+                $RSDetail = DB::connection($r->connection)->table('T_PCHORDDETA')
+                    ->selectRaw("COUNT(*) TTLDETAIL, TPCHORDDETA_PCHCD")
+                    ->groupBy("TPCHORDDETA_PCHCD")
+                    ->whereNull('deleted_at');
+                $dataPurchaseOrderTobeUpproved = T_PCHORDHEAD::on($r->connection)->select(DB::raw("TPCHORD_PCHCD,max(TTLDETAIL) TTLDETAIL, max(T_PCHORDHEAD.created_at) CREATED_AT"))
+                    ->joinSub($RSDetail, 'dt', function ($join) {
+                        $join->on("TPCHORD_PCHCD", "=", "TPCHORDDETA_PCHCD");
+                    })
+                    ->whereNull("TPCHORD_APPRVDT")
+                    ->whereNull("TPCHORD_REJCTBY")
+                    ->groupBy('TPCHORD_PCHCD')->get();
+                $preparedData = ['name' => $r->name, 'connection' => $r->connection, 'data' => $dataPurchaseOrderTobeUpproved];
+                $PurchaseOrder[] = $preparedData;
+
+                $SPK = C_SPK::on($r->connection)->select('CSPK_PIC_AS', 'CSPK_REFF_DOC', 'CSPK_JOBDESK')
+                    ->whereNotNull('submitted_at')
+                    ->whereNull('CSPK_GA_MGR_APPROVED_AT')->get();
+                $preparedData = ['name' => $r->name, 'connection' => $r->connection, 'data' => $SPK];
+                $SPKData[] = $preparedData;
+            }
+        }
+
+        return ['data' => $data, 'PurchaseRequest' => $PurchaseRequest, 'PurchaseOrder' => $PurchaseOrder, 'SPKData' => $SPKData];
     }
 }

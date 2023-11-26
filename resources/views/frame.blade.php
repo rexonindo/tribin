@@ -278,10 +278,72 @@
             </div>
         </div>
     </div>
+
     <script src="{{ url('assets/feathericon/feather.min.js') }} "></script>
     <script src="{{ url('assets/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
     <script src="{{ url('assets/js/inputmask.min.js') }} "></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG" crossorigin="anonymous"></script>
+    @if (!in_array(Auth::user()->role, ['director','manager']) )
+    <script>
+        function showNotificationToApprove() {
+            $.ajax({
+                type: "GET",
+                url: "/approval/notifications",
+                dataType: "json",
+                success: function(response) {
+                    // Quotations
+                    const totalNotifQT = response.data.length
+                    const totalNotifApprovedQT = response.dataApproved.length
+
+                    // Purchase Request
+                    const totalNotifQTPurchaseRequest = response.dataPurchaseRequest.length
+                    const totalNotifApprovedQTPurchaseRequest = response.dataPurchaseRequestApproved.length
+
+                    // Sales Order Draft
+                    const totalNotifQTSalesOrderDraft = response.dataSalesOrderDraft.length
+
+                    // Purchase Order
+                    const totalNotifQTPurchaseOrder = response.dataPurchaseOrder.length
+
+                    // Delivery Order
+                    const totalNotifQTDeliveryNoDriver = response.dataDeliveryOrderNoDriver.length
+                    const totalNotifQTDeliveryUndelivered = response.dataDeliveryOrderUndelivered.length
+
+                    // SPK
+                    const totalNotifQTUnApprovedSPK = response.dataUnApprovedSPK.length
+
+                    const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest + totalNotifQTSalesOrderDraft +
+                        totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver + totalNotifQTDeliveryUndelivered +
+                        totalNotifQTUnApprovedSPK
+                    labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
+
+                    // Quotations Group
+                    createLiItem('linotif1', 'labelNotifApprovalQuotation', 'Quotation Approval', totalNotifQT, liHeadQuotation, liApprovalOnclick)
+                    createLiItem('linotif2', 'labelNotifApprovedQuotation', 'Quotation Recent Updates', totalNotifApprovedQT, liHeadQuotation, liApprovedQuotationOnclick)
+
+                    // Purchase Request Group
+                    createLiItem('linotif3', 'labelNotifApprovalPurchaseRequest', 'Purchase Request Approval', totalNotifQTPurchaseRequest, liHeadPurchaseRequest, liApprovalPurchaseRequestOnclick)
+                    createLiItem('linotif4', 'labelNotifApprovedPurchaseRequest', 'Purchase Request Recent Updates', totalNotifApprovedQTPurchaseRequest, liHeadPurchaseRequest, liApprovedPurchaseRequestOnclick)
+
+                    // Purchase Order Group
+                    createLiItem('linotif5', 'labelNotifApprovalPurchaseOrder', 'Purchase Order Approval', totalNotifQTPurchaseOrder, liHeadPurchaseOrder, liApprovalPurchaseOrderOnclick)
+
+                    // Sales Order Draft Group
+                    createLiItem('linotif6', 'labelNotifApprovalSalesOrderDraft', 'Sales Order Draft Status', totalNotifQTSalesOrderDraft, liHeadSalesOrderDraft, liApprovalSalesOrderDraftOnclick)
+
+                    // Delivery Group
+                    createLiItem('linotif7', 'labelNotifDeliveryAssignment', 'Delivery Assignment', totalNotifQTDeliveryNoDriver, liHeadDelivery, liDeliveryAssignmentOnclick)
+                    createLiItem('linotif8', 'labelNotifDeliveryOnGoing', 'On going', totalNotifQTDeliveryUndelivered, liHeadDelivery, liDeliveryOnGoingOnclick)
+                    // SPK Group
+                    createLiItem('linotif9', 'labelNotifUnApprovedSPK', 'SPK Approval', totalNotifQTUnApprovedSPK, liHeadSPK, liUnApprovedSPKOnclick)
+                }
+            });
+        }
+
+        showNotificationToApprove()
+    </script>
+    @endif
+
     <script>
         const mybsCollapse = new bootstrap.Collapse(sidebarMenu, {
             toggle: false
@@ -341,63 +403,6 @@
                 });
             }
         }
-
-        function showNotificationToApprove() {
-            $.ajax({
-                type: "GET",
-                url: "/approval/notifications",
-                dataType: "json",
-                success: function(response) {
-                    // Quotations
-                    const totalNotifQT = response.data.length
-                    const totalNotifApprovedQT = response.dataApproved.length
-
-                    // Purchase Request
-                    const totalNotifQTPurchaseRequest = response.dataPurchaseRequest.length
-                    const totalNotifApprovedQTPurchaseRequest = response.dataPurchaseRequestApproved.length
-
-                    // Sales Order Draft
-                    const totalNotifQTSalesOrderDraft = response.dataSalesOrderDraft.length
-
-                    // Purchase Order
-                    const totalNotifQTPurchaseOrder = response.dataPurchaseOrder.length
-
-                    // Delivery Order
-                    const totalNotifQTDeliveryNoDriver = response.dataDeliveryOrderNoDriver.length
-                    const totalNotifQTDeliveryUndelivered = response.dataDeliveryOrderUndelivered.length
-
-                    // SPK
-                    const totalNotifQTUnApprovedSPK = response.dataUnApprovedSPK.length
-
-                    const totalNotif = totalNotifQT + totalNotifApprovedQT + totalNotifQTPurchaseRequest + totalNotifApprovedQTPurchaseRequest + totalNotifQTSalesOrderDraft +
-                        totalNotifQTPurchaseOrder + totalNotifQTDeliveryNoDriver + totalNotifQTDeliveryUndelivered +
-                        totalNotifQTUnApprovedSPK
-                    labelNotifAll.innerHTML = totalNotif === 0 ? '' : totalNotif
-
-                    // Quotations Group
-                    createLiItem('linotif1', 'labelNotifApprovalQuotation', 'Quotation Approval', totalNotifQT, liHeadQuotation, liApprovalOnclick)
-                    createLiItem('linotif2', 'labelNotifApprovedQuotation', 'Quotation Recent Updates', totalNotifApprovedQT, liHeadQuotation, liApprovedQuotationOnclick)
-
-                    // Purchase Request Group
-                    createLiItem('linotif3', 'labelNotifApprovalPurchaseRequest', 'Purchase Request Approval', totalNotifQTPurchaseRequest, liHeadPurchaseRequest, liApprovalPurchaseRequestOnclick)
-                    createLiItem('linotif4', 'labelNotifApprovedPurchaseRequest', 'Purchase Request Recent Updates', totalNotifApprovedQTPurchaseRequest, liHeadPurchaseRequest, liApprovedPurchaseRequestOnclick)
-
-                    // Purchase Order Group
-                    createLiItem('linotif5', 'labelNotifApprovalPurchaseOrder', 'Purchase Order Approval', totalNotifQTPurchaseOrder, liHeadPurchaseOrder, liApprovalPurchaseOrderOnclick)
-
-                    // Sales Order Draft Group
-                    createLiItem('linotif6', 'labelNotifApprovalSalesOrderDraft', 'Sales Order Draft Status', totalNotifQTSalesOrderDraft, liHeadSalesOrderDraft, liApprovalSalesOrderDraftOnclick)
-
-                    // Delivery Group
-                    createLiItem('linotif7', 'labelNotifDeliveryAssignment', 'Delivery Assignment', totalNotifQTDeliveryNoDriver, liHeadDelivery, liDeliveryAssignmentOnclick)
-                    createLiItem('linotif8', 'labelNotifDeliveryOnGoing', 'On going', totalNotifQTDeliveryUndelivered, liHeadDelivery, liDeliveryOnGoingOnclick)
-                    // SPK Group
-                    createLiItem('linotif9', 'labelNotifUnApprovedSPK', 'SPK Approval', totalNotifQTUnApprovedSPK, liHeadSPK, liUnApprovedSPKOnclick)
-                }
-            });
-        }
-
-        showNotificationToApprove()
 
         function createLiItem(IDElement, IDElementChild, description, totalNotif, IDTop, callback) {
             let collectionsLi = ulHeadContainer.getElementsByTagName('li')

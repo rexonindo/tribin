@@ -8,6 +8,17 @@
     </div>
 </div>
 <div class="container">
+    <div class="row">
+        <div class="col-md-12" id="div-alert">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" id="divDashboardContainer">
+
+        </div>
+    </div>
+    <hr>
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
         <div class="col">
             <div class="card">
@@ -94,6 +105,9 @@
     </div>
 
 </div>
+@if (in_array(Auth::user()->role, ['director','manager']) )
+<script src="{{ url('assets/js/JOSDashboard.js') }} "></script>
+@endif
 <script>
     $.ajax({
         type: "GET",
