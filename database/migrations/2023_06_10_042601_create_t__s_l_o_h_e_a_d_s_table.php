@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('TSLO_SLOCD', 25)->primary();
             $table->string('TSLO_CUSCD', 10);
             $table->integer('TSLO_LINE');
-            $table->string('TSLO_ATTN', 20);
+            $table->string('TSLO_ATTN', 100);
             $table->string('TSLO_QUOCD', 25);
             $table->string('TSLO_POCD', 50);
             $table->date('TSLO_ISSUDT');

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('TSLODRAFT_SLOCD', 25)->primary();
             $table->string('TSLODRAFT_CUSCD', 10);
             $table->integer('TSLODRAFT_LINE');
-            $table->string('TSLODRAFT_ATTN', 20);            
+            $table->string('TSLODRAFT_ATTN', 100);            
             $table->string('TSLODRAFT_POCD', 50);
             $table->date('TSLODRAFT_ISSUDT');
             $table->string('TSLODRAFT_APPRVBY', 16)->nullable();

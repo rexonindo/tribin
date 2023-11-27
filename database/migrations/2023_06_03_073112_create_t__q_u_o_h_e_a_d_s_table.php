@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('TQUO_QUOCD', 25)->primary();
             $table->string('TQUO_CUSCD', 10);
             $table->integer('TQUO_LINE');
-            $table->string('TQUO_ATTN', 20);
+            $table->string('TQUO_ATTN', 100);
             $table->string('TQUO_SBJCT', 100);
             $table->date('TQUO_ISSUDT');
             $table->string('TQUO_APPRVBY', 16)->nullable();
