@@ -49,13 +49,17 @@
                                 </div>
                                 <div class="col-md-6 mb-1">
                                     <label for="quotationAttn" class="form-label">Attn.</label>
-                                    <input type="text" id="quotationAttn" class="form-control form-control-sm" maxlength="50">
+                                    <input type="text" id="quotationAttn" class="form-control form-control-sm" maxlength="100">
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label for="quotationSubject" class="form-label">Subject</label>
                                     <input type="text" id="quotationSubject" class="form-control" placeholder="Penawaran ..." maxlength="100">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="quotationSubject" class="form-label">Project Location</label>
+                                    <input type="text" id="quotationProjectLocation" class="form-control" maxlength="100">
                                 </div>
                             </div>
                             <div class="row border-top">
@@ -1139,6 +1143,7 @@
                 TQUO_ATTN: quotationAttn.value.trim(),
                 TQUO_SBJCT: quotationSubject.value.trim(),
                 TQUO_ISSUDT: quotationIssueDate.value.trim(),
+                TQUO_PROJECT_LOCATION: quotationProjectLocation.value.trim(),
                 TQUO_TYPE: FinalQuotationType,
                 TQUO_SERVTRANS_COST: quotationServiceCost.value,
                 TQUODETA_ITMCD: itemCode,
@@ -1191,6 +1196,7 @@
                 TQUO_ATTN: quotationAttn.value.trim(),
                 TQUO_SBJCT: quotationSubject.value.trim(),
                 TQUO_ISSUDT: quotationIssueDate.value.trim(),
+                TQUO_PROJECT_LOCATION: quotationProjectLocation.value.trim(),
                 TQUO_SERVTRANS_COST: quotationServiceCost.value,
                 _token: '{{ csrf_token() }}',
             }
@@ -1271,6 +1277,7 @@
                             quotationCustomer.value = arrayItem['MCUS_CUSNM']
                             quotationCustomerCode.value = arrayItem['TQUO_CUSCD']
                             quotationAttn.value = arrayItem['TQUO_ATTN']
+                            quotationProjectLocation.value = arrayItem['TQUO_PROJECT_LOCATION']
                             loadQuotationDetail({
                                 doc: arrayItem['TQUO_QUOCD']
                             })

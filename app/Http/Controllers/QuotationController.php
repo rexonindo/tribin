@@ -80,6 +80,7 @@ class QuotationController extends Controller
             'TQUO_ATTN' => $request->TQUO_ATTN,
             'TQUO_SBJCT' => $request->TQUO_SBJCT,
             'TQUO_ISSUDT' => $request->TQUO_ISSUDT,
+            'TQUO_PROJECT_LOCATION' => $request->TQUO_PROJECT_LOCATION,
             'created_by' => Auth::user()->nick_name,
             'TQUO_BRANCH' => Auth::user()->branch,
             'TQUO_TYPE' => $request->TQUO_TYPE,
@@ -298,7 +299,7 @@ class QuotationController extends Controller
             'MCUS_CUSNM',
         ];
 
-        $RS = $request->approval == '1' ? T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST', 'MCUS_ADDR1'])
+        $RS = $request->approval == '1' ? T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST', 'MCUS_ADDR1', 'TQUO_PROJECT_LOCATION'])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->leftJoin('T_SLOHEAD', 'TQUO_QUOCD', '=', 'TSLO_QUOCD')
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
@@ -306,7 +307,7 @@ class QuotationController extends Controller
             ->whereNull("TSLO_QUOCD")
             ->where('TQUO_BRANCH', Auth::user()->branch)
             ->get()
-            : T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST'])
+            : T_QUOHEAD::on($this->dedicatedConnection)->select(["TQUO_QUOCD", "TQUO_CUSCD", "MCUS_CUSNM", "TQUO_ISSUDT", "TQUO_SBJCT", "TQUO_ATTN", 'TQUO_TYPE', 'TQUO_SERVTRANS_COST', 'TQUO_PROJECT_LOCATION'])
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->where('TQUO_BRANCH', Auth::user()->branch)
