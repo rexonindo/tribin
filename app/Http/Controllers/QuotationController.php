@@ -616,8 +616,7 @@ class QuotationController extends Controller
 
             $y += 5;
             $this->fpdf->SetXY(7, $y);
-            $this->fpdf->MultiCell(0, 5, 'Besar harapan kami penawaran ini dapat menjadi pertimbangan prioritas untuk pengadaan kebutuhan di Perusahaan Bapak / Ibu
-                    Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, atas perhatian dan kerjasama yang baik kami ucapkan banyak terima kasih.', 0, 'J');
+            $this->fpdf->MultiCell(0, 5, 'Besar harapan kami penawaran ini dapat menjadi pertimbangan prioritas untuk pengadaan kebutuhan di Perusahaan Bapak / Ibu. Demikian kami sampaikan penawaran ini, dan sambil menunggu kabar lebih lanjut, atas perhatian dan kerjasama yang baik kami ucapkan banyak terima kasih.', 0, 'J');
         } else {
             $this->fpdf->SetXY(7, 66);
             $this->fpdf->MultiCell(0, 5, 'Sebelumnya kami ucapkan terima kasih atas kepercayaan yang diberikan kepada kami,', 0, 'J');
@@ -705,7 +704,7 @@ class QuotationController extends Controller
         $this->fpdf->Cell(80, 5, 'BANK', 1, 0, 'C');
         $this->fpdf->Cell(70, 5, 'Atas Nama', 1, 0, 'C');
         $this->fpdf->Cell(50, 5, 'Nomor Rekening', 1, 0, 'C');
-        
+
         $y += 5;
         $this->fpdf->SetFont('Arial', '', 10);
         foreach ($branchPaymentAccount as $r) {
