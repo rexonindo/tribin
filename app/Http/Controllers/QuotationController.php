@@ -422,7 +422,7 @@ class QuotationController extends Controller
                 ->whereNull("TSLO_QUOCD")
                 ->where('T_QUOHEAD.created_by', Auth::user()->nick_name)
                 ->where('TQUO_BRANCH', Auth::user()->branch)
-                ->groupBy('TQUO_QUOCD')->get();
+                ->groupBy('TQUO_QUOCD', 'type')->get();
         }
 
         return [
