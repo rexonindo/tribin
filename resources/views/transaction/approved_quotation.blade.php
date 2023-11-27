@@ -173,6 +173,13 @@
     </div>
 </div>
 <script>
+    function previewQuotation() {
+        if (labelQuotationInModal.innerText.trim().length === 0) {
+            alertify.message('Quotation Code is required')
+            return
+        }
+        window.open(`PDF/quotation/${btoa(labelQuotationInModal.innerText)}`, '_blank');
+    }
     function loadApprovalList() {
         approvalContainer.innerHTML = 'Please wait'
         $.ajax({
