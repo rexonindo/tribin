@@ -93,13 +93,7 @@ class QuotationController extends Controller
             'TQUODETA_ITMCD' => 'required|array',
             'TQUODETA_USAGE_DESCRIPTION' => 'required|array',
             'TQUODETA_PRC' => 'required|array',
-            'TQUODETA_PRC.*' => 'required|numeric',
-            'TQUODETA_MOBDEMOB' => 'required|array',
-            'TQUODETA_MOBDEMOB.*' => 'required|numeric',
-            'TQUODETA_OPRPRC' => 'required|array',
-            'TQUODETA_OPRPRC.*' => 'required|numeric',
-            'TQUODETA_MOBDEMOB' => 'required|array',
-            'TQUODETA_MOBDEMOB.*' => 'required|numeric',
+            'TQUODETA_PRC.*' => 'required|numeric',           
         ]);
 
         if ($validator->fails()) {
@@ -115,8 +109,8 @@ class QuotationController extends Controller
                 'TQUODETA_USAGE' => 1,
                 'TQUODETA_USAGE_DESCRIPTION' => $request->TQUODETA_USAGE_DESCRIPTION[$i],
                 'TQUODETA_PRC' => $request->TQUODETA_PRC[$i],
-                'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC[$i],
-                'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB[$i],
+                'TQUODETA_OPRPRC' => 0,
+                'TQUODETA_MOBDEMOB' => 0,
                 'TQUODETA_ELECTRICITY' => $request->TQUODETA_ELECTRICITY[$i],
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),

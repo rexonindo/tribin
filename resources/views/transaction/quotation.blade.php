@@ -85,8 +85,6 @@
                                                                         <th>Item Name</th>
                                                                         <th class="text-center">Usage</th>
                                                                         <th class="text-end">Price</th>
-                                                                        <th class="text-end">Operator</th>
-                                                                        <th class="text-end">MOB DEMOB</th>
                                                                         <th class="text-center">Electricity</th>
                                                                         <th class="text-end">SUB TOTAL</th>
                                                                     </tr>
@@ -95,7 +93,7 @@
                                                                 </tbody>
                                                                 <tfoot>
                                                                     <tr>
-                                                                        <td colspan="7" class="text-end"> <b>Grand Total</b></td>
+                                                                        <td colspan="5" class="text-end"> <b>Grand Total</b></td>
                                                                         <td class="text-end"><strong id="strongGrandTotal">0</strong></td>
                                                                     </tr>
                                                                 </tfoot>
@@ -134,20 +132,6 @@
                                                         <div class="input-group input-group-sm mb-1">
                                                             <span class="input-group-text">Price</span>
                                                             <input type="text" id="quotationPrice" class="form-control quotationInputItem" title="price per hour">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-1">
-                                                        <div class="input-group input-group-sm mb-1">
-                                                            <span class="input-group-text">Operator Price</span>
-                                                            <input type="text" id="quotationOperator" class="form-control quotationInputItem" title="price per man">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6 mb-1">
-                                                        <div class="input-group input-group-sm mb-1">
-                                                            <span class="input-group-text">MOBDEMOB</span>
-                                                            <input type="text" id="quotationMOBDEMOB" class="form-control quotationInputItem">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -692,8 +676,6 @@
                 TQUODETA_USAGE: 1,
                 TQUODETA_USAGE_DESCRIPTION: quotationUsage.value,
                 TQUODETA_PRC: numeral(quotationPrice.value).value(),
-                TQUODETA_OPRPRC: numeral(quotationOperator.value).value(),
-                TQUODETA_MOBDEMOB: numeral(quotationMOBDEMOB.value).value(),
                 TQUODETA_ELECTRICITY: quotationElectricity.value,
                 TQUO_TYPE: '2',
                 _token: '{{ csrf_token() }}',
@@ -733,9 +715,7 @@
             });
         } else {
             const quotationTableBody = quotationTable.getElementsByTagName('tbody')[0]
-            const subTotal = numeral(quotationPrice.value).value() +
-                numeral(quotationOperator.value).value() +
-                numeral(quotationMOBDEMOB.value).value()
+            const subTotal = numeral(quotationPrice.value).value()
             newrow = quotationTableBody.insertRow(-1)
             newrow.title = 'not selected'
             newrow.onclick = (event) => {
@@ -743,6 +723,11 @@
                 if (selrow.title === 'selected') {
                     selrow.title = 'not selected'
                     selrow.classList.remove('table-info')
+                    quotationItemCode.value = ''
+                    quotationItemName.value = ''
+                    quotationUsage.value = ''
+                    quotationPrice.value = ''
+                    quotationElectricity.value = ''
                 } else {
                     const ttlrows = quotationTable.rows.length
                     for (let i = 1; i < ttlrows; i++) {
@@ -751,6 +736,11 @@
                     }
                     selrow.title = 'selected'
                     selrow.classList.add('table-info')
+                    quotationItemCode.value = selrow.cells[1].innerText
+                    quotationItemName.value = selrow.cells[2].innerText
+                    quotationUsage.value = selrow.cells[3].innerText
+                    quotationPrice.value = selrow.cells[4].innerText
+                    quotationElectricity.value = selrow.cells[5].innerText
                 }
             }
             newcell = newrow.insertCell(0)
@@ -768,14 +758,6 @@
 
             newcell = newrow.insertCell(4)
             newcell.innerHTML = numeral(quotationPrice.value).format(',')
-            newcell.classList.add('text-end')
-
-            newcell = newrow.insertCell(5)
-            newcell.innerHTML = numeral(quotationOperator.value).format(',')
-            newcell.classList.add('text-end')
-
-            newcell = newrow.insertCell(6)
-            newcell.innerHTML = numeral(quotationMOBDEMOB.value).format(',')
             newcell.classList.add('text-end')
 
             newcell = newrow.insertCell(-1)
@@ -806,8 +788,6 @@
                 TQUODETA_ITMQT: quotationQtySale.value,
                 TQUODETA_USAGE: 1,
                 TQUODETA_PRC: numeral(quotationPriceSale.value).value(),
-                TQUODETA_OPRPRC: 0,
-                TQUODETA_MOBDEMOB: 0,
                 TQUO_TYPE: '2',
                 _token: '{{ csrf_token() }}',
             }
@@ -855,6 +835,10 @@
                 if (selrow.title === 'selected') {
                     selrow.title = 'not selected'
                     selrow.classList.remove('table-info')
+                    quotationItemCodeSale.value = ''
+                    quotationItemNameSale.value = ''
+                    quotationQtySale.value = ''
+                    quotationPriceSale.value = ''
                 } else {
                     const ttlrows = quotationSaleTable.rows.length
                     for (let i = 1; i < ttlrows; i++) {
@@ -863,6 +847,10 @@
                     }
                     selrow.title = 'selected'
                     selrow.classList.add('table-info')
+                    quotationItemCodeSale.value = selrow[1].innerText
+                    quotationItemNameSale.value = selrow[2].innerText
+                    quotationQtySale.value = selrow[3].innerText
+                    quotationPriceSale.value = selrow[4].innerText
                 }
             }
             newcell = newrow.insertCell(0)
@@ -927,7 +915,7 @@
                         success: function(response) {
                             pthis.innerHTML = `Remove line`
                             pthis.disabled = false
-                            grandTotal -= numeral(quotationTable.rows[iFounded].cells[7].innerText).value()
+                            grandTotal -= numeral(quotationTable.rows[iFounded].cells[6].innerText).value()
                             strongGrandTotal.innerText = numeral(grandTotal).format(',')
                             quotationTable.rows[iFounded].remove()
                             alertify.message(response.msg)
@@ -939,7 +927,7 @@
                         }
                     });
                 } else {
-                    grandTotal -= numeral(quotationTable.rows[iFounded].cells[7].innerText).value()
+                    grandTotal -= numeral(quotationTable.rows[iFounded].cells[6].innerText).value()
                     strongGrandTotal.innerText = numeral(grandTotal).format(',')
                     quotationTable.rows[iFounded].remove()
                 }
@@ -976,8 +964,6 @@
                         TQUODETA_ITMQT: 1,
                         TQUODETA_USAGE_DESCRIPTION: quotationUsage.value,
                         TQUODETA_PRC: quotationPrice.value,
-                        TQUODETA_OPRPRC: quotationOperator.value,
-                        TQUODETA_MOBDEMOB: quotationMOBDEMOB.value,
                         TQUODETA_ELECTRICITY: quotationElectricity.value,
                         TQUO_QUOCD: quotationCode.value,
                     }
@@ -1010,17 +996,13 @@
     }
 
     function refreshTableRent(selectedRow) {
-        const subTotal = numeral(quotationPrice.value).value() +
-            numeral(quotationOperator.value).value() +
-            numeral(quotationMOBDEMOB.value).value()
+        const subTotal = numeral(quotationPrice.value).value()
         quotationTable.rows[selectedRow].cells[1].innerText = quotationItemCode.value
         quotationTable.rows[selectedRow].cells[2].innerText = quotationItemName.value
         quotationTable.rows[selectedRow].cells[3].innerText = quotationUsage.value
         quotationTable.rows[selectedRow].cells[4].innerText = quotationPrice.value
-        quotationTable.rows[selectedRow].cells[5].innerText = quotationOperator.value
-        quotationTable.rows[selectedRow].cells[6].innerText = quotationMOBDEMOB.value
-        quotationTable.rows[selectedRow].cells[7].innerText = quotationElectricity.value
-        quotationTable.rows[selectedRow].cells[8].innerText = subTotal
+        quotationTable.rows[selectedRow].cells[5].innerText = quotationElectricity.value
+        quotationTable.rows[selectedRow].cells[6].innerText = subTotal
         recalculateGrandTotalRent()
     }
 
@@ -1039,7 +1021,7 @@
         const ttlrows = quotationTable.rows.length - 1
         let grandTotal = 0
         for (let i = 1; i < ttlrows; i++) {
-            let subTotal = numeral(quotationTable.rows[i].cells[7].innerText.trim()).value()
+            let subTotal = numeral(quotationTable.rows[i].cells[6].innerText.trim()).value()
             grandTotal += subTotal
         }
         strongGrandTotal.innerText = numeral(grandTotal).format(',')
@@ -1109,8 +1091,8 @@
         let itemQty = []
         let itemUsage = []
         let itemPrice = []
-        let itemOperatorPrice = []
-        let itemMobDemob = []
+        let itemElectricity = []
+
         let quotationCondition = []
         const NavRental = document.getElementById('nav-rental')
         let FinalQuotationType = '1'
@@ -1123,8 +1105,7 @@
                 itemUsage.push(quotationTable.rows[i].cells[3].innerText.trim())
                 itemQty.push(1)
                 itemPrice.push(numeral(quotationTable.rows[i].cells[4].innerText.trim()).value())
-                itemOperatorPrice.push(numeral(quotationTable.rows[i].cells[5].innerText.trim()).value())
-                itemMobDemob.push(numeral(quotationTable.rows[i].cells[6].innerText.trim()).value())
+                itemElectricity.push(quotationTable.rows[i].cells[5].innerText.trim())
             }
         } else {
             FinalQuotationType = '2'
@@ -1134,8 +1115,6 @@
                 itemUsage.push(1)
                 itemQty.push(numeral(quotationSaleTable.rows[i].cells[3].innerText.trim()).value())
                 itemPrice.push(numeral(quotationSaleTable.rows[i].cells[4].innerText.trim()).value())
-                itemOperatorPrice.push(0)
-                itemMobDemob.push(0)
             }
         }
 
@@ -1170,8 +1149,7 @@
                 TQUODETA_ITMQT: itemQty,
                 TQUODETA_USAGE_DESCRIPTION: itemUsage,
                 TQUODETA_PRC: itemPrice,
-                TQUODETA_OPRPRC: itemOperatorPrice,
-                TQUODETA_MOBDEMOB: itemMobDemob,
+                TQUODETA_ELECTRICITY: itemElectricity,
                 TQUOCOND_CONDI: quotationCondition,
                 _token: '{{ csrf_token() }}',
             }
@@ -1338,9 +1316,7 @@
                     myTableBody.innerHTML = ''
                     grandTotal = 0
                     response.dataItem.forEach((arrayItem) => {
-                        const subTotal = numeral(arrayItem['TQUODETA_PRC']).value() +
-                            numeral(arrayItem['TQUODETA_OPRPRC']).value() +
-                            numeral(arrayItem['TQUODETA_MOBDEMOB']).value()
+                        const subTotal = numeral(arrayItem['TQUODETA_PRC']).value()
                         newrow = myTableBody.insertRow(-1)
                         newrow.onclick = (event) => {
                             const selrow = quotationTable.rows[event.target.parentElement.rowIndex]
@@ -1351,8 +1327,6 @@
                                 quotationItemName.value = ''
                                 quotationUsage.value = ''
                                 quotationPrice.value = ''
-                                quotationOperator.value = ''
-                                quotationMOBDEMOB.value = ''
                                 quotationElectricity.value = ''
                             } else {
                                 const ttlrows = quotationTable.rows.length
@@ -1366,8 +1340,6 @@
                                 quotationItemName.value = arrayItem['MITM_ITMNM']
                                 quotationUsage.value = arrayItem['TQUODETA_USAGE_DESCRIPTION']
                                 quotationPrice.value = arrayItem['TQUODETA_PRC']
-                                quotationOperator.value = arrayItem['TQUODETA_OPRPRC']
-                                quotationMOBDEMOB.value = arrayItem['TQUODETA_MOBDEMOB']
                                 quotationElectricity.value = arrayItem['TQUODETA_ELECTRICITY']
                             }
                         }
@@ -1384,12 +1356,6 @@
                         newcell = newrow.insertCell(4)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TQUODETA_PRC']).format(',')
-                        newcell = newrow.insertCell(5)
-                        newcell.classList.add('text-end')
-                        newcell.innerHTML = numeral(arrayItem['TQUODETA_OPRPRC']).format(',')
-                        newcell = newrow.insertCell(6)
-                        newcell.classList.add('text-end')
-                        newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
                         newcell = newrow.insertCell(-1)
                         newcell.classList.add('text-center')
                         newcell.innerHTML = arrayItem['TQUODETA_ELECTRICITY']
