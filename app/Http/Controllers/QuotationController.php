@@ -117,6 +117,7 @@ class QuotationController extends Controller
                 'TQUODETA_PRC' => $request->TQUODETA_PRC[$i],
                 'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC[$i],
                 'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB[$i],
+                'TQUODETA_ELECTRICITY' => $request->TQUODETA_ELECTRICITY[$i],
                 'created_by' => Auth::user()->nick_name,
                 'created_at' => date('Y-m-d H:i:s'),
                 'TQUODETA_BRANCH' => Auth::user()->branch
@@ -192,6 +193,7 @@ class QuotationController extends Controller
             'TQUODETA_PRC' => $request->TQUODETA_PRC,
             'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC,
             'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB,
+            'TQUODETA_ELECTRICITY' => $request->TQUODETA_ELECTRICITY,
             'created_by' => Auth::user()->nick_name,
             'TQUODETA_BRANCH' => Auth::user()->branch
         ]);
@@ -285,10 +287,11 @@ class QuotationController extends Controller
             ->update([
                 'TQUODETA_ITMCD' => $request->TQUODETA_ITMCD,
                 'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT,
-                'TQUODETA_USAGE' => $request->TQUODETA_USAGE,
+                'TQUODETA_USAGE_DESCRIPTION' => $request->TQUODETA_USAGE_DESCRIPTION,
                 'TQUODETA_PRC' => $request->TQUODETA_PRC,
                 'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC ? $request->TQUODETA_OPRPRC : 0,
                 'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB ? $request->TQUODETA_MOBDEMOB : 0,
+                'TQUODETA_ELECTRICITY' => $request->TQUODETA_ELECTRICITY,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
@@ -320,7 +323,7 @@ class QuotationController extends Controller
     {
         $documentNumber = base64_decode($request->id);
 
-        $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE_DESCRIPTION", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB", 'TQUODETA_ITMQT'])
+        $RS = T_QUODETA::on($this->dedicatedConnection)->select(["id", "TQUODETA_ITMCD", "MITM_ITMNM", "TQUODETA_USAGE_DESCRIPTION", "TQUODETA_PRC", "TQUODETA_OPRPRC", "TQUODETA_MOBDEMOB", 'TQUODETA_ITMQT', 'TQUODETA_ELECTRICITY'])
             ->leftJoin("M_ITM", function ($join) {
                 $join->on("TQUODETA_ITMCD", "=", "MITM_ITMCD")
                     ->on('TQUODETA_BRANCH', '=', 'MITM_BRANCH');
@@ -552,9 +555,9 @@ class QuotationController extends Controller
 
             $this->fpdf->SetXY(6, 72);
             $this->fpdf->Cell(7, 5, 'No', 1, 0, 'L');
-            $this->fpdf->Cell(20, 5, 'Merk', 1, 0, 'L');
-            $this->fpdf->Cell(45, 5, 'Capacity / Pemakaian', 1, 0, 'L');
-            $this->fpdf->Cell(35, 5, 'Model', 1, 0, 'C');
+            $this->fpdf->Cell(30, 5, 'Capacity', 1, 0, 'L');
+            $this->fpdf->Cell(45, 5, 'Pemakaian', 1, 0, 'L');
+            $this->fpdf->Cell(30, 5, 'Data Elektrik', 1, 0, 'C');
             $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
             $this->fpdf->Cell(25, 5, 'Harga Sewa', 1, 0, 'C');
             $this->fpdf->Cell(20, 5, 'Operator', 1, 0, 'C');
@@ -564,11 +567,10 @@ class QuotationController extends Controller
             foreach ($RSDetail as $r) {
                 $this->fpdf->SetXY(6, $y);
                 $this->fpdf->Cell(7, 10, $NomorUrut++, 1, 0, 'L');
-                $this->fpdf->Cell(20, 10, $r['MITM_BRAND'], 1, 0, 'L');
 
+                $this->fpdf->Cell(30, 10, '', 1, 0, 'L');
+                $this->fpdf->Text(14, $y + 4, $r['MITM_ITMNM']);
                 $this->fpdf->Cell(45, 10, '', 1, 0, 'L');
-                $this->fpdf->Text(35, $y + 4, $r['MITM_ITMNM']);
-
                 $ttlwidth = $this->fpdf->GetStringWidth($r['TQUODETA_USAGE_DESCRIPTION']);
                 if ($ttlwidth > 45) {
                     $ukuranfont = 8.5;
@@ -578,7 +580,7 @@ class QuotationController extends Controller
                         $ukuranfont = $ukuranfont - 0.5;
                     }
                 }
-                $this->fpdf->Text(35, $y + 8, $r['TQUODETA_USAGE_DESCRIPTION']);
+                $this->fpdf->Text(44, $y+3, $r['TQUODETA_USAGE_DESCRIPTION']);
 
                 $this->fpdf->SetFont('Arial', '', 9);
                 $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_MODEL']);
@@ -590,7 +592,7 @@ class QuotationController extends Controller
                         $ukuranfont = $ukuranfont - 0.5;
                     }
                 }
-                $this->fpdf->Cell(35, 10, $r['MITM_MODEL'], 1, 0, 'C');
+                $this->fpdf->Cell(30, 10, $r['MITM_MODEL'], 1, 0, 'C');
 
                 $this->fpdf->SetFont('Arial', '', 9);
                 $this->fpdf->Cell(10, 10, $r['TQUODETA_ITMQT'], 1, 0, 'C');
