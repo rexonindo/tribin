@@ -87,6 +87,7 @@
                                                                         <th class="text-end">Price</th>
                                                                         <th class="text-end">Operator</th>
                                                                         <th class="text-end">MOB DEMOB</th>
+                                                                        <th class="text-center">Electricity</th>
                                                                         <th class="text-end">SUB TOTAL</th>
                                                                     </tr>
                                                                 </thead>
@@ -94,7 +95,7 @@
                                                                 </tbody>
                                                                 <tfoot>
                                                                     <tr>
-                                                                        <td colspan="6" class="text-end"> <b>Grand Total</b></td>
+                                                                        <td colspan="7" class="text-end"> <b>Grand Total</b></td>
                                                                         <td class="text-end"><strong id="strongGrandTotal">0</strong></td>
                                                                     </tr>
                                                                 </tfoot>
@@ -147,6 +148,18 @@
                                                         <div class="input-group input-group-sm mb-1">
                                                             <span class="input-group-text">MOBDEMOB</span>
                                                             <input type="text" id="quotationMOBDEMOB" class="form-control quotationInputItem">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <span class="input-group-text">Electricity</span>
+                                                            <input type="text" id="quotationElectricity" class="form-control quotationInputItem" list="quotationElectricityDL">
+                                                            <datalist id="quotationElectricityDL">
+                                                                <option value="50Mhz">
+                                                                <option value="60Mhz">
+                                                            </datalist>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -681,6 +694,7 @@
                 TQUODETA_PRC: numeral(quotationPrice.value).value(),
                 TQUODETA_OPRPRC: numeral(quotationOperator.value).value(),
                 TQUODETA_MOBDEMOB: numeral(quotationMOBDEMOB.value).value(),
+                TQUODETA_ELECTRICITY: quotationElectricity.value,
                 TQUO_TYPE: '2',
                 _token: '{{ csrf_token() }}',
             }
@@ -764,7 +778,11 @@
             newcell.innerHTML = numeral(quotationMOBDEMOB.value).format(',')
             newcell.classList.add('text-end')
 
-            newcell = newrow.insertCell(7)
+            newcell = newrow.insertCell(-1)
+            newcell.innerHTML = quotationElectricity.value
+            newcell.classList.add('text-center')
+
+            newcell = newrow.insertCell(-1)
             newcell.innerHTML = numeral(subTotal).format(',')
             newcell.classList.add('text-end')
 
@@ -960,6 +978,7 @@
                         TQUODETA_PRC: quotationPrice.value,
                         TQUODETA_OPRPRC: quotationOperator.value,
                         TQUODETA_MOBDEMOB: quotationMOBDEMOB.value,
+                        TQUODETA_ELECTRICITY: quotationElectricity.value,
                         TQUO_QUOCD: quotationCode.value,
                     }
                     $.ajax({
@@ -1000,7 +1019,8 @@
         quotationTable.rows[selectedRow].cells[4].innerText = quotationPrice.value
         quotationTable.rows[selectedRow].cells[5].innerText = quotationOperator.value
         quotationTable.rows[selectedRow].cells[6].innerText = quotationMOBDEMOB.value
-        quotationTable.rows[selectedRow].cells[7].innerText = subTotal
+        quotationTable.rows[selectedRow].cells[7].innerText = quotationElectricity.value
+        quotationTable.rows[selectedRow].cells[8].innerText = subTotal
         recalculateGrandTotalRent()
     }
 
@@ -1333,6 +1353,7 @@
                                 quotationPrice.value = ''
                                 quotationOperator.value = ''
                                 quotationMOBDEMOB.value = ''
+                                quotationElectricity.value = ''
                             } else {
                                 const ttlrows = quotationTable.rows.length
                                 for (let i = 1; i < ttlrows; i++) {
@@ -1347,6 +1368,7 @@
                                 quotationPrice.value = arrayItem['TQUODETA_PRC']
                                 quotationOperator.value = arrayItem['TQUODETA_OPRPRC']
                                 quotationMOBDEMOB.value = arrayItem['TQUODETA_MOBDEMOB']
+                                quotationElectricity.value = arrayItem['TQUODETA_ELECTRICITY']
                             }
                         }
                         newcell = newrow.insertCell(0)
@@ -1368,7 +1390,10 @@
                         newcell = newrow.insertCell(6)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(arrayItem['TQUODETA_MOBDEMOB']).format(',')
-                        newcell = newrow.insertCell(7)
+                        newcell = newrow.insertCell(-1)
+                        newcell.classList.add('text-center')
+                        newcell.innerHTML = arrayItem['TQUODETA_ELECTRICITY']
+                        newcell = newrow.insertCell(-1)
                         newcell.classList.add('text-end')
                         newcell.innerHTML = numeral(subTotal).format(',')
 
