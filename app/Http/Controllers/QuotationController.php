@@ -456,7 +456,8 @@ class QuotationController extends Controller
             'TQUO_APPRVDT',
             'TQUO_TYPE',
             'TQUO_SERVTRANS_COST',
-            'T_QUOHEAD.created_by'
+            'T_QUOHEAD.created_by',
+            'TQUO_PROJECT_LOCATION'
         )
             ->leftJoin("M_CUS", "TQUO_CUSCD", "=", "MCUS_CUSCD")
             ->where("TQUO_QUOCD", $doc)
@@ -480,7 +481,8 @@ class QuotationController extends Controller
             'TQUODETA_OPRPRC',
             'TQUODETA_MOBDEMOB',
             'TQUODETA_ITMQT',
-            'MITM_STKUOM'
+            'MITM_STKUOM',
+            'TQUODETA_ELECTRICITY'
         )
             ->leftJoin("M_ITM", function ($join) {
                 $join->on("TQUODETA_ITMCD", "=", "MITM_ITMCD")
@@ -515,19 +517,28 @@ class QuotationController extends Controller
         $this->fpdf->SetFont('Arial', '', 9);
         $this->fpdf->SetXY(7, 31);
         $this->fpdf->Cell(15, 5, 'To', 0, 0, 'L');
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ': ' . $MCUS_CUSNM, 0, 0, 'L');
         $this->fpdf->SetXY(7, 36);
         $this->fpdf->Cell(15, 5, 'Attn', 0, 0, 'L');
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ': ' . $TQUO_ATTN, 0, 0, 'L');
         $this->fpdf->SetXY(7, 41);
         $this->fpdf->Cell(15, 5, 'Telp', 0, 0, 'L');
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ': ' . $MCUS_TELNO, 0, 0, 'L');
         $this->fpdf->SetXY(7, 46);
         $this->fpdf->Cell(15, 5, 'Email', 0, 0, 'L');
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ':', 0, 0, 'L');
         $this->fpdf->SetXY(7, 51);
         $this->fpdf->Cell(15, 5, 'Subject', 0, 0, 'L');
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'L');
         $this->fpdf->Cell(5, 5, ': ' . $TQUO_SBJCT, 0, 0, 'L');
+        $this->fpdf->SetXY(7, 56);
+        $this->fpdf->Cell(15, 5, 'Project Location', 0, 0, 'L');
+        $this->fpdf->Cell(10, 5, '', 0, 0, 'L');
+        $this->fpdf->Cell(5, 5, ': ' . $RSHeader->TQUO_PROJECT_LOCATION, 0, 0, 'L');
 
         $this->fpdf->SetFont('Arial', '', 9);
         $this->fpdf->SetXY(140, 31);
@@ -555,13 +566,13 @@ class QuotationController extends Controller
 
             $this->fpdf->SetXY(6, 72);
             $this->fpdf->Cell(7, 5, 'No', 1, 0, 'L');
-            $this->fpdf->Cell(30, 5, 'Capacity', 1, 0, 'L');
+            $this->fpdf->Cell(30, 5, 'Item / Capacity', 1, 0, 'L');
             $this->fpdf->Cell(45, 5, 'Pemakaian', 1, 0, 'L');
             $this->fpdf->Cell(30, 5, 'Data Elektrik', 1, 0, 'C');
             $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
             $this->fpdf->Cell(25, 5, 'Harga Sewa', 1, 0, 'C');
-            $this->fpdf->Cell(20, 5, 'Operator', 1, 0, 'C');
-            $this->fpdf->Cell(20, 5, 'MOBDEMOB', 1, 0, 'C');
+            $this->fpdf->Cell(25, 5, 'Total', 1, 0, 'C');
+
             $y = 77;
             $NomorUrut = 1;
             foreach ($RSDetail as $r) {
@@ -580,25 +591,25 @@ class QuotationController extends Controller
                         $ukuranfont = $ukuranfont - 0.5;
                     }
                 }
-                $this->fpdf->Text(44, $y+3, $r['TQUODETA_USAGE_DESCRIPTION']);
+                $this->fpdf->Text(44, $y + 3, $r['TQUODETA_USAGE_DESCRIPTION']);
 
                 $this->fpdf->SetFont('Arial', '', 9);
-                $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_MODEL']);
+                $ttlwidth = $this->fpdf->GetStringWidth($r['TQUODETA_ELECTRICITY']);
                 if ($ttlwidth > 35) {
                     $ukuranfont = 8.5;
                     while ($ttlwidth > 35) {
                         $this->fpdf->SetFont('Arial', '', $ukuranfont);
-                        $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_MODEL']);
+                        $ttlwidth = $this->fpdf->GetStringWidth($r['TQUODETA_ELECTRICITY']);
                         $ukuranfont = $ukuranfont - 0.5;
                     }
                 }
-                $this->fpdf->Cell(30, 10, $r['MITM_MODEL'], 1, 0, 'C');
+                $this->fpdf->Cell(30, 10, $r['TQUODETA_ELECTRICITY'], 1, 0, 'C');
 
                 $this->fpdf->SetFont('Arial', '', 9);
                 $this->fpdf->Cell(10, 10, $r['TQUODETA_ITMQT'], 1, 0, 'C');
                 $this->fpdf->Cell(25, 10, number_format($r['TQUODETA_PRC']), 1, 0, 'C');
-                $this->fpdf->Cell(20, 10, number_format($r['TQUODETA_OPRPRC']), 1, 0, 'C');
-                $this->fpdf->Cell(20, 10, number_format($r['TQUODETA_MOBDEMOB']), 1, 0, 'C');
+                $this->fpdf->Cell(25, 10, number_format($r['TQUODETA_PRC'] * $r['TQUODETA_ITMQT']), 1, 0, 'C');
+
                 $y += 10;
             }
             $y += 5;
@@ -699,7 +710,7 @@ class QuotationController extends Controller
             ->where('BRANCH', Auth::user()->branch)
             ->whereNull('deleted_at')
             ->get();
-            
+
         $y += 15;
         $this->fpdf->SetFont('Arial', 'B', 10);
         $this->fpdf->SetXY(6, $y);
