@@ -93,7 +93,7 @@ class QuotationController extends Controller
             'TQUODETA_ITMCD' => 'required|array',
             'TQUODETA_USAGE_DESCRIPTION' => 'required|array',
             'TQUODETA_PRC' => 'required|array',
-            'TQUODETA_PRC.*' => 'required|numeric',           
+            'TQUODETA_PRC.*' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -495,6 +495,8 @@ class QuotationController extends Controller
         $User = User::where('nick_name', $RSHeader->created_by)->select('name', 'phone')->first();
 
         $this->fpdf->SetFont('Arial', 'BU', 24);
+        $this->fpdf->SetAutoPageBreak(true, 1);
+        // $this->fpdf->SetMargins(0, 0);
         $this->fpdf->AddPage("P", 'A4');
         $this->fpdf->SetXY(7, 3);
         $this->fpdf->Cell(0, 8, $RSCG->letter_head, 0, 0, 'C');
@@ -560,9 +562,9 @@ class QuotationController extends Controller
 
             $this->fpdf->SetXY(6, 72);
             $this->fpdf->Cell(7, 5, 'No', 1, 0, 'L');
-            $this->fpdf->Cell(30, 5, 'Item / Capacity', 1, 0, 'L');
+            $this->fpdf->Cell(30, 5, 'Item', 1, 0, 'L');
             $this->fpdf->Cell(45, 5, 'Pemakaian', 1, 0, 'L');
-            $this->fpdf->Cell(30, 5, 'Data Elektrik', 1, 0, 'C');
+            $this->fpdf->Cell(30, 5, 'Capacity', 1, 0, 'C');
             $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
             $this->fpdf->Cell(25, 5, 'Harga Sewa', 1, 0, 'C');
             $this->fpdf->Cell(25, 5, 'Total', 1, 0, 'C');
@@ -574,7 +576,18 @@ class QuotationController extends Controller
                 $this->fpdf->Cell(7, 10, $NomorUrut++, 1, 0, 'L');
 
                 $this->fpdf->Cell(30, 10, '', 1, 0, 'L');
+                $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_ITMNM']);
+                if ($ttlwidth > 30) {
+                    $ukuranfont = 8.5;
+                    while ($ttlwidth > 30) {
+                        $this->fpdf->SetFont('Arial', '', $ukuranfont);
+                        $ttlwidth = $this->fpdf->GetStringWidth($r['MITM_ITMNM']);
+                        $ukuranfont = $ukuranfont - 0.5;
+                    }
+                }
                 $this->fpdf->Text(14, $y + 4, $r['MITM_ITMNM']);
+
+                $this->fpdf->SetFont('Arial', '', 9);
                 $this->fpdf->Cell(45, 10, '', 1, 0, 'L');
                 $ttlwidth = $this->fpdf->GetStringWidth($r['TQUODETA_USAGE_DESCRIPTION']);
                 if ($ttlwidth > 45) {
@@ -734,16 +747,18 @@ class QuotationController extends Controller
         $y += 25;
         $this->fpdf->SetXY(7, $y);
         $this->fpdf->Image(storage_path('app/public/mkt_sign.jpg'), 7, $y - 19, 15, 15);
-        $this->fpdf->Cell(20, 5, 'Marketing Dept.', 0, 0, 'L');
-
         if (!empty($TQUO_APPRVDT)) {
             $this->fpdf->Image(storage_path('app/public/dir_sign.jpg'), 85, $y - 19, 15, 15);
         }
+        $y -= 5;
+        $this->fpdf->SetXY(7, $y);
+        $this->fpdf->Cell(20, 5, 'Marketing Dept.', 0, 0, 'L');
         $this->fpdf->Cell(130, 5, ' Pimpinan,', 0, 0, 'C');
         $this->fpdf->Cell(40, 5, ' Penyewa/pembeli', 0, 0, 'C');
+
+        $this->fpdf->SetXY(6, $this->fpdf->GetPageHeight() - 9);
+        $this->fpdf->Cell(0, 5, 'Cetakan dari system komputer tidak memerlukan tanda tangan basah', 1, 0, 'C');
         $this->fpdf->Output('quotation ' . $doc . '.pdf', 'I');
-
-
         exit;
     }
 
