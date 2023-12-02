@@ -159,9 +159,6 @@ class QuotationController extends Controller
             'TQUODETA_QUOCD' => 'required',
             'TQUODETA_ITMCD' => 'required',
             'TQUODETA_PRC' => 'required|numeric',
-            'TQUODETA_MOBDEMOB' => 'required|numeric',
-            'TQUODETA_OPRPRC' => 'required|numeric',
-            'TQUODETA_MOBDEMOB' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -185,8 +182,8 @@ class QuotationController extends Controller
             'TQUODETA_USAGE' => 1,
             'TQUODETA_USAGE_DESCRIPTION' => $request->TQUODETA_USAGE_DESCRIPTION,
             'TQUODETA_PRC' => $request->TQUODETA_PRC,
-            'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC,
-            'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB,
+            'TQUODETA_OPRPRC' => 0,
+            'TQUODETA_MOBDEMOB' => 0,
             'TQUODETA_ELECTRICITY' => $request->TQUODETA_ELECTRICITY,
             'created_by' => Auth::user()->nick_name,
             'TQUODETA_BRANCH' => Auth::user()->branch
@@ -283,8 +280,8 @@ class QuotationController extends Controller
                 'TQUODETA_ITMQT' => $request->TQUODETA_ITMQT,
                 'TQUODETA_USAGE_DESCRIPTION' => $request->TQUODETA_USAGE_DESCRIPTION,
                 'TQUODETA_PRC' => $request->TQUODETA_PRC,
-                'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC ? $request->TQUODETA_OPRPRC : 0,
-                'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB ? $request->TQUODETA_MOBDEMOB : 0,
+                'TQUODETA_OPRPRC' => $request->TQUODETA_OPRPRC ?? 0,
+                'TQUODETA_MOBDEMOB' => $request->TQUODETA_MOBDEMOB ?? 0,
                 'TQUODETA_ELECTRICITY' => $request->TQUODETA_ELECTRICITY,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
@@ -564,7 +561,7 @@ class QuotationController extends Controller
             $this->fpdf->Cell(7, 5, 'No', 1, 0, 'L');
             $this->fpdf->Cell(30, 5, 'Item', 1, 0, 'L');
             $this->fpdf->Cell(45, 5, 'Pemakaian', 1, 0, 'L');
-            $this->fpdf->Cell(30, 5, 'Capacity', 1, 0, 'C');
+            $this->fpdf->Cell(30, 5, 'Freq/Volt', 1, 0, 'C');
             $this->fpdf->Cell(10, 5, 'Qty', 1, 0, 'C');
             $this->fpdf->Cell(25, 5, 'Harga Sewa', 1, 0, 'C');
             $this->fpdf->Cell(25, 5, 'Total', 1, 0, 'C');
