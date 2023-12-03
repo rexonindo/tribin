@@ -290,6 +290,23 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-1">
+                                    <label for="orderCustomer" class="form-label">Maps</label>
+                                    <div class="input-group input-group-sm mb-1">
+                                        <textarea id="orderEmbedCodeContainer" class="form-control" maxlength="500">
+                                        </textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-1">
+                                    <button type="button" class="btn btn-primary btn-sm" id="btnPreviewMaps" onclick="btnPreviewMapOnclick(this)">Preview Map</button>
+                                </div>
+                                <div class="col-md-6 mb-1">
+                                    <iframe id="frame1" height="256" frameborder="0" width="100%"></iframe>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -504,6 +521,7 @@
     </div>
 </div>
 <script>
+    orderEmbedCodeContainer.value = ''
     $("#orderIssueDate").datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
@@ -730,9 +748,9 @@
         newcell.innerHTML = numeral(orderMOBDEMOB.value).format(',')
         newcell.classList.add('text-end')
         newcell = newrow.insertCell(8)
-        newcell.innerHTML = orderPeriodFrom.value        
+        newcell.innerHTML = orderPeriodFrom.value
         newcell = newrow.insertCell(9)
-        newcell.innerHTML = orderPeriodTo.value        
+        newcell.innerHTML = orderPeriodTo.value
 
         tribinClearTextBoxByClassName('orderInputItem')
     }
@@ -740,6 +758,7 @@
     function btnNewOnclick() {
         tribinClearTextBox()
         orderTable.getElementsByTagName('tbody')[0].innerHTML = ``
+        orderEmbedCodeContainer.value = ''
     }
 
     function btnRemoveLineOnclick(pthis) {
@@ -873,6 +892,7 @@
                 TSLO_ADDRESS_DESCRIPTION: orderAddress.value.trim(),
                 TSLO_TYPE: FinalQuotationType,
                 TSLO_SERVTRANS_COST: quotationServiceCost.value,
+                TSLO_MAP_URL: orderEmbedCodeContainer.value,
                 TSLODETA_ITMCD: itemCode,
                 TSLODETA_ITMQT: itemQty,
                 TSLODETA_USAGE_DESCRIPTION: itemUsage,
@@ -928,6 +948,7 @@
                 TSLO_PLAN_DLVDT: orderPlanDeliveryDate.value.trim(),
                 TSLO_ADDRESS_NAME: orderAddressName.value.trim(),
                 TSLO_ADDRESS_DESCRIPTION: orderAddress.value.trim(),
+                TSLO_MAP_URL: orderEmbedCodeContainer.value,
                 _token: '{{ csrf_token() }}',
             }
             if (confirm(`Are you sure want to update ?`)) {
@@ -1011,6 +1032,7 @@
                             orderPlanDeliveryDate.value = arrayItem['TSLO_PLAN_DLVDT']
                             orderAddressName.value = arrayItem['TSLO_ADDRESS_NAME']
                             orderAddress.value = arrayItem['TSLO_ADDRESS_DESCRIPTION']
+                            orderEmbedCodeContainer.value = arrayItem['TSLO_MAP_URL']
                             quotationServiceCost.value = arrayItem['TSLO_SERVTRANS_COST']
                             loadReceiveDetail({
                                 doc: arrayItem['TSLO_SLOCD']
@@ -1703,4 +1725,42 @@
             alertify.message('nothing selected item')
         }
     }
+
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function btnPreviewMapOnclick(pthis) {
+        if (isValidUrl(orderEmbedCodeContainer.value)) {
+            pthis.disabled = true
+            pthis.innerText = 'Please wait'
+            frame1.src = orderEmbedCodeContainer.value
+        } else {
+            const parser = new DOMParser()
+            try {
+                const htmlDoc = parser.parseFromString(orderEmbedCodeContainer.value, 'text/html')
+                const htmlIframe = htmlDoc.body.firstChild
+                if (isValidUrl(htmlIframe.src)) {
+                    pthis.disabled = true
+                    pthis.innerText = 'Please wait'
+                    frame1.src = htmlIframe.src
+                    orderEmbedCodeContainer.value = htmlIframe.src
+                } else {
+                    alertify.warning('URL is not valid')
+                }
+            } catch (ex) {
+                alertify.warning('could not parsing')
+            }
+        }
+    }
+
+    frame1.addEventListener('load', function() {
+        btnPreviewMaps.innerHTML = 'Preview Map'
+        btnPreviewMaps.disabled = false
+    })
 </script>

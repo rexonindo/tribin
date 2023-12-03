@@ -94,6 +94,7 @@ class ReceiveOrderController extends Controller
             'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
             'TSLO_ADDRESS_NAME' => $request->TSLO_ADDRESS_NAME,
             'TSLO_ADDRESS_DESCRIPTION' => $request->TSLO_ADDRESS_DESCRIPTION,
+            'TSLO_MAP_URL' => $request->TSLO_MAP_URL,
             'TSLO_TYPE' => $request->TSLO_TYPE,
             'TSLO_SERVTRANS_COST' => $request->TSLO_SERVTRANS_COST,
             'created_by' => Auth::user()->nick_name,
@@ -147,7 +148,7 @@ class ReceiveOrderController extends Controller
             'msg' => 'OK', 'doc' => $newDocumentCode, '$RSLast' => $LastLine,
             'quotationHeader' => $quotationHeader,
             'quotationDetail' => $quotationDetail,
-            'newPOCode' => $newPOCode,            
+            'newPOCode' => $newPOCode,
         ];
     }
 
@@ -161,7 +162,7 @@ class ReceiveOrderController extends Controller
 
         $RS = T_SLOHEAD::on($this->dedicatedConnection)->select([
             "TSLO_SLOCD", "TSLO_CUSCD", "MCUS_CUSNM", "TSLO_ISSUDT", "TSLO_QUOCD", "TSLO_POCD",
-            "TSLO_ATTN", "TSLO_PLAN_DLVDT", "TSLO_ADDRESS_NAME", "TSLO_ADDRESS_DESCRIPTION", "TSLO_TYPE", "TSLO_SERVTRANS_COST"
+            "TSLO_ATTN", "TSLO_PLAN_DLVDT", "TSLO_ADDRESS_NAME", "TSLO_ADDRESS_DESCRIPTION", "TSLO_TYPE", "TSLO_SERVTRANS_COST", 'TSLO_MAP_URL'
         ])
             ->leftJoin("M_CUS", function ($join) {
                 $join->on("TSLO_CUSCD", "=", "MCUS_CUSCD")
@@ -253,6 +254,7 @@ class ReceiveOrderController extends Controller
                 'TSLO_PLAN_DLVDT' => $request->TSLO_PLAN_DLVDT,
                 'TSLO_ADDRESS_NAME' => $request->TSLO_ADDRESS_NAME,
                 'TSLO_ADDRESS_DESCRIPTION' => $request->TSLO_ADDRESS_DESCRIPTION,
+                'TSLO_MAP_URL' => $request->TSLO_MAP_URL,
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
