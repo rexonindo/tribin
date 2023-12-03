@@ -5,6 +5,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\CoaController;
 use App\Http\Controllers\CompanyGroupController;
+use App\Http\Controllers\ConditionController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\DistancePriceController;
@@ -127,6 +128,17 @@ Route::middleware('auth')->group(function () {
         Route::get('', [CoaController::class, 'search']);
         Route::post('', [CoaController::class, 'simpan']);
         Route::put('{id}', [CoaController::class, 'update']);
+    });
+
+    # Terkait Chart of Account Master
+    Route::prefix('condition')->group(function () {
+        Route::get('form', [ConditionController::class, 'index']);
+        Route::post('import', [ConditionController::class, 'importFromAnotherCompany']);
+        Route::get('search', [ConditionController::class, 'search']);
+        Route::post('', [ConditionController::class, 'simpan']);
+        Route::put('{id}', [ConditionController::class, 'update']);
+        Route::delete('{id}', [ConditionController::class, 'delete']);
+        Route::get('', [QuotationController::class, 'getAllCondition'])->middleware('auth');
     });
 
     # Terkait Unit of Measurement Master
@@ -256,9 +268,6 @@ Route::middleware('auth')->group(function () {
         Route::put('purchase-order/{id}', [PurchaseController::class, 'rejectPO']);
     });
 });
-
-# Terkait Quotation Condition
-Route::get('condition', [QuotationController::class, 'getAllCondition'])->middleware('auth');
 
 Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
 Route::put('approve/purchase-request/{id}', [PurchaseController::class, 'approve'])->middleware('auth');
