@@ -279,7 +279,7 @@ class DeliveryController extends Controller
             $SalesOrderNumber = $r->TDLVORDDETA_SLOCD;
             break;
         }
-        $SalesOrder = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_ADDRESS_NAME', 'TSLO_ADDRESS_DESCRIPTION')
+        $SalesOrder = T_SLOHEAD::on($this->dedicatedConnection)->select('TSLO_ADDRESS_NAME', 'TSLO_ADDRESS_DESCRIPTION', 'TSLO_MAP_URL')
             ->where('TSLO_SLOCD', $SalesOrderNumber)
             ->where('TSLO_BRANCH', Auth::user()->branch)
             ->get();

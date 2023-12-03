@@ -31,6 +31,7 @@
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab">Item</button>
                                     <button class="nav-link" id="nav-cost-tab" data-bs-toggle="tab" data-bs-target="#nav-cost" type="button" role="tab">Costs</button>
+                                    <button class="nav-link" id="nav-map-tab" data-bs-toggle="tab" data-bs-target="#nav-map" type="button" role="tab">Map</button>
                                 </div>
                             </nav>
                             <div class="tab-content" id="nav-tabContent">
@@ -60,7 +61,7 @@
                                                     </textarea>
                                                 </div>
                                             </div>
-                                        </div>                                        
+                                        </div>
                                         <div class="row border-top">
                                             <div class="col-md-12 mb-1">
                                                 <div class="table-responsive" id="quotationTableContainer">
@@ -261,6 +262,15 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="nav-map" role="tabpanel" tabindex="2">
+                                    <div class="container-fluid mt-2 border-start border-bottom rounded-start">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <iframe id="frame1" height="256" frameborder="0" width="100%"></iframe>
                                             </div>
                                         </div>
                                     </div>
@@ -492,6 +502,7 @@
             success: function(response) {
                 quotationAddressName.value = response.SalesOrder[0].TSLO_ADDRESS_NAME
                 quotationAddressDescription.value = response.SalesOrder[0].TSLO_ADDRESS_DESCRIPTION
+                frame1.src = response.SalesOrder[0].TSLO_MAP_URL
                 let myContainer = document.getElementById("quotationTableContainer");
                 let myfrag = document.createDocumentFragment();
                 let cln = quotationTable.cloneNode(true);
