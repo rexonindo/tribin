@@ -438,6 +438,7 @@
                                         <tr>
                                             <th>...</th>
                                             <th>Condition</th>
+                                            <th>Order</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1514,6 +1515,8 @@
                     newcell.appendChild(checkBox)
                     newcell = newrow.insertCell(1)
                     newcell.innerHTML = arrayItem['MCONDITION_DESCRIPTION']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['MCONDITION_ORDER_NUMBER']
                 })
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
@@ -1530,7 +1533,7 @@
         const ttlrows = conditionTabel.rows.length - 1
         let isSelectedRowsFound = false
         let conditions = []
-        for (let i = 1; i < ttlrows; i++) {
+        for (let i = 1; i <= ttlrows; i++) {
             const _elCheckBox = conditionTabel.rows[i].cells[0].getElementsByTagName('input')[0]
             if (_elCheckBox.checked) {
                 isSelectedRowsFound = true

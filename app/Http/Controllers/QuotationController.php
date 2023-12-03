@@ -870,7 +870,9 @@ class QuotationController extends Controller
 
     function getAllCondition()
     {
-        return ['data' => M_Condition::on($this->dedicatedConnection)->select('MCONDITION_DESCRIPTION')->orderBy('MCONDITION_DESCRIPTION')->get()];
+        return ['data' => M_Condition::on($this->dedicatedConnection)->select('MCONDITION_ORDER_NUMBER','MCONDITION_DESCRIPTION')
+        ->orderBy('MCONDITION_ORDER_NUMBER','ASC')
+        ->get()];
     }
 
     function revise(Request $request)
