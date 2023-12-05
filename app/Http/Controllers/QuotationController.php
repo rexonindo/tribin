@@ -732,7 +732,7 @@ class QuotationController extends Controller
             $y += 5;
         }
 
-        $y += 25;
+        $y += 10;
         $this->fpdf->SetXY(7, $y);
         $this->fpdf->Cell(20, 5, 'Hormat kami,', 0, 0, 'L');
         $y += 5;
