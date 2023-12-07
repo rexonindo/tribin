@@ -586,17 +586,10 @@ class QuotationController extends Controller
 
                 $this->fpdf->SetFont('Arial', '', 9);
                 $this->fpdf->Cell(45, 10, '', 1, 0, 'L');
-                $ttlwidth = $this->fpdf->GetStringWidth($r['TQUODETA_USAGE_DESCRIPTION']);
-                if ($ttlwidth > 45) {
-                    $ukuranfont = 8.5;
-                    while ($ttlwidth > 45) {
-                        $this->fpdf->SetFont('Arial', '', $ukuranfont);
-                        $ttlwidth = $this->fpdf->GetStringWidth($r['TQUODETA_USAGE_DESCRIPTION']);
-                        $ukuranfont = $ukuranfont - 0.5;
-                    }
-                }
-                $this->fpdf->Text(44, $y + 3, $r['TQUODETA_USAGE_DESCRIPTION']);
+                $this->fpdf->SetXY(43, $y);
+                $this->fpdf->MultiCell(45, 5, $r['TQUODETA_USAGE_DESCRIPTION'], 0, 'L');
 
+                $this->fpdf->SetXY(88, $y);
                 $this->fpdf->SetFont('Arial', '', 9);
                 $ttlwidth = $this->fpdf->GetStringWidth($r['TQUODETA_ELECTRICITY']);
                 if ($ttlwidth > 35) {
@@ -870,9 +863,9 @@ class QuotationController extends Controller
 
     function getAllCondition()
     {
-        return ['data' => M_Condition::on($this->dedicatedConnection)->select('MCONDITION_ORDER_NUMBER','MCONDITION_DESCRIPTION')
-        ->orderBy('MCONDITION_ORDER_NUMBER','ASC')
-        ->get()];
+        return ['data' => M_Condition::on($this->dedicatedConnection)->select('MCONDITION_ORDER_NUMBER', 'MCONDITION_DESCRIPTION')
+            ->orderBy('MCONDITION_ORDER_NUMBER', 'ASC')
+            ->get()];
     }
 
     function revise(Request $request)
