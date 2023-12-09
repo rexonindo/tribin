@@ -267,25 +267,74 @@ Route::middleware('auth')->group(function () {
         Route::put('purchase-request/{id}', [PurchaseController::class, 'reject']);
         Route::put('purchase-order/{id}', [PurchaseController::class, 'rejectPO']);
     });
+
+    #Terkait laporan berupa Pdf
+    Route::prefix('PDF')->group(function () {
+        Route::get('quotation/{id}', [QuotationController::class, 'toPDF']);
+        Route::get('purchase-request/{id}', [PurchaseController::class, 'toPDF']);
+        Route::get('purchase-order/{id}', [PurchaseController::class, 'POtoPDF']);
+        Route::get('delivery-order/{id}', [DeliveryController::class, 'toPDF']);
+        Route::get('SPK/{id}', [DeliveryController::class, 'SPKtoPDF']);
+    });
+
+    Route::prefix('approve')->group(function () {
+        Route::put('quotations/{id}', [QuotationController::class, 'approve']);
+        Route::put('purchase-request/{id}', [PurchaseController::class, 'approve']);
+        Route::put('sales-order-draft/{id}', [ReceiveOrderController::class, 'approve']);
+        Route::put('purchase-order/{id}', [PurchaseController::class, 'approvePO']);
+    });
+
+    Route::prefix('approved')->group(function () {
+        Route::get('form/quotation', [QuotationController::class, 'formApproved']);
+        Route::get('form/purchase-request', [PurchaseController::class, 'formStatus']);
+        Route::get('form/sales-order-draft', [ReceiveOrderController::class, 'formApprovalDraft']);
+    });
+
+    # Terkait Purchase Request Transaction
+    Route::prefix('purchase-request')->group(function () {
+        Route::get('form', [PurchaseController::class, 'index']);
+        Route::post('', [PurchaseController::class, 'save']);
+        Route::get('', [PurchaseController::class, 'search']);
+        Route::put('{id}', [PurchaseController::class, 'update']);
+        Route::get('{id}', [PurchaseController::class, 'loadById']);
+        Route::delete('items/{id}', [PurchaseController::class, 'deleteItemById']);
+    });
+
+    # Terkait Purchase Order Transaction
+    Route::prefix('purchase-order')->group(function () {
+        Route::get('form', [PurchaseController::class, 'formOrder']);
+        Route::post('', [PurchaseController::class, 'savePO']);
+        Route::get('', [PurchaseController::class, 'searchPO']);
+        Route::get('document/{id}', [PurchaseController::class, 'loadPOById']);
+        Route::get('approval-document/{id}', [PurchaseController::class, 'loadPOByIdApproval']);
+        Route::put('items/{id}', [PurchaseController::class, 'updatePODetail']);
+        Route::delete('items/{id}', [PurchaseController::class, 'updatePODetail']);
+    });
+
+    # Terkait Sales Order Draft Transaction
+    Route::prefix('sales-order-draft')->group(function () {
+        Route::get('document/{id}', [ReceiveOrderController::class, 'loadDraftById']);
+        Route::get('', [ReceiveOrderController::class, 'searchDraft']);
+    });
+
+    # Terkait Branch
+    Route::prefix('branch')->group(function () {
+        Route::get('form', [BranchController::class, 'index']);
+        Route::post('', [BranchController::class, 'save']);
+        Route::get('', [BranchController::class, 'search']);
+    });
+
+    Route::prefix('confirmation')->group(function () {
+        Route::get('form/delivery', [DeliveryController::class, 'formDeliveryConfirmation']);
+        Route::put('form/delivery/{id}', [DeliveryController::class, 'confirmDelivery']);
+        Route::get('data/delivery', [DeliveryController::class, 'emptyDeliveryDateTime']);
+    });
 });
 
-Route::put('approve/quotations/{id}', [QuotationController::class, 'approve'])->middleware('auth');
-Route::put('approve/purchase-request/{id}', [PurchaseController::class, 'approve'])->middleware('auth');
-Route::put('approve/sales-order-draft/{id}', [ReceiveOrderController::class, 'approve'])->middleware('auth');
-Route::put('approve/purchase-order/{id}', [PurchaseController::class, 'approvePO'])->middleware('auth');
-Route::get('approved/form/quotation', [QuotationController::class, 'formApproved'])->middleware('auth');
-Route::get('approved/form/purchase-request', [PurchaseController::class, 'formStatus'])->middleware('auth');
-Route::get('approved/form/sales-order-draft', [ReceiveOrderController::class, 'formApprovalDraft'])->middleware('auth');
+Route::get('purchase-request-approval/{id}', [PurchaseController::class, 'loadByIdApproval'])->middleware('auth');
 
 #Terkait Dasbor
 Route::get('dashboard-resource', [HomeController::class, 'supportDashboard'])->middleware('auth');
-
-#Terkait laporan berupa Pdf
-Route::get('PDF/quotation/{id}', [QuotationController::class, 'toPDF'])->middleware('auth');
-Route::get('PDF/purchase-request/{id}', [PurchaseController::class, 'toPDF'])->middleware('auth');
-Route::get('PDF/purchase-order/{id}', [PurchaseController::class, 'POtoPDF'])->middleware('auth');
-Route::get('PDF/delivery-order/{id}', [DeliveryController::class, 'toPDF'])->middleware('auth');
-Route::get('PDF/SPK/{id}', [DeliveryController::class, 'SPKtoPDF'])->middleware('auth');
 
 #Terkait config
 Route::get('ACL/database', function () {
@@ -299,36 +348,5 @@ Route::get('ACL/database', function () {
     return ['data' => $ConnectionList];
 });
 
-# Terkait Purchase Request Transaction
-Route::get('purchase-request/form', [PurchaseController::class, 'index'])->middleware('auth');
-Route::post('purchase-request', [PurchaseController::class, 'save'])->middleware('auth');
-Route::get('purchase-request', [PurchaseController::class, 'search'])->middleware('auth');
-Route::put('purchase-request/{id}', [PurchaseController::class, 'update'])->middleware('auth');
-Route::get('purchase-request/{id}', [PurchaseController::class, 'loadById'])->middleware('auth');
-Route::get('purchase-request-approval/{id}', [PurchaseController::class, 'loadByIdApproval'])->middleware('auth');
-Route::delete('purchase-request/items/{id}', [PurchaseController::class, 'deleteItemById'])->middleware('auth');
-
-# Terkait Purchase Order Transaction
-Route::get('purchase-order/form', [PurchaseController::class, 'formOrder'])->middleware('auth');
-Route::post('purchase-order', [PurchaseController::class, 'savePO'])->middleware('auth');
-Route::get('purchase-order', [PurchaseController::class, 'searchPO'])->middleware('auth');
-Route::get('purchase-order/document/{id}', [PurchaseController::class, 'loadPOById'])->middleware('auth');
-Route::get('purchase-order/approval-document/{id}', [PurchaseController::class, 'loadPOByIdApproval'])->middleware('auth');
-Route::put('purchase-order/items/{id}', [PurchaseController::class, 'updatePODetail'])->middleware('auth');
-Route::delete('purchase-order/items/{id}', [PurchaseController::class, 'updatePODetail'])->middleware('auth');
-
-# Terkait Sales Order Draft Transaction
-Route::get('sales-order-draft/document/{id}', [ReceiveOrderController::class, 'loadDraftById'])->middleware('auth');
-Route::get('sales-order-draft', [ReceiveOrderController::class, 'searchDraft'])->middleware('auth');
-
 # Terkait Receive
 Route::get('receive/form', [ReceiveController::class, 'index'])->middleware('auth');
-
-# Terkait Branch
-Route::get('branch/form', [BranchController::class, 'index'])->middleware('auth');
-Route::post('branch', [BranchController::class, 'save'])->middleware('auth');
-Route::get('branch', [BranchController::class, 'search'])->middleware('auth');
-
-Route::get('confirmation/form/delivery', [DeliveryController::class, 'formDeliveryConfirmation'])->middleware('auth');
-Route::get('confirmation/data/delivery', [DeliveryController::class, 'emptyDeliveryDateTime'])->middleware('auth');
-Route::put('confirmation/form/delivery/{id}', [DeliveryController::class, 'confirmDelivery'])->middleware('auth');
