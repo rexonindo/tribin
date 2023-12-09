@@ -962,7 +962,14 @@ class DeliveryController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
+        $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
+            ->where('RANGE2', '>=', $request->CSPK_KM)
+            ->where('BRANCH', Auth::user()->branch)
+            ->orderBy('RANGE1', 'ASC')
+            ->first();
+
         # Validasi Driver
+        $UANG_JALAN = 0;
         if ($request->CSPK_PIC_AS === 'DRIVER') {
             $validator = Validator::make($request->all(), [
                 'CSPK_VEHICLE_TYPE' => 'required',
@@ -974,16 +981,12 @@ class DeliveryController extends Controller
                 'CSPK_LITER_EXISTING' => 'required|numeric',
             ]);
 
+            $UANG_JALAN = $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6;
+
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 406);
             }
-        }
-
-        $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
-            ->where('RANGE2', '>=', $request->CSPK_KM)
-            ->where('BRANCH', Auth::user()->branch)
-            ->orderBy('RANGE1', 'ASC')
-            ->first();
+        }        
 
         $LastLine = DB::connection($this->dedicatedConnection)->table('C_SPK')
             ->whereYear('created_at', '=', date('Y'))
@@ -1003,7 +1006,7 @@ class DeliveryController extends Controller
             'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
             'CSPK_KM' => $request->CSPK_KM,
             'CSPK_WHEELS' => $request->CSPK_WHEELS,
-            'CSPK_UANG_JALAN' => $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6,
+            'CSPK_UANG_JALAN' => $UANG_JALAN,
             'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
             'CSPK_LITER_EXISTING' => $request->CSPK_LITER_EXISTING ? $request->CSPK_LITER_EXISTING : 0,
             'CSPK_LITER' => $request->CSPK_LITER ? $request->CSPK_LITER : 0,
