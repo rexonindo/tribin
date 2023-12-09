@@ -215,11 +215,11 @@
                                             <div class="row">
                                                 <div class="col-md-6 mb-1">
                                                     <label for="tanggalBerangkat" class="form-label">Berangkat</label>
-                                                    <input type="text" id="tanggalBerangkat" class="form-control orderInputItem" maxlength="20" readonly>
+                                                    <input type="text" id="tanggalBerangkat" class="form-control" readonly>
                                                 </div>
                                                 <div class="col-md-6 mb-1">
                                                     <label for="tanggalKembali" class="form-label">Kembali</label>
-                                                    <input type="text" id="tanggalKembali" class="form-control orderInputItem" maxlength="20" readonly>
+                                                    <input type="text" id="tanggalKembali" class="form-control" readonly>
                                                 </div>
                                             </div>
                                         </fieldset>
@@ -707,6 +707,9 @@
                     newcell = newrow.insertCell(-1)
                     newcell.classList.add('text-end')
                     newcell.innerHTML = numeral(arrayItem['CSPK_UANG_LAIN2']).format(',')
+
+                    tanggalBerangkat.value = arrayItem['CSPK_LEAVEDT']
+                    tanggalKembali.value = arrayItem['CSPK_BACKDT']
                 })
                 myContainer.innerHTML = ''
                 myContainer.appendChild(myfrag)
