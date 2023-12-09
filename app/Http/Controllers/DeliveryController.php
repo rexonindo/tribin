@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApprovalHistory;
 use App\Models\BranchPaymentAccount;
 use App\Models\C_ITRN;
 use App\Models\C_SPK;
@@ -136,6 +137,12 @@ class DeliveryController extends Controller
             ->where('BRANCH', Auth::user()->branch)
             ->orderBy('RANGE1', 'ASC')
             ->first();
+
+        $UANG_JALAN = 0;
+        if ($request->CSPK_PIC_AS === 'DRIVER') {
+            $UANG_JALAN = $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6;
+        }
+
         # ubah data header
         $affectedRow = C_SPK::on($this->dedicatedConnection)
             ->where('id', base64_decode($request->id))
@@ -144,7 +151,7 @@ class DeliveryController extends Controller
                 'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
                 'CSPK_KM' => $request->CSPK_KM,
                 'CSPK_WHEELS' => $request->CSPK_WHEELS,
-                'CSPK_UANG_JALAN' => $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6,
+                'CSPK_UANG_JALAN' => $UANG_JALAN,
                 'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
                 'CSPK_LITER_EXISTING' => $request->CSPK_LITER_EXISTING,
                 'CSPK_LITER' => $request->CSPK_LITER,
@@ -156,11 +163,24 @@ class DeliveryController extends Controller
                 'CSPK_UANG_LAIN2' => $request->CSPK_UANG_LAIN2,
                 'CSPK_LEAVEDT' => $request->CSPK_LEAVEDT,
                 'CSPK_BACKDT' => $request->CSPK_BACKDT,
-                'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE,
+                'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE ?? '',
                 'CSPK_VEHICLE_REGNUM' => $request->CSPK_VEHICLE_REGNUM,
                 'CSPK_JOBDESK' => $request->CSPK_JOBDESK,
-                'updated_by' => Auth::user()->nick_name
+                'updated_by' => Auth::user()->nick_name,
+                'submitted_by' => null,
+                'submitted_at' => null,
             ]);
+
+        if ($affectedRow) {
+            ApprovalHistory::on($this->dedicatedConnection)->create([
+                'created_by' => Auth::user()->nick_name,
+                'form' => 'SPK',
+                'code' => base64_decode($request->id),
+                'type' => '2',
+                'remark' => 'EDITED',
+                'branch' => Auth::user()->branch,
+            ]);
+        }
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
@@ -986,7 +1006,7 @@ class DeliveryController extends Controller
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 406);
             }
-        }        
+        }
 
         $LastLine = DB::connection($this->dedicatedConnection)->table('C_SPK')
             ->whereYear('created_at', '=', date('Y'))
@@ -1020,7 +1040,7 @@ class DeliveryController extends Controller
             'created_by' => Auth::user()->nick_name,
             'CSPK_LEAVEDT' => $request->CSPK_LEAVEDT,
             'CSPK_BACKDT' => $request->CSPK_BACKDT,
-            'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE ? $request->CSPK_VEHICLE_TYPE : '',
+            'CSPK_VEHICLE_TYPE' => $request->CSPK_VEHICLE_TYPE ?? '',
             'CSPK_VEHICLE_REGNUM' => $request->CSPK_VEHICLE_REGNUM ? $request->CSPK_VEHICLE_REGNUM : '',
             'CSPK_JOBDESK' => $request->CSPK_JOBDESK,
             'CSPK_DOCNO' => $newDocCode,
@@ -1384,6 +1404,17 @@ class DeliveryController extends Controller
                 'submitted_by' => Auth::user()->nick_name,
                 'submitted_at' => date('Y-m-d H:i:s')
             ]);
+
+        if ($affectedRow) {
+            ApprovalHistory::on($this->dedicatedConnection)->create([
+                'created_by' => Auth::user()->nick_name,
+                'form' => 'SPK',
+                'code' => base64_decode($request->id),
+                'type' => '1',
+                'remark' => '',
+                'branch' => Auth::user()->branch,
+            ]);
+        }
         return ['message' => 'Submitted'];
     }
 
