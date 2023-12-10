@@ -130,6 +130,17 @@ class DeliveryController extends Controller
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 
+    public function updateDODetailActual(Request $request)
+    {
+        # ubah data header
+        $affectedRow = T_DLVORDDETA::on($this->dedicatedConnection)
+            ->where('id', base64_decode($request->id))
+            ->update([
+                'TDLVORDDETA_ITMCD_ACT' => $request->TDLVORDDETA_ITMCD_ACT
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
+    }
+
     public function updateSPK(Request $request)
     {
         $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
@@ -288,9 +299,20 @@ class DeliveryController extends Controller
     function loadByDocument(Request $request)
     {
         $DONUM =  base64_decode($request->id);
-        $OrderDetail = T_DLVORDDETA::on($this->dedicatedConnection)->select('T_DLVORDDETA.id', 'TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT', 'MITM_ITMNM', 'TDLVORDDETA_SLOCD')
-            ->leftJoin("M_ITM", function ($join) {
-                $join->on('TDLVORDDETA_ITMCD', '=', 'MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'MITM_BRANCH');
+        $OrderDetail = T_DLVORDDETA::on($this->dedicatedConnection)->select(
+            'T_DLVORDDETA.id',
+            'TDLVORDDETA_ITMCD',
+            'TDLVORDDETA_ITMQT',
+            'ITM.MITM_ITMNM',
+            'TDLVORDDETA_SLOCD',
+            'TDLVORDDETA_ITMCD_ACT',
+            'ITMACT.MITM_ITMNM AS ITMNM_ACT',
+        )
+            ->leftJoin("M_ITM AS ITM", function ($join) {
+                $join->on('TDLVORDDETA_ITMCD', '=', 'ITM.MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'ITM.MITM_BRANCH');
+            })
+            ->leftJoin("M_ITM AS ITMACT", function ($join) {
+                $join->on('TDLVORDDETA_ITMCD_ACT', '=', 'ITMACT.MITM_ITMCD')->on('TDLVORDDETA_BRANCH', '=', 'ITMACT.MITM_BRANCH');
             })
             ->where('TDLVORDDETA_DLVCD', $DONUM)
             ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)->get();

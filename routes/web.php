@@ -195,6 +195,7 @@ Route::middleware('auth')->group(function () {
         Route::get('outstanding-warehouse', [DeliveryController::class, 'outstandingWarehouse']);
         Route::get('outstanding-warehouse/{id}', [DeliveryController::class, 'outstandingWarehousePerDocument']);
         Route::put('items/{id}', [DeliveryController::class, 'updateDODetail']);
+        Route::put('items-actual/{id}', [DeliveryController::class, 'updateDODetailActual']);
         Route::post('', [DeliveryController::class, 'save']);
         Route::get('', [DeliveryController::class, 'search']);
         Route::put('{id}', [DeliveryController::class, 'update']);
@@ -328,6 +329,11 @@ Route::middleware('auth')->group(function () {
         Route::get('form/delivery', [DeliveryController::class, 'formDeliveryConfirmation']);
         Route::put('form/delivery/{id}', [DeliveryController::class, 'confirmDelivery']);
         Route::get('data/delivery', [DeliveryController::class, 'emptyDeliveryDateTime']);
+    });
+
+    # Terkait Inventory
+    Route::prefix('inventory')->group(function() {
+        Route::get('status', [InventoryController::class, 'stockStatus']);
     });
 });
 
