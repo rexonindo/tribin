@@ -189,7 +189,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Confirm</button>
+                <button type="button" class="btn btn-primary" onclick="btnConfirmOnClick(this)">Confirm</button>
             </div>
         </div>
     </div>
@@ -206,23 +206,40 @@
         senderContext = 2
     }
 
-    function si_conf_on_GridActionButton_Click(event) {
-        if (confirm("Is this DO (" + event.data.TDLVORD_DLVCD + ") delivered ?")) {
+    function btnConfirmOnClick(pthis) {
+        if (confirm("Are you sure ?")) {
+            pthis.disabled = true
+            pthis.innerHTML = 'Please wait'
             $.ajax({
                 type: "POST",
                 url: "delivery/confirm",
                 data: {
-                    id: event.data.TDLVORD_DLVCD,
+                    id: documentNumber.value,
                     _token: '{{ csrf_token() }}',
                 },
                 dataType: "json",
                 success: function(response) {
+                    pthis.innerHTML = 'Confirm'
+                    pthis.disabled = false
                     alertify.success(response.msg);
                     btnRefreshOnclick(btnRefresh);
-
+                    $('#modalConfirmation').modal('hide')
                 },
                 error: function(xhr, xopt, xthrow) {
-                    alertify.error(xthrow);
+                    pthis.innerHTML = 'Confirm'
+                    pthis.disabled = false
+                    const respon = Object.keys(xhr.responseJSON)
+                    const div_alert = document.getElementById('div-alert')
+                    let msg = ''
+                    for (const item of respon) {
+                        msg += `<p>${xhr.responseJSON[item]}</p>`
+                    }
+                    div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${msg}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`
+
+                    alertify.warning(xthrow);
                 }
             });
         }

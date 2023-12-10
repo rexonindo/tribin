@@ -1581,6 +1581,15 @@ class DeliveryController extends Controller
 
     function confirmOutgoing(Request $request)
     {
+        $totalEmptyItemActual = T_DLVORDDETA::on($this->dedicatedConnection)
+            ->whereNull('TDLVORDDETA_ITMCD_ACT')
+            ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
+            ->where('TDLVORDDETA_DLVCD', $request->id)
+            ->count();
+        if($totalEmptyItemActual>0) {
+            return response()->json([['Please input Actual item']], 406);
+        }
+
         $Delivery = T_DLVORDHEAD::on($this->dedicatedConnection)
             ->leftJoin('T_DLVORDDETA', function ($join) {
                 $join->on('TDLVORD_DLVCD', '=', 'TDLVORDDETA_DLVCD')->on('TDLVORD_BRANCH', '=', 'TDLVORDDETA_BRANCH');
@@ -1612,7 +1621,7 @@ class DeliveryController extends Controller
 
         if (count($Data)) {
             $Delivery = T_DLVORDDETA::on($this->dedicatedConnection)
-                ->select('TDLVORDDETA_ITMCD', 'TDLVORDDETA_ITMQT')
+                ->select('TDLVORDDETA_ITMCD_ACT', 'TDLVORDDETA_ITMQT')
                 ->where('TDLVORDDETA_DLVCD', $request->id)
                 ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
                 ->get();
@@ -1623,7 +1632,7 @@ class DeliveryController extends Controller
                     'CITRN_DOCNO' => $request->id,
                     'CITRN_ISSUDT' => date('Y-m-d'),
                     'CITRN_FORM' => 'OUT-SHP',
-                    'CITRN_ITMCD' => $r->TDLVORDDETA_ITMCD,
+                    'CITRN_ITMCD' => $r->TDLVORDDETA_ITMCD_ACT,
                     'CITRN_ITMQT' => $r->TDLVORDDETA_ITMQT * -1,
                     'CITRN_PRCPER' => 0,
                     'CITRN_PRCAMT' => 0,
