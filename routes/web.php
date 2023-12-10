@@ -200,6 +200,10 @@ Route::middleware('auth')->group(function () {
         Route::get('', [DeliveryController::class, 'search']);
         Route::put('{id}', [DeliveryController::class, 'update']);
         Route::get('document/{id}', [DeliveryController::class, 'loadByDocument']);
+        Route::post('accessory-items/{id}', [DeliveryController::class, 'saveAccessory']);
+        Route::get('accessory-items/{id}', [DeliveryController::class, 'loadAccessoryById']);
+        Route::delete('accessory-items/{id}', [DeliveryController::class, 'deleteAccessoryById']);
+        Route::put('accessory-items/{id}', [DeliveryController::class, 'updateAccessoryById']);
     });
 
     #Terkait Receive Order
@@ -332,7 +336,7 @@ Route::middleware('auth')->group(function () {
     });
 
     # Terkait Inventory
-    Route::prefix('inventory')->group(function() {
+    Route::prefix('inventory')->group(function () {
         Route::get('status', [InventoryController::class, 'stockStatus']);
     });
 });

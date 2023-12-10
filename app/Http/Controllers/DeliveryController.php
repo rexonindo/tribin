@@ -11,6 +11,7 @@ use App\Models\CompanyGroup;
 use App\Models\M_BRANCH;
 use App\Models\M_DISTANCE_PRICE;
 use App\Models\M_SUP;
+use App\Models\T_DLVACCESSORY;
 use App\Models\T_DLVORDDETA;
 use App\Models\T_DLVORDHEAD;
 use App\Models\T_PCHORDDETA;
@@ -1632,5 +1633,65 @@ class DeliveryController extends Controller
         }
 
         return ['msg' => 'Confirmed !'];
+    }
+
+    function saveAccessory(Request $request)
+    {
+        # data quotation detail item
+        $validator = Validator::make($request->all(), [
+            'TDLVACCESSORY_DLVCD' => 'required',
+            'TDLVACCESSORY_ITMCD' => 'required',
+            'TDLVACCESSORY_ITMQT' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        T_DLVACCESSORY::on($this->dedicatedConnection)->create([
+            'TDLVACCESSORY_DLVCD' => base64_decode($request->id),
+            'TDLVACCESSORY_ITMCD' => $request->TDLVACCESSORY_ITMCD,
+            'TDLVACCESSORY_ITMQT' => $request->TDLVACCESSORY_ITMQT,
+            'created_by' => Auth::user()->nick_name,
+            'TDLVACCESSORY_BRANCH' => Auth::user()->branch
+        ]);
+
+        return [
+            'message' => 'OK.'
+        ];
+    }
+
+    function loadAccessoryById(Request $request)
+    {
+        $data = T_DLVACCESSORY::on($this->dedicatedConnection)
+            ->leftJoin('M_ITM', function ($join) {
+                $join->on('TDLVACCESSORY_ITMCD', '=', 'MITM_ITMCD')->on('TDLVACCESSORY_BRANCH', '=', 'MITM_BRANCH');
+            })
+            ->select('id', 'MITM_ITMCD', 'TDLVACCESSORY_ITMQT', 'MITM_ITMNM')
+            ->where('TDLVACCESSORY_DLVCD', base64_decode($request->id))
+            ->where('TDLVACCESSORY_BRANCH', Auth::user()->branch)
+            ->whereNull('deleted_at')
+            ->get();
+        return ['data' => $data];
+    }
+
+    function deleteAccessoryById(Request $request)
+    {
+        $affectedRow = T_DLVACCESSORY::on($this->dedicatedConnection)->where('id', $request->id)
+            ->update([
+                'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
+    }
+
+    function updateAccessoryById(Request $request)
+    {
+        $affectedRow = T_DLVACCESSORY::on($this->dedicatedConnection)->where('id', $request->id)
+            ->update([
+                'TDLVACCESSORY_ITMCD' => $request->TDLVACCESSORY_ITMCD,
+                'TDLVACCESSORY_ITMQT' => $request->TDLVACCESSORY_ITMQT,
+                'updated_by' => Auth::user()->nick_name
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
     }
 }
