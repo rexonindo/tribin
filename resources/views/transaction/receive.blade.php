@@ -151,11 +151,11 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="quotationModal" tabindex="-1">
+<div class="modal fade" id="purchaseOutStandingModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Approved Quotation List</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">PO Outstanding List</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -164,24 +164,23 @@
                         <div class="col mb-1">
                             <div class="input-group input-group-sm mb-1">
                                 <span class="input-group-text">Search by</span>
-                                <select id="quotationSearchBy" class="form-select" onchange="quotationSearch.focus()">
-                                    <option value="0">Quotation Code</option>
+                                <select id="purchaseSearchSearchBy" class="form-select" onchange="purchaseSearch.focus()">
+                                    <option value="0">Purchase Code</option>
                                     <option value="1">Customer</option>
                                 </select>
-                                <input type="text" id="quotationSearch" class="form-control" maxlength="50" onkeypress="quotationSearchOnKeypress(event)">
+                                <input type="text" id="purchaseSearch" class="form-control" maxlength="50" onkeypress="purchaseSearchOnKeypress(event)">
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col">
-                            <div class="table-responsive" id="quotationSavedTabelContainer">
-                                <table id="quotationSavedTabel" class="table table-sm table-striped table-bordered table-hover">
+                            <div class="table-responsive" id="purchaseOutStandingTabelContainer">
+                                <table id="purchaseOutStandingTabel" class="table table-sm table-striped table-bordered table-hover">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Code</th>
-                                            <th>Customer</th>
+                                            <th>Supplier</th>
                                             <th>Issue Date</th>
-                                            <th>Subject</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -195,3 +194,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    function btnFromPOLineOnclick() {
+        const myModal = new bootstrap.Modal(document.getElementById('purchaseOutStandingModal'), {})
+        myModal.show()
+    }
+
+    purchaseOutStandingModal.addEventListener('shown.bs.modal', () => {
+        purchaseSearch.focus()
+    })
+
+    function purchaseSearchOnKeypress(e) {
+        if (e.key === 'Enter') {
+
+        }
+    }
+</script>

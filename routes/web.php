@@ -339,6 +339,12 @@ Route::middleware('auth')->group(function () {
     Route::prefix('inventory')->group(function () {
         Route::get('status', [InventoryController::class, 'stockStatus']);
     });
+
+    # Terkait Receive
+    Route::prefix('receive')->group(function () {
+        Route::get('form', [ReceiveController::class, 'index'])->middleware('auth');
+        Route::get('outstanding-po', [ReceiveController::class, 'outstandingPO'])->middleware('auth');
+    });
 });
 
 Route::get('purchase-request-approval/{id}', [PurchaseController::class, 'loadByIdApproval'])->middleware('auth');
@@ -357,6 +363,3 @@ Route::get('ACL/database', function () {
     }
     return ['data' => $ConnectionList];
 });
-
-# Terkait Receive
-Route::get('receive/form', [ReceiveController::class, 'index'])->middleware('auth');
