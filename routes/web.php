@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Config;
 Route::get('/welcome', [LoginController::class, 'login'])->name('login');
 Route::get('/', [PageController::class, 'index']);
 Route::post('actionlogin', [LoginController::class, 'actionlogin'])->name('actionlogin');
-Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout')->middleware('auth');
+
 
 # Terkait tampilan awal
 Route::get('home', [HomeController::class, 'index'])->name('home')->middleware('auth');
@@ -64,17 +64,19 @@ Route::get('/version', function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('actionlogout', [LoginController::class, 'actionlogout'])->name('actionlogout');
+
     # Terkait Company Group
     Route::prefix('company')->group(function () {
-        Route::get('form', [CompanyGroupController::class, 'index'])->middleware('auth');
-        Route::get('management-form', [CompanyGroupController::class, 'form'])->middleware('auth');
-        Route::put('management-form/{id}', [CompanyGroupController::class, 'updateBranch'])->middleware('auth');
-        Route::get('', [CompanyGroupController::class, 'search'])->middleware('auth');
-        Route::post('', [CompanyGroupController::class, 'save'])->middleware('auth');
-        Route::put('{id}', [CompanyGroupController::class, 'update'])->middleware('auth');
-        Route::get('access/{id}', [CompanyGroupController::class, 'loadByNickName'])->middleware('auth');
-        Route::post('access', [CompanyGroupController::class, 'saveAccess'])->middleware('auth');
-        Route::delete('access/{id}', [CompanyGroupController::class, 'deleteAccess'])->middleware('auth');
+        Route::get('form', [CompanyGroupController::class, 'index']);
+        Route::get('management-form', [CompanyGroupController::class, 'form']);
+        Route::put('management-form/{id}', [CompanyGroupController::class, 'updateBranch']);
+        Route::get('', [CompanyGroupController::class, 'search']);
+        Route::post('', [CompanyGroupController::class, 'save']);
+        Route::put('{id}', [CompanyGroupController::class, 'update']);
+        Route::get('access/{id}', [CompanyGroupController::class, 'loadByNickName']);
+        Route::post('access', [CompanyGroupController::class, 'saveAccess']);
+        Route::delete('access/{id}', [CompanyGroupController::class, 'deleteAccess']);
     });
 
     # Terkait Company Group
@@ -344,6 +346,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('receive')->group(function () {
         Route::get('form', [ReceiveController::class, 'index'])->middleware('auth');
         Route::get('outstanding-po', [ReceiveController::class, 'outstandingPO'])->middleware('auth');
+        Route::get('outstanding-po/{id}', [ReceiveController::class, 'outstandingPOPerDocument'])->middleware('auth');
     });
 });
 

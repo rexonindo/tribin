@@ -150,7 +150,7 @@
 
 
 
-<!-- Modal -->
+<!-- Modal Outstanding PO-->
 <div class="modal fade" id="purchaseOutStandingModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
@@ -166,7 +166,7 @@
                                 <span class="input-group-text">Search by</span>
                                 <select id="purchaseSearchSearchBy" class="form-select" onchange="purchaseSearch.focus()">
                                     <option value="0">Purchase Code</option>
-                                    <option value="1">Customer</option>
+                                    <option value="1">Supplier</option>
                                 </select>
                                 <input type="text" id="purchaseSearch" class="form-control" maxlength="50" onkeypress="purchaseSearchOnKeypress(event)">
                             </div>
@@ -207,7 +207,111 @@
 
     function purchaseSearchOnKeypress(e) {
         if (e.key === 'Enter') {
-
+            e.target.disabled = true
+            const data = {
+                searchBy: purchaseSearchSearchBy.value,
+                searchValue: e.target.value,
+            }
+            $.ajax({
+                type: "GET",
+                url: "receive/outstanding-po",
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    e.target.disabled = false
+                    let myContainer = document.getElementById("purchaseOutStandingTabelContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = purchaseOutStandingTabel.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("purchaseOutStandingTabel");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    response.data.forEach((arrayItem) => {
+                        newrow = myTableBody.insertRow(-1)
+                        newcell = newrow.insertCell(0)
+                        newcell.innerHTML = arrayItem['TPCHORDDETA_PCHCD']
+                        newcell.style.cssText = 'cursor:pointer'
+                        newcell.onclick = () => {
+                            $("#purchaseOutStandingModal").modal('hide')
+                            loadDocumentDetail({
+                                doc: arrayItem['TPCHORDDETA_PCHCD']
+                            })
+                        }
+                        newcell = newrow.insertCell(-1)
+                        newcell.innerHTML = arrayItem['MSUP_SUPNM']
+                        newcell = newrow.insertCell(-1)
+                        newcell.innerHTML = arrayItem['TPCHORD_ISSUDT']
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    e.target.disabled = false
+                }
+            });
         }
+    }
+
+    function loadDocumentDetail(data) {
+        $.ajax({
+            type: "GET",
+            url: `receive/outstanding-po/${btoa(data.doc)}`,
+            dataType: "json",
+            success: function(response) {
+                let myContainer = document.getElementById("orderTableContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = orderTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("orderTable");
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+                response.data.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newrow.onclick = (event) => {
+                        const selrow = orderTable.rows[event.target.parentElement.rowIndex]
+                        if (selrow.title === 'selected') {
+                            selrow.title = 'not selected'
+                            selrow.classList.remove('table-info')
+                            orderItemCode.value = ''
+                            orderItemName.value = ''                            
+                            orderQty.value = ''                            
+                        } else {
+                            const ttlrows = orderTable.rows.length
+                            for (let i = 1; i < ttlrows; i++) {
+                                orderTable.rows[i].classList.remove('table-info')
+                                orderTable.rows[i].title = 'not selected'
+                            }
+                            selrow.title = 'selected'
+                            selrow.classList.add('table-info')
+                            
+                            orderItemCode.value = arrayItem['TPCHORDDETA_ITMCD']
+                            orderItemName.value = arrayItem['MITM_ITMNM']
+                            orderQty.value = arrayItem['BALQT']                            
+                        }
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.classList.add('d-none')
+                    newcell.style.cssText = 'cursor:pointer'
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['TPCHORDDETA_PCHCD']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['TPCHORDDETA_ITMCD']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['MITM_ITMNM']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['BALQT']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['TPCHORDDETA_ITMPRC_PER']
+                })
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+            }
+        });
     }
 </script>
