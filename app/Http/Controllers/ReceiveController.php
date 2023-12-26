@@ -31,7 +31,7 @@ class ReceiveController extends Controller
             'MSUP_SUPNM',
         ];
 
-        $groupedColumns = ['TPCHORDDETA_BRANCH', 'TPCHORDDETA_PCHCD', 'TPCHORDDETA_ITMCD', 'TPCHORDDETA_ITMPRC_PER', 'MSUP_SUPNM', 'TPCHORD_ISSUDT'];
+        $groupedColumns = ['TPCHORDDETA_BRANCH', 'TPCHORDDETA_PCHCD', 'TPCHORDDETA_ITMCD', 'TPCHORDDETA_ITMPRC_PER', 'MSUP_SUPCD', 'MSUP_SUPNM', 'TPCHORD_ISSUDT'];
         $receivegroupedColumns = ['branch', 'po_number', 'item_code', 'unit_price'];
 
         $subData = T_PCHORDDETA::on($this->dedicatedConnection)
@@ -67,15 +67,15 @@ class ReceiveController extends Controller
 
         $data = DB::connection($this->dedicatedConnection)
             ->query()->fromSub($dataFinal, 'V3')
-            ->groupBy('TPCHORDDETA_PCHCD', 'MSUP_SUPNM', 'TPCHORD_ISSUDT')
-            ->select('TPCHORDDETA_PCHCD', 'MSUP_SUPNM', 'TPCHORD_ISSUDT')->get();
+            ->groupBy('TPCHORDDETA_PCHCD', 'MSUP_SUPCD', 'MSUP_SUPNM', 'TPCHORD_ISSUDT')
+            ->select('TPCHORDDETA_PCHCD', 'MSUP_SUPCD', 'MSUP_SUPNM', 'TPCHORD_ISSUDT')->get();
 
         return ['data' => $data];
     }
 
     function outstandingPOPerDocument(Request $request)
     {
-        $groupedColumns = ['TPCHORDDETA_BRANCH', 'TPCHORDDETA_PCHCD', 'TPCHORDDETA_ITMCD', 'MITM_ITMNM', 'TPCHORDDETA_ITMPRC_PER', 'MSUP_SUPNM', 'TPCHORD_ISSUDT'];
+        $groupedColumns = ['TPCHORDDETA_BRANCH', 'TPCHORDDETA_PCHCD', 'TPCHORDDETA_ITMCD', 'MITM_ITMNM', 'TPCHORDDETA_ITMPRC_PER', 'MSUP_SUPCD', 'MSUP_SUPNM', 'TPCHORD_ISSUDT'];
         $receivegroupedColumns = ['branch', 'po_number', 'item_code', 'unit_price'];
 
         $subData = T_PCHORDDETA::on($this->dedicatedConnection)
@@ -114,5 +114,14 @@ class ReceiveController extends Controller
             ->whereRaw("POQT > IFNULL(RCVQT,0)")->get();
 
         return ['data' => $data];
+    }
+
+    function delete(Request $request)
+    {
+        $affectedRow = T_RCV_DETAIL::on($this->dedicatedConnection)->where('id', $request->id)
+            ->update([
+                'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
     }
 }

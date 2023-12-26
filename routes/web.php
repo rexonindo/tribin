@@ -344,16 +344,19 @@ Route::middleware('auth')->group(function () {
 
     # Terkait Receive
     Route::prefix('receive')->group(function () {
-        Route::get('form', [ReceiveController::class, 'index'])->middleware('auth');
-        Route::get('outstanding-po', [ReceiveController::class, 'outstandingPO'])->middleware('auth');
-        Route::get('outstanding-po/{id}', [ReceiveController::class, 'outstandingPOPerDocument'])->middleware('auth');
+        Route::get('form', [ReceiveController::class, 'index']);
+        Route::get('outstanding-po', [ReceiveController::class, 'outstandingPO']);
+        Route::get('outstanding-po/{id}', [ReceiveController::class, 'outstandingPOPerDocument']);
+        Route::delete('item/{id}', [ReceiveController::class, 'remove']);
     });
+
+    Route::get('purchase-request-approval/{id}', [PurchaseController::class, 'loadByIdApproval']);
+
+    #Terkait Dasbor
+    Route::get('dashboard-resource', [HomeController::class, 'supportDashboard']);
 });
 
-Route::get('purchase-request-approval/{id}', [PurchaseController::class, 'loadByIdApproval'])->middleware('auth');
 
-#Terkait Dasbor
-Route::get('dashboard-resource', [HomeController::class, 'supportDashboard'])->middleware('auth');
 
 #Terkait config
 Route::get('ACL/database', function () {

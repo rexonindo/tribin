@@ -30,10 +30,10 @@
         </div>
         <div class="row">
             <div class="col-md-6 mb-1">
-                <label for="orderCustomer" class="form-label">Supplier Name</label>
+                <label for="orderSupplier" class="form-label">Supplier Name</label>
                 <div class="input-group input-group-sm mb-1">
-                    <input type="text" id="orderCustomer" class="form-control" maxlength="50" disabled>
-                    <input type="hidden" id="orderCustomerCode">
+                    <input type="text" id="orderSupplier" class="form-control" maxlength="50" disabled>
+                    <input type="hidden" id="orderSupplierCode">
                 </div>
             </div>
             <div class="col-md-6 mb-1">
@@ -99,6 +99,7 @@
 
     <input type="hidden" id="orderInputMode" value="0">
 </form>
+
 <!-- Modal -->
 <div class="modal fade" id="orderModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -147,8 +148,6 @@
         </div>
     </div>
 </div>
-
-
 
 <!-- Modal Outstanding PO-->
 <div class="modal fade" id="purchaseOutStandingModal" tabindex="-1">
@@ -233,6 +232,8 @@
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
                             $("#purchaseOutStandingModal").modal('hide')
+                            orderSupplier.value = arrayItem['MSUP_SUPNM']
+                            orderSupplierCode.value = arrayItem['MSUP_SUPCD']
                             loadDocumentDetail({
                                 doc: arrayItem['TPCHORDDETA_PCHCD']
                             })
@@ -274,8 +275,8 @@
                             selrow.title = 'not selected'
                             selrow.classList.remove('table-info')
                             orderItemCode.value = ''
-                            orderItemName.value = ''                            
-                            orderQty.value = ''                            
+                            orderItemName.value = ''
+                            orderQty.value = ''
                         } else {
                             const ttlrows = orderTable.rows.length
                             for (let i = 1; i < ttlrows; i++) {
@@ -284,10 +285,10 @@
                             }
                             selrow.title = 'selected'
                             selrow.classList.add('table-info')
-                            
-                            orderItemCode.value = arrayItem['TPCHORDDETA_ITMCD']
-                            orderItemName.value = arrayItem['MITM_ITMNM']
-                            orderQty.value = arrayItem['BALQT']                            
+
+                            orderItemCode.value = selrow.cells[2].innerText
+                            orderItemName.value = selrow.cells[3].innerText
+                            orderQty.value = selrow.cells[4].innerText
                         }
                     }
                     newcell = newrow.insertCell(0)
@@ -313,5 +314,112 @@
                 alertify.warning(xthrow);
             }
         });
+    }
+
+    function btnRemoveLineOnclick(pthis) {
+        const ttlrows = orderTable.rows.length
+        let idItem = ''
+        let iFounded = 0
+        for (let i = 1; i < ttlrows; i++) {
+            if (orderTable.rows[i].title === 'selected') {
+                idItem = orderTable.rows[i].cells[0].innerText.trim()
+                iFounded = i
+                break
+            }
+        }
+
+        if (iFounded > 0) {
+            if (confirm(`Are you sure want to delete ?`)) {
+                if (idItem.length >= 1) {
+                    pthis.disabled = true
+                    pthis.innerHTML = `Please wait`
+                    $.ajax({
+                        type: "DELETE",
+                        url: `receive/items/${idItem}`,
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        dataType: "json",
+                        success: function(response) {
+                            pthis.innerHTML = `Remove line`
+                            pthis.disabled = false
+
+                            orderTable.rows[iFounded].remove()
+                            alertify.message(response.msg)
+                            tribinClearTextBoxByClassName('orderInputItem')
+                        },
+                        error: function(xhr, xopt, xthrow) {
+                            alertify.warning(xthrow);
+                            pthis.disabled = false
+                            pthis.innerHTML = `Remove line`
+                        }
+                    });
+                } else {
+                    orderTable.rows[iFounded].remove()
+                    tribinClearTextBoxByClassName('orderInputItem')
+                }
+            }
+        } else {
+            alertify.message('nothing selected item')
+        }
+    }
+
+    function btnUpdateLineOnclick(pthis) {
+        const ttlrows = orderTable.rows.length
+        let idItem = ''
+        let iFounded = 0
+        for (let i = 1; i < ttlrows; i++) {
+            if (orderTable.rows[i].title === 'selected') {
+                idItem = orderTable.rows[i].cells[0].innerText.trim()
+                iFounded = i
+                break
+            }
+        }
+
+        if (iFounded > 0) {
+            if (idItem.length >= 1) {
+                if (orderCode.value.length === 0) {
+                    alertify.warning(`receive code is required`)
+                    return
+                }
+                if (confirm(`Are you sure want to update ?`)) {
+                    pthis.disabled = true
+                    pthis.innerHTML = `Please wait`
+                    const data = {
+                        _token: '{{ csrf_token() }}',
+                        quantity: orderQty.value,
+                    }
+                    $.ajax({
+                        type: "PUT",
+                        url: `receive/items/${idItem}`,
+                        data: data,
+                        dataType: "json",
+                        success: function(response) {
+                            pthis.innerHTML = `Update line`
+                            pthis.disabled = false
+
+                            if (response.msg === 'OK') {
+                                refreshTableRent(iFounded)
+                            }
+
+                            alertify.message(response.msg)
+                        },
+                        error: function(xhr, xopt, xthrow) {
+                            alertify.warning(xthrow);
+                            pthis.disabled = false
+                            pthis.innerHTML = `Update line`
+                        }
+                    });
+                }
+            } else {
+                refreshTableRent(iFounded)
+            }
+        } else {
+            alertify.message('nothing selected item')
+        }
+    }
+
+    function refreshTableRent(selectedRow) {
+        orderTable.rows[selectedRow].cells[4].innerText = orderQty.value
     }
 </script>
