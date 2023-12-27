@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\T_PCHORDDETA;
 use App\Models\T_RCV_DETAIL;
+use App\Models\T_RCV_HEAD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ReceiveController extends Controller
 {
@@ -123,5 +125,101 @@ class ReceiveController extends Controller
                 'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
+    }
+
+    function save(Request $request)
+    {
+        # data quotation header
+        $validator = Validator::make($request->all(), [
+            'TRCV_SUPCD' => 'required',
+            'TRCV_ISSUDT' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        $quotationHeader = [
+            'TRCV_RCVCD' => $request->TRCV_RCVCD,
+            'TRCV_SUPCD' => $request->TRCV_SUPCD,
+            'TRCV_ISSUDT' => $request->TRCV_ISSUDT,
+            'created_by' => Auth::user()->nick_name,
+            'TRCV_BRANCH' => Auth::user()->branch
+        ];
+
+        # data quotation detail item
+        $validator = Validator::make($request->all(), [
+            'item_code' => 'required|array',
+            'quantity' => 'required|array',
+            'quantity.*' => 'required|numeric',
+            'unit_price' => 'required|array',
+            'unit_price.*' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 406);
+        }
+
+        $countDetail = count($request->item_code);
+
+        $createdObj = T_RCV_HEAD::on($this->dedicatedConnection)->create($quotationHeader);
+        $quotationDetail = [];
+        for ($i = 0; $i < $countDetail; $i++) {
+            $quotationDetail[] = [
+                'id_header' => $createdObj->id,
+                'po_number' => $request->po_number[$i],
+                'item_code' => $request->item_code[$i],
+                'quantity' => $request->quantity[$i],
+                'unit_price' => $request->unit_price[$i],
+                'created_by' => Auth::user()->nick_name,
+                'created_at' => date('Y-m-d H:i:s'),
+                'branch' => Auth::user()->branch
+            ];
+        }
+
+        if (!empty($quotationDetail)) {
+            T_RCV_DETAIL::on($this->dedicatedConnection)->insert($quotationDetail);
+        }
+
+        return [
+            'msg' => 'OK', 'doc' => $createdObj->id
+        ];
+    }
+
+    function loadById(Request $request)
+    {
+        $documentNumber = base64_decode($request->id);
+
+        $RS = T_RCV_DETAIL::on($this->dedicatedConnection)->select(["id", "po_number",  "item_code", "MITM_ITMNM", "quantity", "unit_price"])
+            ->leftJoin("M_ITM", function ($join) {
+                $join->on("item_code", "=", "MITM_ITMCD")
+                    ->on('branch', '=', 'MITM_BRANCH');
+            })
+            ->where('id_header', $documentNumber)
+            ->where('branch', Auth::user()->branch)
+            ->whereNull('deleted_at')->get();
+
+
+        $RSHeader = T_RCV_HEAD::on($this->dedicatedConnection)
+            ->where('id', $documentNumber)
+            ->get();
+
+
+        return [
+            'dataItem' => $RS,
+            'dataHeader' => $RSHeader
+        ];
+    }
+
+    function update(Request $request)
+    {
+        $affectedRow = T_RCV_HEAD::on($this->dedicatedConnection)
+            ->where('id', base64_decode($request->id))
+            ->where('TRCV_BRANCH', Auth::user()->branch)
+            ->whereNull('TRCV_SUBMITTED_AT')
+            ->update([
+                'TRCV_ISSUDT' => $request->TRCV_ISSUDT, 'TRCV_RCVCD' => $request->TRCV_RCVCD
+            ]);
+        return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
 }

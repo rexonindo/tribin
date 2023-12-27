@@ -195,6 +195,130 @@
 </div>
 
 <script>
+    Inputmask({
+        'alias': 'decimal',
+        'groupSeparator': ',',
+    }).mask(orderQty);
+
+    function btnSaveOnclick(pthis) {
+        let purchaseCode = []
+        let itemCode = []
+        let itemQty = []
+        let itemPrice = []
+
+        let ttlrows = 0
+
+        ttlrows = orderTable.rows.length - 1
+        for (let i = 1; i < ttlrows; i++) {
+            purchaseCode.push(orderTable.rows[i].cells[1].innerText.trim())
+            itemCode.push(orderTable.rows[i].cells[2].innerText.trim())
+            itemQty.push(numeral(orderTable.rows[i].cells[4].innerText.trim()).value())
+            itemPrice.push(numeral(orderTable.rows[i].cells[5].innerText.trim()).value())
+        }
+
+        if (ttlrows === 1) {
+            alertify.message('nothing to be saved')
+            return
+        }
+        if (orderIssueDate.value.length === 0) {
+            alertify.message('issue date is required')
+            orderIssueDate.focus()
+            return
+        }
+
+        if (orderCode.value.length === 0) {
+
+            const data = {
+                TRCV_SUPCD: orderSupplierCode.value.trim(),
+                TRCV_ISSUDT: orderIssueDate.value.trim(),
+                TRCV_RCVCD: receiveSupplierDN.value.trim(),
+                po_number: purchaseCode,
+                item_code: itemCode,
+                quantity: itemQty,
+                unit_price: itemPrice,
+                _token: '{{ csrf_token() }}',
+            }
+            if (confirm(`Are you sure want to save ?`)) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "POST",
+                    url: "receive",
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+
+                        orderCode.value = response.doc
+                        loadQuotationDetail({
+                            doc: response.doc
+                        })
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
+        } else {
+            const data = {
+                TRCV_ISSUDT: orderIssueDate.value.trim(),
+                TRCV_RCVCD: receiveSupplierDN.value.trim(),
+                _token: '{{ csrf_token() }}',
+            }
+            if (confirm(`Are you sure want to update ?`)) {
+                pthis.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`
+                pthis.disabled = true
+                $.ajax({
+                    type: "PUT",
+                    url: `receive/form/${btoa(orderCode.value)}`,
+                    data: data,
+                    dataType: "json",
+                    success: function(response) {
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.success(response.msg)
+                        pthis.disabled = false
+                        document.getElementById('div-alert').innerHTML = ''
+                    },
+                    error: function(xhr, xopt, xthrow) {
+                        const respon = Object.keys(xhr.responseJSON)
+                        const div_alert = document.getElementById('div-alert')
+                        let msg = ''
+                        for (const item of respon) {
+                            msg += `<p>${xhr.responseJSON[item]}</p>`
+                        }
+                        div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+                        pthis.innerHTML = `<i class="fas fa-save"></i>`
+                        alertify.warning(xthrow);
+                        pthis.disabled = false
+                    }
+                });
+            }
+        }
+    }
+
+    function btnNewOnclick(pthis) {
+        tribinClearTextBox()
+        orderTable.getElementsByTagName('tbody')[0].innerHTML = ``
+    }
+
     function btnFromPOLineOnclick() {
         const myModal = new bootstrap.Modal(document.getElementById('purchaseOutStandingModal'), {})
         myModal.show()
@@ -276,7 +400,7 @@
                             selrow.classList.remove('table-info')
                             orderItemCode.value = ''
                             orderItemName.value = ''
-                            orderQty.value = ''
+                            Inputmask.setValue(orderQty, 0)
                         } else {
                             const ttlrows = orderTable.rows.length
                             for (let i = 1; i < ttlrows; i++) {
@@ -288,7 +412,7 @@
 
                             orderItemCode.value = selrow.cells[2].innerText
                             orderItemName.value = selrow.cells[3].innerText
-                            orderQty.value = selrow.cells[4].innerText
+                            Inputmask.setValue(orderQty, selrow.cells[4].innerText)
                         }
                     }
                     newcell = newrow.insertCell(0)
@@ -422,4 +546,77 @@
     function refreshTableRent(selectedRow) {
         orderTable.rows[selectedRow].cells[4].innerText = orderQty.value
     }
+
+    function loadQuotationDetail(data) {
+        $.ajax({
+            type: "GET",
+            url: `receive/form/${btoa(data.doc)}`,
+            dataType: "json",
+            success: function(response) {
+
+                let myContainer = document.getElementById("orderTableContainer");
+                let myfrag = document.createDocumentFragment();
+                let cln = orderTable.cloneNode(true);
+                myfrag.appendChild(cln);
+                let myTable = myfrag.getElementById("orderTable");
+
+                let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                myTableBody.innerHTML = ''
+
+                response.dataItem.forEach((arrayItem) => {
+                    newrow = myTableBody.insertRow(-1)
+                    newrow.onclick = (event) => {
+                        const selrow = orderTable.rows[event.target.parentElement.rowIndex]
+                        if (selrow.title === 'selected') {
+                            selrow.title = 'not selected'
+                            selrow.classList.remove('table-info')
+                            orderItemCode.value = ''
+                            orderItemName.value = ''
+                            Inputmask.setValue(orderQty, 0)
+                        } else {
+                            const ttlrows = orderTable.rows.length
+                            for (let i = 1; i < ttlrows; i++) {
+                                orderTable.rows[i].classList.remove('table-info')
+                                orderTable.rows[i].title = 'not selected'
+                            }
+                            selrow.title = 'selected'
+                            selrow.classList.add('table-info')
+
+                            orderItemCode.value = selrow.cells[2].innerText
+                            orderItemName.value = selrow.cells[3].innerText
+                            Inputmask.setValue(orderQty, selrow.cells[4].innerText)
+                        }
+                    }
+                    newcell = newrow.insertCell(0)
+                    newcell.classList.add('d-none')
+                    newcell.innerText = arrayItem['id']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['po_number']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['item_code']
+                    newcell = newrow.insertCell(-1)
+                    newcell.innerHTML = arrayItem['MITM_ITMNM']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['quantity']
+                    newcell = newrow.insertCell(-1)
+                    newcell.classList.add('text-end')
+                    newcell.innerHTML = arrayItem['unit_price']
+
+                })
+
+                myContainer.innerHTML = ''
+                myContainer.appendChild(myfrag)
+            },
+            error: function(xhr, xopt, xthrow) {
+                alertify.warning(xthrow);
+            }
+        });
+    }
+
+    $("#orderIssueDate").datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        uiLibrary: 'bootstrap5'
+    })
 </script>
