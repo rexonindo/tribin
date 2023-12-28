@@ -19,7 +19,7 @@
                 <label for="orderCode" class="form-label">Code</label>
                 <div class="input-group mb-1">
                     <input type="text" id="orderCode" class="form-control" placeholder="Autogenerate" maxlength="17" disabled>
-                    <button class="btn btn-primary" type="button" onclick="btnShowReceiveModal()"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#orderModal"><i class="fas fa-search"></i></button>
                 </div>
             </div>
             <div class="col-md-6 mb-1">
@@ -115,9 +115,9 @@
                             <div class="input-group input-group-sm mb-1">
                                 <span class="input-group-text">Search by</span>
                                 <select id="orderSearchBy" class="form-select" onchange="orderSearch.focus()">
-                                    <option value="0">Order Code</option>
+                                    <option value="0">Receive Code</option>
                                     <option value="1">Supplier</option>
-                                    <option value="2">PO Number</option>
+                                    <option value="2">DN</option>
                                 </select>
                                 <input type="text" id="orderSearch" class="form-control" maxlength="50" onkeypress="orderSearchOnKeypress(event)">
                             </div>
@@ -130,11 +130,9 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Code</th>
-                                            <th>Customer</th>
-                                            <th>Issue Date</th>
-                                            <th>Quotation</th>
-                                            <th>PO Number</th>
-                                            <th>Delivery Plan Date</th>
+                                            <th>Supplier</th>
+                                            <th>DN</th>
+                                            <th>Receive Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -208,7 +206,7 @@
 
         let ttlrows = 0
 
-        ttlrows = orderTable.rows.length - 1
+        ttlrows = orderTable.rows.length
         for (let i = 1; i < ttlrows; i++) {
             purchaseCode.push(orderTable.rows[i].cells[1].innerText.trim())
             itemCode.push(orderTable.rows[i].cells[2].innerText.trim())
@@ -328,6 +326,10 @@
         purchaseSearch.focus()
     })
 
+    orderModal.addEventListener('shown.bs.modal', () => {
+        orderSearch.focus()
+    })
+
     function purchaseSearchOnKeypress(e) {
         if (e.key === 'Enter') {
             e.target.disabled = true
@@ -356,6 +358,7 @@
                         newcell.style.cssText = 'cursor:pointer'
                         newcell.onclick = () => {
                             $("#purchaseOutStandingModal").modal('hide')
+                            purchaseOutStandingTabel.getElementsByTagName('tbody')[0].innerHTML = ''
                             orderSupplier.value = arrayItem['MSUP_SUPNM']
                             orderSupplierCode.value = arrayItem['MSUP_SUPCD']
                             loadDocumentDetail({
@@ -619,4 +622,61 @@
         autoclose: true,
         uiLibrary: 'bootstrap5'
     })
+
+    function orderSearchOnKeypress(e) {
+        if (e.key === 'Enter') {
+            e.target.disabled = true
+            const data = {
+                searchBy: orderSearchBy.value,
+                searchValue: e.target.value,
+            }
+            orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4">Please wait</td></tr>`
+            $.ajax({
+                type: "GET",
+                url: "receive",
+                data: data,
+                dataType: "json",
+                success: function(response) {
+                    e.target.disabled = false
+                    let myContainer = document.getElementById("orderSavedTabelContainer");
+                    let myfrag = document.createDocumentFragment();
+                    let cln = orderSavedTabel.cloneNode(true);
+                    myfrag.appendChild(cln);
+                    let myTable = myfrag.getElementById("orderSavedTabel");
+                    let myTableBody = myTable.getElementsByTagName("tbody")[0];
+                    myTableBody.innerHTML = ''
+                    response.data.forEach((arrayItem) => {
+                        newrow = myTableBody.insertRow(-1)
+                        newcell = newrow.insertCell(0)
+                        newcell.innerHTML = arrayItem['id']
+                        newcell.style.cssText = 'cursor:pointer'
+                        newcell.onclick = () => {
+                            $('#orderModal').modal('hide')
+                            orderCode.value = arrayItem['id']
+                            orderIssueDate.value = arrayItem['TRCV_ISSUDT']
+                            orderSupplier.value = arrayItem['MSUP_SUPNM']
+                            orderSupplierCode.value = arrayItem['MSUP_SUPCD']
+                            receiveSupplierDN.value = arrayItem['TRCV_RCVCD']
+                            loadQuotationDetail({
+                                doc: arrayItem['id']
+                            })
+                        }
+                        newcell = newrow.insertCell(1)
+                        newcell.innerHTML = arrayItem['MSUP_SUPNM']
+                        newcell = newrow.insertCell(2)
+                        newcell.innerHTML = arrayItem['TRCV_RCVCD']
+                        newcell = newrow.insertCell(3)
+                        newcell.innerHTML = arrayItem['TRCV_ISSUDT']
+                    })
+                    myContainer.innerHTML = ''
+                    myContainer.appendChild(myfrag)
+                },
+                error: function(xhr, xopt, xthrow) {
+                    alertify.warning(xthrow);
+                    e.target.disabled = false
+                    orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = `<tr><td colspan="4"></td></tr>`
+                }
+            });
+        }
+    }
 </script>

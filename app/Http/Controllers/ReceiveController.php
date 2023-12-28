@@ -222,4 +222,22 @@ class ReceiveController extends Controller
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
+
+    function search(Request $request)
+    {
+        $columnMap = [
+            'T_RCV_HEAD.id',
+            'MSUP_SUPNM',
+            'TRCV_RCVCD',
+        ];
+
+        $RS = T_RCV_HEAD::on($this->dedicatedConnection)->select(["T_RCV_HEAD.id", "MSUP_SUPNM", "TRCV_RCVCD", "TRCV_ISSUDT", "MSUP_SUPCD"])
+            ->leftJoin("M_SUP", function ($join) {
+                $join->on('TRCV_SUPCD', '=', 'MSUP_SUPCD')->on('TRCV_BRANCH', '=', 'MSUP_BRANCH');
+            })
+            ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
+            ->where('TRCV_BRANCH', Auth::user()->branch)
+            ->get();
+        return ['data' => $RS];
+    }
 }

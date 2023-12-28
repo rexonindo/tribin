@@ -348,6 +348,7 @@ Route::middleware('auth')->group(function () {
         Route::get('form/{id}', [ReceiveController::class, 'loadById']);
         Route::put('form/{id}', [ReceiveController::class, 'update']);
         Route::post('', [ReceiveController::class, 'save']);
+        Route::get('', [ReceiveController::class, 'search']);
         Route::get('outstanding-po', [ReceiveController::class, 'outstandingPO']);
         Route::get('outstanding-po/{id}', [ReceiveController::class, 'outstandingPOPerDocument']);
         Route::delete('item/{id}', [ReceiveController::class, 'remove']);
