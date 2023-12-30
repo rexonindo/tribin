@@ -37,7 +37,7 @@
     <div class="col-md-6 mb-1">
     </div>
     <div class="col-md-6 mb-1">
-        <button id="btnSave" title="Save changes" class="btn btn-primary btn-block" type="submit"><i class="fas fa-save"></i></button>
+        <button id="btnSave" title="Save changes" class="btn btn-primary btn-block" type="submit" onclick="btnSaveOnClick(this)"><i class="fas fa-save"></i></button>
     </div>
 </div>
 
@@ -67,7 +67,7 @@
         settingTree.expandAll()
     });
 
-    $('#btnSave').click(function() {
+    function btnSaveOnClick(pthis) {
         let nodesId = settingTree.getCheckedNodes()
         let AllNode = []
         let FinalNodes = []
@@ -93,6 +93,8 @@
             alertify.message('nothing to be processed')
             return
         }
+
+        pthis.disabled = true
         $.ajax({
             type: "post",
             url: "/api/setting/tree/roles",
@@ -106,14 +108,16 @@
                 "Authorization": `Bearer ${sessionStorage.getItem('tokenGue')}`
             },
             success: function(response) {
+                pthis.disabled = false
                 alert('saved successfully')
                 getAllAM()
             },
             error: function(xhr, ajaxOptions, throwError) {
                 alertify.error(throwError);
+                pthis.disabled = false
             }
         });
-    });
+    }
 
     function insertTangkai(punik) {
         if (!tangkai.includes(punik)) {
@@ -133,7 +137,7 @@
                 for (let i = 0; i < response.length; i++) {
                     lgroupid.push('' + response[i].role_name + '');
                     lmenuid.push('' + response[i].menu_code + '');
-                }                
+                }
             },
             error: function(xhr, ajaxOptions, throwError) {
                 alertify.error(throwError);
