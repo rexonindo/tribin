@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\C_ITRN;
 use App\Models\T_PCHORDDETA;
 use App\Models\T_RCV_DETAIL;
 use App\Models\T_RCV_HEAD;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -53,6 +55,7 @@ class ReceiveController extends Controller
 
         $receivingData = T_RCV_DETAIL::on($this->dedicatedConnection)
             ->where('branch', Auth::user()->branch)
+            ->whereNull('deleted_at')
             ->groupBy($receivegroupedColumns)
             ->select(array_merge($receivegroupedColumns, [DB::raw("SUM(quantity) AS RCVQT")]));
 
@@ -101,6 +104,7 @@ class ReceiveController extends Controller
 
         $receivingData = T_RCV_DETAIL::on($this->dedicatedConnection)
             ->where('branch', Auth::user()->branch)
+            ->whereNull('deleted_at')
             ->groupBy($receivegroupedColumns)
             ->select(array_merge($receivegroupedColumns, [DB::raw("SUM(quantity) AS RCVQT")]));
 
@@ -120,11 +124,32 @@ class ReceiveController extends Controller
 
     function delete(Request $request)
     {
+        $parentDoc = T_RCV_DETAIL::on($this->dedicatedConnection)->select('id_header')
+            ->where('id', $request->id)
+            ->first();
+
         $affectedRow = T_RCV_DETAIL::on($this->dedicatedConnection)->where('id', $request->id)
             ->update([
                 'deleted_at' => date('Y-m-d H:i:s'), 'deleted_by' => Auth::user()->nick_name
             ]);
-        return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
+        if ($affectedRow) {
+            $countRow = T_RCV_DETAIL::on($this->dedicatedConnection)
+                ->where('id_header', $parentDoc->id_header)
+                ->whereNull('deleted_at')
+                ->count();
+            if ($countRow === 0) {
+                T_RCV_HEAD::on($this->dedicatedConnection)->where('id', $parentDoc->id_header)
+                    ->update([
+                        'deleted_at' => date('Y-m-d H:i:s'),
+                        'deleted_by' => Auth::user()->nick_name,
+                    ]);
+            }
+        }
+        return [
+            'msg' => $affectedRow ? 'OK' : 'could not be deleted',
+            'affectedRow' => $affectedRow,
+            'headRowsCount' => $countRow,
+        ];
     }
 
     function save(Request $request)
@@ -218,7 +243,9 @@ class ReceiveController extends Controller
             ->where('TRCV_BRANCH', Auth::user()->branch)
             ->whereNull('TRCV_SUBMITTED_AT')
             ->update([
-                'TRCV_ISSUDT' => $request->TRCV_ISSUDT, 'TRCV_RCVCD' => $request->TRCV_RCVCD
+                'TRCV_ISSUDT' => $request->TRCV_ISSUDT,
+                'TRCV_RCVCD' => $request->TRCV_RCVCD,
+                'updated_by' => Auth::user()->nick_name
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'No changes'];
     }
@@ -231,13 +258,67 @@ class ReceiveController extends Controller
             'TRCV_RCVCD',
         ];
 
-        $RS = T_RCV_HEAD::on($this->dedicatedConnection)->select(["T_RCV_HEAD.id", "MSUP_SUPNM", "TRCV_RCVCD", "TRCV_ISSUDT", "MSUP_SUPCD"])
+        $RS = T_RCV_HEAD::on($this->dedicatedConnection)->select(["T_RCV_HEAD.id", "MSUP_SUPNM", "TRCV_RCVCD", "TRCV_ISSUDT", "MSUP_SUPCD", "TRCV_SUBMITTED_AT"])
             ->leftJoin("M_SUP", function ($join) {
                 $join->on('TRCV_SUPCD', '=', 'MSUP_SUPCD')->on('TRCV_BRANCH', '=', 'MSUP_BRANCH');
             })
             ->where($columnMap[$request->searchBy], 'like', '%' . $request->searchValue . '%')
             ->where('TRCV_BRANCH', Auth::user()->branch)
+            ->whereNull('deleted_at')
             ->get();
         return ['data' => $RS];
+    }
+
+    function submit(Request $request)
+    {
+        try {
+            $doc = base64_decode($request->id);
+            DB::connection($this->dedicatedConnection)->beginTransaction();
+            $affectedRow = T_RCV_HEAD::on($this->dedicatedConnection)
+                ->where('id', $doc)
+                ->whereNull('TRCV_SUBMITTED_AT')
+                ->update([
+                    'TRCV_SUBMITTED_AT' => date('Y-m-d H:i:s'),
+                    'TRCV_SUBMITTED_BY' => Auth::user()->nick_name
+                ]);
+            if ($affectedRow) {
+                $t_rcv_detail = T_RCV_DETAIL::on($this->dedicatedConnection)
+                    ->leftJoin('T_RCV_HEAD', 'id_header', '=', 'T_RCV_HEAD.id')
+                    ->whereNull('T_RCV_DETAIL.deleted_at')
+                    ->select('T_RCV_DETAIL.*', 'TRCV_RCVCD', 'TRCV_ISSUDT')
+                    ->get();
+                $tobeSaved = [];
+
+                foreach ($t_rcv_detail as $r) {
+                    $tobeSaved[] = [
+                        'CITRN_BRANCH' => Auth::user()->branch,
+                        'CITRN_LOCCD' => 'WH1',
+                        'CITRN_DOCNO' => $r->TRCV_RCVCD,
+                        'CITRN_ISSUDT' => $r->TRCV_ISSUDT,
+                        'CITRN_FORM' => 'INC-SHP',
+                        'CITRN_ITMCD' => $r->item_code,
+                        'CITRN_ITMQT' => $r->quantity,
+                        'CITRN_PRCPER' => $r->unit_price,
+                        'CITRN_PRCAMT' => $r->unit_price * $r->quantity,
+                        'created_by' => Auth::user()->nick_name,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'id_reff' => $r->id_header,
+                    ];
+                }
+
+                if (!empty($tobeSaved)) {
+                    C_ITRN::on($this->dedicatedConnection)->insert(
+                        $tobeSaved
+                    );
+                }
+                DB::connection($this->dedicatedConnection)->commit();
+
+                return ['message' => 'Submitted successfully'];
+            } else {
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([[$e->getMessage()]], 406);
+        }
     }
 }

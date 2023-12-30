@@ -462,7 +462,7 @@
                     pthis.innerHTML = `Please wait`
                     $.ajax({
                         type: "DELETE",
-                        url: `receive/items/${idItem}`,
+                        url: `receive/item/${idItem}`,
                         data: {
                             _token: '{{ csrf_token() }}'
                         },
@@ -474,6 +474,10 @@
                             orderTable.rows[iFounded].remove()
                             alertify.message(response.msg)
                             tribinClearTextBoxByClassName('orderInputItem')
+
+                            if (response.headRowsCount === 0) {
+                                btnNewOnclick(btnNew)
+                            }
                         },
                         error: function(xhr, xopt, xthrow) {
                             alertify.warning(xthrow);
@@ -660,6 +664,9 @@
                             loadQuotationDetail({
                                 doc: arrayItem['id']
                             })
+                            orderSavedTabel.getElementsByTagName('tbody')[0].innerHTML = ''
+
+                            btnSubmit.disabled = arrayItem['TRCV_SUBMITTED_AT'] ? true : false
                         }
                         newcell = newrow.insertCell(1)
                         newcell.innerHTML = arrayItem['MSUP_SUPNM']
@@ -678,5 +685,37 @@
                 }
             });
         }
+    }
+
+    function btnSubmitOnclick(pthis) {
+        if (!confirm("Submit this document ?")) {
+            return
+        }
+        pthis.disabled = true
+        $.ajax({
+            type: "post",
+            url: `receive/form/${btoa(orderCode.value)}`,
+            data: {
+                _token: '{{ csrf_token() }}',
+            },
+            dataType: "json",
+            success: function(response) {
+                alertify.success(response.message);
+            },
+            error: function(xhr, xopt, xthrow) {
+                pthis.disabled = false
+                const respon = Object.keys(xhr.responseJSON)
+                const div_alert = document.getElementById('div-alert')
+                let msg = ''
+                for (const item of respon) {
+                    msg += `<p>${xhr.responseJSON[item]}</p>`
+                }
+                div_alert.innerHTML = `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`
+                alertify.warning(xthrow);
+            }
+        });
     }
 </script>
