@@ -260,6 +260,7 @@ Route::middleware('auth')->group(function () {
         Route::get('quotation', [QuotationController::class, 'report']);
         Route::get('received-order', [ReceiveOrderController::class, 'report']);
         Route::get('stock-status', [InventoryController::class, 'report']);
+        Route::get('stock-ledger', [InventoryController::class, 'reportLedger']);
     });
 
     # Terkait Rejection
@@ -341,7 +342,9 @@ Route::middleware('auth')->group(function () {
     # Terkait Inventory
     Route::prefix('inventory')->group(function () {
         Route::get('form', [InventoryController::class, 'index']);
+        Route::get('ledger-form', [InventoryController::class, 'formLedger']);
         Route::get('status', [InventoryController::class, 'stockStatus']);
+        Route::get('ledger', [InventoryController::class, 'stockLedger']);
     });
 
     # Terkait Receive
