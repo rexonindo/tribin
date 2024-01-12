@@ -171,6 +171,14 @@
                                         <fieldset class="border rounded-3 p-2">
                                             <legend class="float-none w-auto px-3">Biaya</legend>
                                             <div class="row">
+                                                <div class="col-md-12 mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Uang Jalan</span>
+                                                        <input type="number" id="uangJalan" class="form-control" disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
                                                 <div class="col-md-6 mb-1">
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text">Makan</span>
@@ -305,7 +313,7 @@
                         uangPengawalan.value = arrayItem['CSPK_UANG_PENGAWALAN']
                         uangPenginapan.value = arrayItem['CSPK_UANG_PENGINAPAN']
                         uangLain.value = arrayItem['CSPK_UANG_LAIN2']
-                        uangMakan.value = arrayItem['CSPK_UANG_MAKAN']
+                        uangJalan.value = arrayItem['CSPK_UANG_JALAN']
 
                         tanggalBerangkat.value = arrayItem['CSPK_LEAVEDT']
                         tanggalKembali.value = arrayItem['CSPK_BACKDT']

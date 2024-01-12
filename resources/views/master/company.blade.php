@@ -64,10 +64,16 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-12 mb-1">
+                            <div class="col-md-6 mb-1">
                                 <label for="companyInvoiceNumber" class="form-label">Invoice Number Pattern</label>
                                 <div class="input-group input-group-sm mb-1">
                                     <input type="text" id="companyInvoiceNumber" class="form-control" maxlength="15" placeholder="JP/INV  or JC/INV" value="{{ $SelectedCompany ? $SelectedCompany->invoice_letter_id : '' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-1">
+                                <label for="companyQuotationNumber" class="form-label">Quotation Number Pattern</label>
+                                <div class="input-group input-group-sm mb-1">
+                                    <input type="text" id="companyQuotationNumber" class="form-control" maxlength="15" placeholder="PT/PNW  or CV/PNW" value="{{ $SelectedCompany ? $SelectedCompany->quotation_letter_id : '' }}">
                                 </div>
                             </div>
                         </div>
@@ -154,6 +160,7 @@
             phone: companyPhone.value,
             fax: companyFax.value,
             invoice_letter_id: companyInvoiceNumber.value,
+            quotation_letter_id: companyQuotationNumber.value,
             letter_head: companyLetterHead.value,
             _token: '{{ csrf_token() }}',
         }

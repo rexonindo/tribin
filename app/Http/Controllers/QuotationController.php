@@ -65,14 +65,22 @@ class QuotationController extends Controller
             ->where('TQUO_BRANCH', Auth::user()->branch)
             ->max('TQUO_LINE');
 
+
+        $Company = COMPANY_BRANCH::on($this->dedicatedConnection)->select(
+            'quotation_letter_id'
+        )
+            ->where('connection', $this->dedicatedConnection)
+            ->where('BRANCH', Auth::user()->branch)
+            ->first();
+
         $quotationHeader = [];
         $newQuotationCode = '';
         if (!$LastLine) {
             $LastLine = 1;
-            $newQuotationCode = '001/PT/PNW/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
+            $newQuotationCode = '001/' . $Company->quotation_letter_id . '/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         } else {
             $LastLine++;
-            $newQuotationCode = substr('00' . $LastLine, -3) . '/PT/PNW/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
+            $newQuotationCode = substr('00' . $LastLine, -3) . '/' . $Company->quotation_letter_id . '/' . $monthOfRoma[date('n') - 1] . '/' . date('Y');
         }
         $quotationHeader = [
             'TQUO_QUOCD' => $newQuotationCode,

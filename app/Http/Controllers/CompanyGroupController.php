@@ -177,6 +177,7 @@ class CompanyGroupController extends Controller
                 'phone' => $request->phone,
                 'fax' => $request->fax,
                 'invoice_letter_id' => $request->invoice_letter_id,
+                'quotation_letter_id' => $request->quotation_letter_id,
                 'letter_head' => $request->letter_head,
             ]);
             $message = 'Saved';
@@ -190,6 +191,7 @@ class CompanyGroupController extends Controller
                     'phone' => $request->phone,
                     'fax' => $request->fax,
                     'invoice_letter_id' => $request->invoice_letter_id,
+                    'quotation_letter_id' => $request->quotation_letter_id,
                     'letter_head' => $request->letter_head,
                 ]);
             $message = 'Updated';
