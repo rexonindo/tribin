@@ -781,6 +781,7 @@ class QuotationController extends Controller
                 'code' => $documentNumber,
                 'type' => '3',
                 'remark' => '-',
+                'branch' => $request->TQUO_BRANCH,
             ]);
 
             $message = $affectedRow ? 'Approved' : 'Something wrong please contact admin';
