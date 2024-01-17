@@ -149,7 +149,10 @@ class DeliveryController extends Controller
             ->where('BRANCH', Auth::user()->branch)
             ->orderBy('RANGE1', 'ASC')
             ->first();
-
+        
+        if(!$RangePrice) {
+            return response()->json([['Distance out of range, please register on distance price master']], 406);
+        }
         $UANG_JALAN = 0;
         if ($request->CSPK_PIC_AS === 'DRIVER') {
             $UANG_JALAN = $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6;
