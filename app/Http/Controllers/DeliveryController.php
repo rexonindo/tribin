@@ -149,8 +149,8 @@ class DeliveryController extends Controller
             ->where('BRANCH', Auth::user()->branch)
             ->orderBy('RANGE1', 'ASC')
             ->first();
-        
-        if(!$RangePrice) {
+
+        if (!$RangePrice) {
             return response()->json([['Distance out of range, please register on distance price master']], 406);
         }
         $UANG_JALAN = 0;
@@ -1013,6 +1013,9 @@ class DeliveryController extends Controller
             ->where('BRANCH', Auth::user()->branch)
             ->orderBy('RANGE1', 'ASC')
             ->first();
+        if (!$RangePrice) {
+            return response()->json([['Distance out of range, please register on distance price master']], 406);
+        }
 
         # Validasi Driver
         $UANG_JALAN = 0;
@@ -1589,7 +1592,7 @@ class DeliveryController extends Controller
             ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
             ->where('TDLVORDDETA_DLVCD', $request->id)
             ->count();
-        if($totalEmptyItemActual>0) {
+        if ($totalEmptyItemActual > 0) {
             return response()->json([['Please input Actual item']], 406);
         }
 
