@@ -165,7 +165,7 @@ class DeliveryController extends Controller
             ->update([
                 'CSPK_PIC_AS' => $request->CSPK_PIC_AS,
                 'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
-                'CSPK_KM' => $request->CSPK_KM,
+                'CSPK_KM' => $request->CSPK_KM ?? 0,
                 'CSPK_WHEELS' => $request->CSPK_WHEELS,
                 'CSPK_UANG_JALAN' => $UANG_JALAN,
                 'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
@@ -1056,7 +1056,7 @@ class DeliveryController extends Controller
             'CSPK_REFF_DOC' => $request->CSPK_REFF_DOC,
             'CSPK_PIC_AS' => $request->CSPK_PIC_AS,
             'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
-            'CSPK_KM' => $request->CSPK_KM,
+            'CSPK_KM' => $request->CSPK_KM ?? 0,
             'CSPK_WHEELS' => $request->CSPK_WHEELS,
             'CSPK_UANG_JALAN' => $UANG_JALAN,
             'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
