@@ -1022,7 +1022,7 @@ class DeliveryController extends Controller
             if (!$RangePrice) {
                 return response()->json([['Distance out of range, please register on distance price master']], 406);
             }
-        
+
             $validator = Validator::make($request->all(), [
                 'CSPK_VEHICLE_TYPE' => 'required',
                 'CSPK_VEHICLE_REGNUM' => 'required',
@@ -1711,5 +1711,28 @@ class DeliveryController extends Controller
                 'updated_by' => Auth::user()->nick_name
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
+    }
+
+    function unreturnedItem()
+    {
+        $data = C_ITRN::on($this->dedicatedConnection)
+            ->leftJoin('T_DLVORDDETA', function ($join) {
+                $join->on('CITRN_DOCNO', '=', 'TDLVORDDETA_DLVCD')
+                    ->on('CITRN_ITMCD', '=', 'TDLVORDDETA_ITMCD_ACT')
+                    ->on('CITRN_BRANCH', '=', 'TDLVORDDETA_BRANCH');
+            })->leftJoin('T_SLODETA', function ($join) {
+                $join->on('TDLVORDDETA_SLOCD', '=', 'TSLODETA_SLOCD')
+                    ->on('TDLVORDDETA_ITMCD', '=', 'TSLODETA_ITMCD')
+                    ->on('TDLVORDDETA_BRANCH', '=', 'TSLODETA_BRANCH');
+            })->leftJoin('T_SLOHEAD', function ($join) {
+                $join->on('TSLODETA_SLOCD', '=', 'TSLO_SLOCD')
+                    ->on('TSLODETA_BRANCH', '=', 'TSLO_BRANCH');
+            })->leftJoin('T_QUOHEAD', function ($join) {
+                $join->on('TSLO_QUOCD', '=', 'TQUO_QUOCD')
+                    ->on('TSLO_BRANCH', '=', 'TQUO_BRANCH');
+            })->where('TQUO_TYPE', '1')
+            ->whereNull('returned_at')
+            ->get();
+        return ['data' => $data];
     }
 }

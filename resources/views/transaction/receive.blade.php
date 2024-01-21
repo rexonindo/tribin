@@ -49,7 +49,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="d-none">idLine</th>
-                                <th>PO Code</th>
+                                <th>Document Code</th>
                                 <th>Item Code</th>
                                 <th>Item Name</th>
                                 <th class="text-center">Qty</th>
@@ -91,7 +91,11 @@
             </div>
             <div class="col-md-6 mb-1 text-end">
                 <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-primary" id="btnFromPO" onclick="btnFromPOLineOnclick(this)">Add from PO</button>
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" id="btnFromPO">Addition</button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="btnFromPOLineOnclick(this)">From PO</a></li>
+                        <li><a class="dropdown-item" href="#">From Internal DO</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
