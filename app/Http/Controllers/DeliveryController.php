@@ -144,14 +144,18 @@ class DeliveryController extends Controller
 
     public function updateSPK(Request $request)
     {
-        $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
-            ->where('RANGE2', '>=', $request->CSPK_KM)
-            ->where('BRANCH', Auth::user()->branch)
-            ->orderBy('RANGE1', 'ASC')
-            ->first();
-
+        $RangePrice = NULL;
         $UANG_JALAN = 0;
         if ($request->CSPK_PIC_AS === 'DRIVER') {
+            $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
+                ->where('RANGE2', '>=', $request->CSPK_KM)
+                ->where('BRANCH', Auth::user()->branch)
+                ->orderBy('RANGE1', 'ASC')
+                ->first();
+
+            if (!$RangePrice) {
+                return response()->json([['Distance out of range, please register on distance price master']], 406);
+            }
             $UANG_JALAN = $request->CSPK_WHEELS == 10 ? $RangePrice->PRICE_WHEEL_10 : $RangePrice->PRICE_WHEEL_4_AND_6;
         }
 
@@ -161,7 +165,7 @@ class DeliveryController extends Controller
             ->update([
                 'CSPK_PIC_AS' => $request->CSPK_PIC_AS,
                 'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
-                'CSPK_KM' => $request->CSPK_KM,
+                'CSPK_KM' => $request->CSPK_KM ?? 0,
                 'CSPK_WHEELS' => $request->CSPK_WHEELS,
                 'CSPK_UANG_JALAN' => $UANG_JALAN,
                 'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
@@ -1005,15 +1009,20 @@ class DeliveryController extends Controller
             return response()->json($validator->errors(), 406);
         }
 
-        $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
-            ->where('RANGE2', '>=', $request->CSPK_KM)
-            ->where('BRANCH', Auth::user()->branch)
-            ->orderBy('RANGE1', 'ASC')
-            ->first();
+        $RangePrice = NULL;
 
         # Validasi Driver
         $UANG_JALAN = 0;
         if ($request->CSPK_PIC_AS === 'DRIVER') {
+            $RangePrice = M_DISTANCE_PRICE::on($this->dedicatedConnection)->select('*')
+                ->where('RANGE2', '>=', $request->CSPK_KM)
+                ->where('BRANCH', Auth::user()->branch)
+                ->orderBy('RANGE1', 'ASC')
+                ->first();
+            if (!$RangePrice) {
+                return response()->json([['Distance out of range, please register on distance price master']], 406);
+            }
+
             $validator = Validator::make($request->all(), [
                 'CSPK_VEHICLE_TYPE' => 'required',
                 'CSPK_VEHICLE_REGNUM' => 'required',
@@ -1047,7 +1056,7 @@ class DeliveryController extends Controller
             'CSPK_REFF_DOC' => $request->CSPK_REFF_DOC,
             'CSPK_PIC_AS' => $request->CSPK_PIC_AS,
             'CSPK_PIC_NAME' => $request->CSPK_PIC_NAME,
-            'CSPK_KM' => $request->CSPK_KM,
+            'CSPK_KM' => $request->CSPK_KM ?? 0,
             'CSPK_WHEELS' => $request->CSPK_WHEELS,
             'CSPK_UANG_JALAN' => $UANG_JALAN,
             'CSPK_SUPPLIER' => $request->CSPK_SUPPLIER,
@@ -1586,7 +1595,7 @@ class DeliveryController extends Controller
             ->where('TDLVORDDETA_BRANCH', Auth::user()->branch)
             ->where('TDLVORDDETA_DLVCD', $request->id)
             ->count();
-        if($totalEmptyItemActual>0) {
+        if ($totalEmptyItemActual > 0) {
             return response()->json([['Please input Actual item']], 406);
         }
 
@@ -1702,5 +1711,28 @@ class DeliveryController extends Controller
                 'updated_by' => Auth::user()->nick_name
             ]);
         return ['msg' => $affectedRow ? 'OK' : 'could not be deleted', 'affectedRow' => $affectedRow];
+    }
+
+    function unreturnedItem()
+    {
+        $data = C_ITRN::on($this->dedicatedConnection)
+            ->leftJoin('T_DLVORDDETA', function ($join) {
+                $join->on('CITRN_DOCNO', '=', 'TDLVORDDETA_DLVCD')
+                    ->on('CITRN_ITMCD', '=', 'TDLVORDDETA_ITMCD_ACT')
+                    ->on('CITRN_BRANCH', '=', 'TDLVORDDETA_BRANCH');
+            })->leftJoin('T_SLODETA', function ($join) {
+                $join->on('TDLVORDDETA_SLOCD', '=', 'TSLODETA_SLOCD')
+                    ->on('TDLVORDDETA_ITMCD', '=', 'TSLODETA_ITMCD')
+                    ->on('TDLVORDDETA_BRANCH', '=', 'TSLODETA_BRANCH');
+            })->leftJoin('T_SLOHEAD', function ($join) {
+                $join->on('TSLODETA_SLOCD', '=', 'TSLO_SLOCD')
+                    ->on('TSLODETA_BRANCH', '=', 'TSLO_BRANCH');
+            })->leftJoin('T_QUOHEAD', function ($join) {
+                $join->on('TSLO_QUOCD', '=', 'TQUO_QUOCD')
+                    ->on('TSLO_BRANCH', '=', 'TQUO_BRANCH');
+            })->where('TQUO_TYPE', '1')
+            ->whereNull('returned_at')
+            ->get();
+        return ['data' => $data];
     }
 }

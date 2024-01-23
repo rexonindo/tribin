@@ -206,6 +206,7 @@ Route::middleware('auth')->group(function () {
         Route::get('accessory-items/{id}', [DeliveryController::class, 'loadAccessoryById']);
         Route::delete('accessory-items/{id}', [DeliveryController::class, 'deleteAccessoryById']);
         Route::put('accessory-items/{id}', [DeliveryController::class, 'updateAccessoryById']);
+        Route::get('unreturned', [DeliveryController::class, 'unreturnedItem']);
     });
 
     #Terkait Receive Order
