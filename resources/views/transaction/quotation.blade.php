@@ -1116,6 +1116,7 @@
                 itemUsage.push(1)
                 itemQty.push(numeral(quotationSaleTable.rows[i].cells[3].innerText.trim()).value())
                 itemPrice.push(numeral(quotationSaleTable.rows[i].cells[4].innerText.trim()).value())
+                itemElectricity.push(null)
             }
         }
 
